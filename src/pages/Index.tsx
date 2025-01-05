@@ -4,7 +4,7 @@ import TideTable from "@/components/TideTable";
 import LocationPicker from "@/components/LocationPicker";
 import TideAlerts from "@/components/TideAlerts";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { addHours, startOfToday, addDays } from "date-fns";
+import { addHours, startOfToday, addDays, addMinutes } from "date-fns";
 
 const Index = () => {
   const [location, setLocation] = React.useState<{name: string, lat: number, lng: number} | null>(null);
@@ -16,39 +16,55 @@ const Index = () => {
     }
   }, []);
 
-  // Generate more realistic tide data based on location and lunar cycle simulation
-  const generateTideData = (startDate: Date, count: number) => {
-    return Array.from({ length: count }, (_, i) => {
-      const time = addHours(startDate, i * 6).toISOString();
+  // Generate realistic tide times based on lunar cycle (approximately 12.4 hours between high tides)
+  const generateTideData = (startDate: Date, days: number) => {
+    const tidesPerDay = [];
+    const LUNAR_CYCLE_HOURS = 12.4; // Average time between high tides
+    
+    for (let day = 0; day < days; day++) {
+      const dayStart = addDays(startDate, day);
       
-      // Create more realistic tide heights based on location and lunar cycle
-      const baseHeight = location ? (
-        // Use latitude to affect average tide height (higher tides near equator)
-        2 + Math.cos(Math.abs(location.lat) * (Math.PI / 180)) * 0.5 +
-        // Add some variation based on longitude
-        Math.sin(location.lng * (Math.PI / 180)) * 0.2
-      ) : 2;
-
-      // Simulate lunar cycle influence (approximately 12.4 hour cycle)
-      const lunarInfluence = Math.sin((i * 6) / 12.4 * Math.PI);
+      // Calculate first high tide of the day (varies by location)
+      const baseOffset = location ? 
+        (location.lng / 360) * 24 * 60 : // Adjust base time by longitude
+        0;
       
-      // Add small random variation
-      const randomVariation = (Math.random() - 0.5) * 0.2;
-      
-      const height = Math.max(0, baseHeight + (lunarInfluence * 1.2) + randomVariation);
-
-      return {
-        time,
-        height,
-        type: lunarInfluence > 0 ? ("high" as const) : ("low" as const),
-      };
-    });
+      // Generate two high tides and two low tides for the day
+      for (let cycle = 0; cycle < 2; cycle++) {
+        const cycleStart = addMinutes(dayStart, baseOffset + (cycle * LUNAR_CYCLE_HOURS * 60));
+        
+        // High tide
+        const highTideTime = cycleStart.toISOString();
+        const baseHeight = location ? 
+          (2 + Math.cos(Math.abs(location.lat) * (Math.PI / 180)) * 0.5) : 
+          2;
+        
+        tidesPerDay.push({
+          time: highTideTime,
+          height: baseHeight + (Math.random() * 0.2),
+          type: "high" as const
+        });
+        
+        // Low tide (approximately 6.2 hours after high tide)
+        const lowTideTime = addHours(cycleStart, 6.2).toISOString();
+        tidesPerDay.push({
+          time: lowTideTime,
+          height: Math.max(0.2, baseHeight - 1.5 + (Math.random() * 0.2)),
+          type: "low" as const
+        });
+      }
+    }
+    
+    // Sort all tides by time
+    return tidesPerDay.sort((a, b) => 
+      new Date(a.time).getTime() - new Date(b.time).getTime()
+    );
   };
 
   const today = startOfToday();
-  const mockDailyTideData = generateTideData(today, 4);
-  const mockWeeklyTideData = generateTideData(today, 28); // 4 times per day for 7 days
-  const mockMonthlyTideData = generateTideData(today, 120); // 4 times per day for 30 days
+  const mockDailyTideData = generateTideData(today, 1);
+  const mockWeeklyTideData = generateTideData(today, 7);
+  const mockMonthlyTideData = generateTideData(today, 30);
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-blue-50 to-blue-100 p-6">
