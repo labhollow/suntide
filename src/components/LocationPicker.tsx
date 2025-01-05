@@ -5,7 +5,11 @@ import { Input } from "@/components/ui/input";
 import { MapPin } from "lucide-react";
 import { useToast } from "@/components/ui/use-toast";
 
-const LocationPicker = () => {
+interface LocationPickerProps {
+  onLocationUpdate?: (location: { name: string; lat: number; lng: number }) => void;
+}
+
+const LocationPicker = ({ onLocationUpdate }: LocationPickerProps) => {
   const [location, setLocation] = React.useState("");
   const { toast } = useToast();
 
@@ -19,6 +23,7 @@ const LocationPicker = () => {
             lng: position.coords.longitude,
           };
           localStorage.setItem("savedLocation", JSON.stringify(locationData));
+          onLocationUpdate?.(locationData);
           toast({
             title: "Location saved",
             description: `Saved ${location} for tide tracking`,

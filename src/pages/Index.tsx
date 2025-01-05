@@ -4,27 +4,37 @@ import TideTable from "@/components/TideTable";
 import LocationPicker from "@/components/LocationPicker";
 import TideAlerts from "@/components/TideAlerts";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { addHours, startOfToday } from "date-fns";
 
 const Index = () => {
-  // Mock data - in a real app, this would come from an API
-  const mockDailyTideData = [
-    { time: "2024-03-20T00:00:00", height: 1.2, type: "high" as const },
-    { time: "2024-03-20T06:00:00", height: 0.3, type: "low" as const },
-    { time: "2024-03-20T12:00:00", height: 1.4, type: "high" as const },
-    { time: "2024-03-20T18:00:00", height: 0.2, type: "low" as const },
-  ];
+  const [location, setLocation] = React.useState<{name: string, lat: number, lng: number} | null>(null);
 
-  const mockWeeklyTideData = Array.from({ length: 14 }, (_, i) => ({
-    time: new Date(Date.now() + i * 12 * 3600 * 1000).toISOString(),
-    height: 1 + Math.sin(i) * 0.5,
-    type: i % 2 === 0 ? ("high" as const) : ("low" as const),
-  }));
+  React.useEffect(() => {
+    const savedLocation = localStorage.getItem("savedLocation");
+    if (savedLocation) {
+      setLocation(JSON.parse(savedLocation));
+    }
+  }, []);
 
-  const mockMonthlyTideData = Array.from({ length: 60 }, (_, i) => ({
-    time: new Date(Date.now() + i * 12 * 3600 * 1000).toISOString(),
-    height: 1 + Math.sin(i) * 0.5,
-    type: i % 2 === 0 ? ("high" as const) : ("low" as const),
-  }));
+  // Generate mock tide data based on location and current date
+  const generateTideData = (startDate: Date, count: number) => {
+    return Array.from({ length: count }, (_, i) => {
+      const time = addHours(startDate, i * 6).toISOString();
+      // Use location coordinates to affect tide height if available
+      const baseHeight = location ? (Math.sin(location.lat / 10) + Math.cos(location.lng / 10)) : 1;
+      const height = baseHeight + Math.sin(i) * 0.5;
+      return {
+        time,
+        height,
+        type: i % 2 === 0 ? ("high" as const) : ("low" as const),
+      };
+    });
+  };
+
+  const today = startOfToday();
+  const mockDailyTideData = generateTideData(today, 4);
+  const mockWeeklyTideData = generateTideData(today, 14);
+  const mockMonthlyTideData = generateTideData(today, 60);
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-blue-50 to-blue-100 p-6">
@@ -33,7 +43,17 @@ const Index = () => {
           Tide Tracker
         </h1>
         
-        <LocationPicker />
+        <LocationPicker onLocationUpdate={setLocation} />
+        
+        {location ? (
+          <div className="text-sm text-muted-foreground text-center">
+            Showing tide data for {location.name} ({location.lat.toFixed(2)}, {location.lng.toFixed(2)})
+          </div>
+        ) : (
+          <div className="text-sm text-muted-foreground text-center">
+            Please set a location to see local tide data
+          </div>
+        )}
         
         <Tabs defaultValue="daily" className="w-full">
           <TabsList className="grid w-full grid-cols-3">
