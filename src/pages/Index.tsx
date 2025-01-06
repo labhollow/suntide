@@ -5,6 +5,7 @@ import LocationPicker from "@/components/LocationPicker";
 import TideAlerts from "@/components/TideAlerts";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { addHours, startOfToday, addDays, addMinutes } from "date-fns";
+import SunCalc from "suncalc";
 
 const Index = () => {
   const [location, setLocation] = React.useState<{name: string, lat: number, lng: number} | null>(null);
@@ -66,6 +67,30 @@ const Index = () => {
   const mockWeeklyTideData = generateTideData(today, 7);
   const mockMonthlyTideData = generateTideData(today, 30);
 
+  // Calculate low tides near sunrise/sunset
+  const getLowTidesNearSunriseSunset = () => {
+    if (!location) return [];
+    
+    const allTides = generateTideData(today, 30); // Get a month of tide data
+    const nearSunriseSunsetTides = allTides.filter(tide => {
+      if (tide.type !== 'low') return false;
+      
+      const tideDate = new Date(tide.time);
+      const times = SunCalc.getTimes(tideDate, location.lat, location.lng);
+      const sunrise = times.sunrise;
+      const sunset = times.sunset;
+      
+      // Calculate time differences in hours
+      const hoursFromSunrise = Math.abs(tideDate.getTime() - sunrise.getTime()) / (1000 * 60 * 60);
+      const hoursFromSunset = Math.abs(tideDate.getTime() - sunset.getTime()) / (1000 * 60 * 60);
+      
+      // Return true if within 2 hours of either sunrise or sunset
+      return hoursFromSunrise <= 2 || hoursFromSunset <= 2;
+    });
+    
+    return nearSunriseSunsetTides;
+  };
+
   return (
     <div className="min-h-screen bg-gradient-to-b from-blue-50 to-blue-100 p-6">
       <div className="max-w-4xl mx-auto space-y-6">
@@ -86,10 +111,11 @@ const Index = () => {
         )}
         
         <Tabs defaultValue="daily" className="w-full">
-          <TabsList className="grid w-full grid-cols-3">
+          <TabsList className="grid w-full grid-cols-4">
             <TabsTrigger value="daily">Today</TabsTrigger>
             <TabsTrigger value="weekly">This Week</TabsTrigger>
             <TabsTrigger value="monthly">This Month</TabsTrigger>
+            <TabsTrigger value="sunrise-sunset">Near Sunrise/Sunset</TabsTrigger>
           </TabsList>
           
           <TabsContent value="daily">
@@ -105,6 +131,21 @@ const Index = () => {
             <div className="space-y-4">
               <h2 className="text-xl font-semibold text-tide-blue">Monthly Tide Times</h2>
               <TideTable data={mockMonthlyTideData} period="monthly" />
+            </div>
+          </TabsContent>
+          <TabsContent value="sunrise-sunset">
+            <div className="space-y-4">
+              <h2 className="text-xl font-semibold text-tide-blue">Low Tides Near Sunrise/Sunset</h2>
+              {location ? (
+                <TideTable 
+                  data={getLowTidesNearSunriseSunset()} 
+                  period="monthly" 
+                />
+              ) : (
+                <div className="text-center text-muted-foreground">
+                  Please select a location to see low tides near sunrise/sunset
+                </div>
+              )}
             </div>
           </TabsContent>
         </Tabs>
