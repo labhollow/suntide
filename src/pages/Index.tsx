@@ -19,7 +19,6 @@ const Index = () => {
     }
   }, []);
 
-  // Generate realistic tide times based on lunar cycle (approximately 12.4 hours between high tides)
   const generateTideData = (startDate: Date, days: number) => {
     const tidesPerDay = [];
     const LUNAR_CYCLE_HOURS = 12.4; // Average time between high tides
@@ -74,11 +73,65 @@ const Index = () => {
     const times = SunCalc.getTimes(date, location.lat, location.lng);
     return {
       sunrise: format(times.sunrise, 'h:mm aa'),
-      sunset: format(times.sunset, 'h:mm aa')
+      sunset: format(times.sunset, 'h:mm aa'),
+      date: format(date, 'MMM dd, yyyy')
     };
   };
 
-  // Calculate low tides near sunrise/sunset
+  // Calculate sun times for each day in the period
+  const getMultipleDaysSunTimes = (startDate: Date, days: number) => {
+    const sunTimes = [];
+    for (let i = 0; i < days; i++) {
+      const date = addDays(startDate, i);
+      const times = getSunTimes(date);
+      if (times) {
+        sunTimes.push(times);
+      }
+    }
+    return sunTimes;
+  };
+
+  const weeklySunTimes = getMultipleDaysSunTimes(today, 7);
+  const monthlySunTimes = getMultipleDaysSunTimes(today, 30);
+
+  const SunTimesDisplay = ({ date }: { date: Date }) => {
+    const times = getSunTimes(date);
+    if (!times) return null;
+
+    return (
+      <div className="flex gap-6 justify-center my-4">
+        <Card className="p-3 bg-tide-sunrise/10 flex items-center gap-2 text-tide-sunrise">
+          <Sunrise className="h-5 w-5" />
+          <span>Sunrise: {times.sunrise}</span>
+        </Card>
+        <Card className="p-3 bg-tide-sunset/10 flex items-center gap-2 text-tide-sunset">
+          <Sunset className="h-5 w-5" />
+          <span>Sunset: {times.sunset}</span>
+        </Card>
+      </div>
+    );
+  };
+
+  const MultiDaySunTimes = ({ sunTimes }: { sunTimes: Array<{ date: string; sunrise: string; sunset: string; }> }) => (
+    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mb-6">
+      {sunTimes.map((time, index) => (
+        <Card key={index} className="p-3 bg-white/50 backdrop-blur-sm">
+          <div className="font-medium text-tide-blue mb-2">{time.date}</div>
+          <div className="flex flex-col gap-2">
+            <div className="flex items-center gap-2 text-tide-sunrise">
+              <Sunrise className="h-4 w-4" />
+              <span>Sunrise: {time.sunrise}</span>
+            </div>
+            <div className="flex items-center gap-2 text-tide-sunset">
+              <Sunset className="h-4 w-4" />
+              <span>Sunset: {time.sunset}</span>
+            </div>
+          </div>
+        </Card>
+      ))}
+    </div>
+  );
+
   const getLowTidesNearSunriseSunset = () => {
     if (!location) return [];
     
@@ -98,26 +151,6 @@ const Index = () => {
     });
     
     return nearSunriseSunsetTides;
-  };
-
-  const sunTimes = getSunTimes(today);
-
-  const SunTimesDisplay = ({ date }: { date: Date }) => {
-    const times = getSunTimes(date);
-    if (!times) return null;
-
-    return (
-      <div className="flex gap-6 justify-center my-4">
-        <Card className="p-3 bg-tide-sunrise/10 flex items-center gap-2 text-tide-sunrise">
-          <Sunrise className="h-5 w-5" />
-          <span>Sunrise: {times.sunrise}</span>
-        </Card>
-        <Card className="p-3 bg-tide-sunset/10 flex items-center gap-2 text-tide-sunset">
-          <Sunset className="h-5 w-5" />
-          <span>Sunset: {times.sunset}</span>
-        </Card>
-      </div>
-    );
   };
 
   return (
@@ -155,7 +188,7 @@ const Index = () => {
           <TabsContent value="weekly">
             <div className="space-y-4">
               <h2 className="text-xl font-semibold text-tide-blue">Weekly Tide Times</h2>
-              {location && <SunTimesDisplay date={today} />}
+              {location && <MultiDaySunTimes sunTimes={weeklySunTimes} />}
               <TideTable data={mockWeeklyTideData} period="weekly" />
             </div>
           </TabsContent>
@@ -163,7 +196,7 @@ const Index = () => {
           <TabsContent value="monthly">
             <div className="space-y-4">
               <h2 className="text-xl font-semibold text-tide-blue">Monthly Tide Times</h2>
-              {location && <SunTimesDisplay date={today} />}
+              {location && <MultiDaySunTimes sunTimes={monthlySunTimes} />}
               <TideTable data={mockMonthlyTideData} period="monthly" />
             </div>
           </TabsContent>
@@ -173,7 +206,7 @@ const Index = () => {
               <h2 className="text-xl font-semibold text-tide-blue">Low Tides Near Sunrise/Sunset</h2>
               {location ? (
                 <>
-                  <SunTimesDisplay date={today} />
+                  <MultiDaySunTimes sunTimes={monthlySunTimes} />
                   <TideTable 
                     data={getLowTidesNearSunriseSunset()} 
                     period="monthly" 

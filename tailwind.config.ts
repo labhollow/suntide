@@ -26,7 +26,7 @@ export default {
             dark: "#172554",
           },
           sunrise: "#f97316",
-          sunset: "#facc15",
+          sunset: "#f97316", // Changed from yellow to orange
         },
         border: "hsl(var(--border))",
         input: "hsl(var(--input))",
