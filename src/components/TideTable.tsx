@@ -21,6 +21,11 @@ interface TideTableProps {
 }
 
 const TideTable = ({ data, period }: TideTableProps) => {
+  // Convert meters to feet
+  const metersToFeet = (meters: number) => {
+    return meters * 3.28084;
+  };
+
   return (
     <div className="w-full overflow-auto">
       <Table>
@@ -29,7 +34,7 @@ const TideTable = ({ data, period }: TideTableProps) => {
             <TableHead>Date</TableHead>
             <TableHead>Time</TableHead>
             <TableHead>Type</TableHead>
-            <TableHead>Height (m)</TableHead>
+            <TableHead>Height (ft)</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
@@ -38,9 +43,9 @@ const TideTable = ({ data, period }: TideTableProps) => {
               <TableCell>
                 {format(new Date(tide.time), "MMM dd, yyyy")}
               </TableCell>
-              <TableCell>{format(new Date(tide.time), "HH:mm")}</TableCell>
+              <TableCell>{format(new Date(tide.time), "hh:mm a")}</TableCell>
               <TableCell className="capitalize">{tide.type}</TableCell>
-              <TableCell>{tide.height.toFixed(2)}</TableCell>
+              <TableCell>{metersToFeet(tide.height).toFixed(2)}</TableCell>
             </TableRow>
           ))}
         </TableBody>
