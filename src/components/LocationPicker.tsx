@@ -4,6 +4,14 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { MapPin } from "lucide-react";
 import { useToast } from "@/components/ui/use-toast";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { NOAA_STATIONS } from "@/utils/noaaApi";
 
 interface LocationPickerProps {
   onLocationUpdate?: (location: { name: string; lat: number; lng: number }) => void;
@@ -12,6 +20,21 @@ interface LocationPickerProps {
 const LocationPicker = ({ onLocationUpdate }: LocationPickerProps) => {
   const [location, setLocation] = React.useState("");
   const { toast } = useToast();
+
+  const handleStationSelect = (stationKey: string) => {
+    const locationData = {
+      name: NOAA_STATIONS[stationKey].name,
+      lat: 0, // We could add actual coordinates to NOAA_STATIONS if needed
+      lng: 0,
+    };
+    localStorage.setItem("savedLocation", JSON.stringify(locationData));
+    onLocationUpdate?.(locationData);
+    setLocation(locationData.name);
+    toast({
+      title: "Location updated",
+      description: `Now showing tide data for ${locationData.name}`,
+    });
+  };
 
   const handleSaveLocation = () => {
     if ("geolocation" in navigator) {
@@ -49,13 +72,25 @@ const LocationPicker = ({ onLocationUpdate }: LocationPickerProps) => {
   return (
     <Card className="p-4 flex gap-4 items-center">
       <MapPin className="text-tide-blue" />
+      <Select onValueChange={handleStationSelect}>
+        <SelectTrigger className="w-[180px]">
+          <SelectValue placeholder="Select station" />
+        </SelectTrigger>
+        <SelectContent>
+          {Object.entries(NOAA_STATIONS).map(([key, station]) => (
+            <SelectItem key={key} value={key}>
+              {station.name}
+            </SelectItem>
+          ))}
+        </SelectContent>
+      </Select>
       <Input
-        placeholder="Enter location name"
+        placeholder="Or enter custom location name"
         value={location}
         onChange={(e) => setLocation(e.target.value)}
       />
       <Button onClick={handleSaveLocation} variant="default">
-        Save Location
+        Save Custom Location
       </Button>
     </Card>
   );

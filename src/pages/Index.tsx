@@ -12,6 +12,12 @@ import { useQuery } from "@tanstack/react-query";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Loader2 } from "lucide-react";
 
+const DEFAULT_LOCATION = {
+  name: "San Francisco",
+  lat: 37.7749,
+  lng: -122.4194
+};
+
 const Index = () => {
   const [location, setLocation] = React.useState<Location | null>(null);
   const today = startOfToday();
@@ -20,6 +26,10 @@ const Index = () => {
     const savedLocation = localStorage.getItem("savedLocation");
     if (savedLocation) {
       setLocation(JSON.parse(savedLocation));
+    } else {
+      // Set default location if none is saved
+      setLocation(DEFAULT_LOCATION);
+      localStorage.setItem("savedLocation", JSON.stringify(DEFAULT_LOCATION));
     }
   }, []);
 
