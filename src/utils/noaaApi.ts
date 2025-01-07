@@ -3,11 +3,14 @@ import { addDays, format } from "date-fns";
 const NOAA_BASE_URL = "https://api.tidesandcurrents.noaa.gov/api/prod/datagetter";
 
 interface NOAAResponse {
-  predictions: Array<{
+  predictions?: Array<{
     t: string;  // Time of prediction
     v: string;  // Water level
     type: "H" | "L";  // High or Low tide
   }>;
+  error?: {
+    message: string;
+  };
 }
 
 export const fetchTideData = async (
@@ -29,22 +32,26 @@ export const fetchTideData = async (
     interval: "hilo"  // Only get high/low tide predictions
   });
 
-  try {
-    const response = await fetch(`${NOAA_BASE_URL}?${params}`);
-    if (!response.ok) {
-      throw new Error('Failed to fetch tide data');
-    }
-    const data: NOAAResponse = await response.json();
-    
-    return data.predictions.map(prediction => ({
-      time: new Date(prediction.t).toISOString(),
-      height: parseFloat(prediction.v),
-      type: prediction.type === "H" ? "high" : "low" as "high" | "low"
-    }));
-  } catch (error) {
-    console.error("Error fetching tide data:", error);
-    throw error;
+  const response = await fetch(`${NOAA_BASE_URL}?${params}`);
+  const data: NOAAResponse = await response.json();
+  
+  if (!response.ok) {
+    throw new Error(`API Error (${response.status}): ${response.statusText}`);
   }
+  
+  if (data.error) {
+    throw new Error(`NOAA API Error: ${data.error.message}`);
+  }
+  
+  if (!data.predictions || data.predictions.length === 0) {
+    throw new Error('No tide predictions available for this location');
+  }
+
+  return data.predictions.map(prediction => ({
+    time: new Date(prediction.t).toISOString(),
+    height: parseFloat(prediction.v),
+    type: prediction.type === "H" ? "high" : "low" as "high" | "low"
+  }));
 };
 
 // Map of locations to their NOAA station IDs

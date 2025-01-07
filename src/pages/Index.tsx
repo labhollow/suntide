@@ -47,7 +47,7 @@ const Index = () => {
     return (
       <Alert variant="destructive">
         <AlertDescription>
-          Failed to load tide data. Please try again later.
+          {error instanceof Error ? error.message : 'Failed to load tide data. Please try again later.'}
         </AlertDescription>
       </Alert>
     );
