@@ -20,7 +20,7 @@ interface TideData {
 
 interface TideTableProps {
   data: TideData[];
-  period: "weekly" | "monthly";
+  period: "daily" | "weekly" | "monthly";
 }
 
 const TideTable = ({ data, period }: TideTableProps) => {
