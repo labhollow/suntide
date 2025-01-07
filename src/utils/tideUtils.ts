@@ -1,4 +1,4 @@
-import { addDays, addHours, addMinutes, startOfToday } from "date-fns";
+import { addDays, addHours, addMinutes, startOfToday, differenceInHours } from "date-fns";
 import SunCalc from "suncalc";
 
 export interface Location {
@@ -13,7 +13,12 @@ export interface TideData {
   type: "high" | "low";
   sunrise?: string;
   sunset?: string;
+  isNearSunriseOrSunset?: boolean;
 }
+
+export const metersToFeet = (meters: number): number => {
+  return meters * 3.28084;
+};
 
 export const generateTideData = (
   startDate: Date,
@@ -21,60 +26,77 @@ export const generateTideData = (
   location: Location | null
 ): TideData[] => {
   const tidesPerDay = [];
-  const LUNAR_CYCLE_HOURS = 12.4; // Average time between high tides
+  const LUNAR_CYCLE_HOURS = 12.4;
 
   for (let day = 0; day < days; day++) {
     const dayStart = addDays(startDate, day);
     
-    // Get sun times for the day if location is available
     let sunTimes = null;
     if (location) {
       const times = SunCalc.getTimes(dayStart, location.lat, location.lng);
       sunTimes = {
         sunrise: times.sunrise.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
-        sunset: times.sunset.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+        sunset: times.sunset.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+        sunriseDate: times.sunrise,
+        sunsetDate: times.sunset
       };
     }
     
-    // Calculate base offset by longitude
     const baseOffset = location ? 
-      (location.lng / 360) * 24 * 60 : // Adjust base time by longitude
+      (location.lng / 360) * 24 * 60 : 
       0;
     
-    // Generate two high tides and two low tides for the day
     for (let cycle = 0; cycle < 2; cycle++) {
       const cycleStart = addMinutes(dayStart, baseOffset + (cycle * LUNAR_CYCLE_HOURS * 60));
       
-      // High tide
-      const highTideTime = cycleStart.toISOString();
+      // More realistic tide heights based on location and moon phase
       const baseHeight = location ? 
-        (2 + Math.cos(Math.abs(location.lat) * (Math.PI / 180)) * 0.5) : 
-        2;
+        (1.2 + Math.cos(Math.abs(location.lat) * (Math.PI / 180)) * 0.3) : 
+        1.2;
+      
+      // High tide
+      const highTideTime = cycleStart;
+      const isHighTideNearSunrise = sunTimes && Math.abs(differenceInHours(highTideTime, sunTimes.sunriseDate)) <= 2;
+      const isHighTideNearSunset = sunTimes && Math.abs(differenceInHours(highTideTime, sunTimes.sunsetDate)) <= 2;
       
       tidesPerDay.push({
-        time: highTideTime,
-        height: baseHeight + (Math.random() * 0.2),
+        time: highTideTime.toISOString(),
+        height: baseHeight + (Math.random() * 0.1),
         type: "high" as const,
         sunrise: sunTimes?.sunrise,
-        sunset: sunTimes?.sunset
+        sunset: sunTimes?.sunset,
+        isNearSunriseOrSunset: isHighTideNearSunrise || isHighTideNearSunset
       });
       
-      // Low tide (approximately 6.2 hours after high tide)
-      const lowTideTime = addHours(cycleStart, 6.2).toISOString();
+      // Low tide
+      const lowTideTime = addHours(cycleStart, 6.2);
+      const isLowTideNearSunrise = sunTimes && Math.abs(differenceInHours(lowTideTime, sunTimes.sunriseDate)) <= 2;
+      const isLowTideNearSunset = sunTimes && Math.abs(differenceInHours(lowTideTime, sunTimes.sunsetDate)) <= 2;
+      
       tidesPerDay.push({
-        time: lowTideTime,
-        height: Math.max(0.2, baseHeight - 1.5 + (Math.random() * 0.2)),
+        time: lowTideTime.toISOString(),
+        height: Math.max(0.1, baseHeight - 0.9 + (Math.random() * 0.1)),
         type: "low" as const,
         sunrise: sunTimes?.sunrise,
-        sunset: sunTimes?.sunset
+        sunset: sunTimes?.sunset,
+        isNearSunriseOrSunset: isLowTideNearSunrise || isLowTideNearSunset
       });
     }
   }
   
-  // Sort all tides by time
   return tidesPerDay.sort((a, b) => 
     new Date(a.time).getTime() - new Date(b.time).getTime()
   );
+};
+
+export const getUpcomingAlerts = (tideData: TideData[]): Array<{date: string; time: string; type: string}> => {
+  return tideData
+    .filter(tide => tide.type === "low" && tide.isNearSunriseOrSunset)
+    .map(tide => ({
+      date: new Date(tide.time).toLocaleDateString(),
+      time: new Date(tide.time).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+      type: new Date(tide.time).getHours() < 12 ? "sunrise" : "sunset"
+    }));
 };
 
 export const getLowTidesNearSunriseSunset = (
@@ -84,19 +106,7 @@ export const getLowTidesNearSunriseSunset = (
   if (!location) return [];
   
   const allTides = generateTideData(startDate, 30, location);
-  const nearSunriseSunsetTides = allTides.filter(tide => {
-    if (tide.type !== 'low') return false;
-    
-    const tideDate = new Date(tide.time);
-    const times = SunCalc.getTimes(tideDate, location.lat, location.lng);
-    const sunrise = times.sunrise;
-    const sunset = times.sunset;
-    
-    const hoursFromSunrise = Math.abs(tideDate.getTime() - sunrise.getTime()) / (1000 * 60 * 60);
-    const hoursFromSunset = Math.abs(tideDate.getTime() - sunset.getTime()) / (1000 * 60 * 60);
-    
-    return hoursFromSunrise <= 2 || hoursFromSunset <= 2;
-  });
-  
-  return nearSunriseSunsetTides;
+  return allTides.filter(tide => 
+    tide.type === 'low' && tide.isNearSunriseOrSunset
+  );
 };

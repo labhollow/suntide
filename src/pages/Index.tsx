@@ -5,7 +5,7 @@ import LocationPicker from "@/components/LocationPicker";
 import TideAlerts from "@/components/TideAlerts";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { startOfToday } from "date-fns";
-import { generateTideData, getLowTidesNearSunriseSunset } from "@/utils/tideUtils";
+import { generateTideData, getLowTidesNearSunriseSunset, getUpcomingAlerts } from "@/utils/tideUtils";
 import type { Location } from "@/utils/tideUtils";
 
 const Index = () => {
@@ -22,6 +22,7 @@ const Index = () => {
   const mockDailyTideData = generateTideData(today, 1, location);
   const mockWeeklyTideData = generateTideData(today, 7, location);
   const mockMonthlyTideData = generateTideData(today, 30, location);
+  const upcomingAlerts = getUpcomingAlerts(mockMonthlyTideData);
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-orange-50 to-yellow-50 p-6">
@@ -87,7 +88,7 @@ const Index = () => {
         </Tabs>
 
         <div className="mt-6">
-          <TideAlerts />
+          <TideAlerts upcomingAlerts={upcomingAlerts} />
         </div>
       </div>
     </div>

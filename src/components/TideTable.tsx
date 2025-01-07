@@ -9,6 +9,8 @@ import {
 } from "@/components/ui/table";
 import { format } from "date-fns";
 import { Sunrise, Sunset } from "lucide-react";
+import { cn } from "@/lib/utils";
+import { metersToFeet } from "@/utils/tideUtils";
 
 interface TideData {
   time: string;
@@ -16,6 +18,7 @@ interface TideData {
   type: "high" | "low";
   sunrise?: string;
   sunset?: string;
+  isNearSunriseOrSunset?: boolean;
 }
 
 interface TideTableProps {
@@ -24,11 +27,6 @@ interface TideTableProps {
 }
 
 const TideTable = ({ data, period }: TideTableProps) => {
-  // Convert meters to feet
-  const metersToFeet = (meters: number) => {
-    return meters * 3.28084;
-  };
-
   return (
     <div className="w-full overflow-auto">
       <Table>
@@ -54,7 +52,12 @@ const TideTable = ({ data, period }: TideTableProps) => {
         </TableHeader>
         <TableBody>
           {data.map((tide, index) => (
-            <TableRow key={index}>
+            <TableRow 
+              key={index}
+              className={cn(
+                tide.isNearSunriseOrSunset && tide.type === "low" && "bg-red-100 hover:bg-red-200"
+              )}
+            >
               <TableCell>
                 {format(new Date(tide.time), "MMM dd, yyyy")}
               </TableCell>
