@@ -2,7 +2,6 @@ import React from "react";
 import { Line, LineChart, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from "recharts";
 import { Card } from "@/components/ui/card";
 import { format } from "date-fns";
-import { metersToFeet } from "@/utils/tideUtils";
 
 interface TideData {
   time: string;
@@ -30,7 +29,7 @@ const TideChart = ({ data, period }: TideChartProps) => {
           </p>
           <p>
             The tide is {data.type === "high" ? "highest" : "lowest"} at{" "}
-            {metersToFeet(data.height).toFixed(1)} ft
+            {data.height.toFixed(1)} ft
           </p>
         </Card>
       );
@@ -44,10 +43,7 @@ const TideChart = ({ data, period }: TideChartProps) => {
       <div className="w-full h-[300px]">
         <ResponsiveContainer width="100%" height="100%">
           <LineChart
-            data={data.map(d => ({
-              ...d,
-              height: metersToFeet(d.height)
-            }))}
+            data={data}
             margin={{ top: 20, right: 30, left: 20, bottom: 5 }}
           >
             <CartesianGrid strokeDasharray="3 3" opacity={0.3} />
