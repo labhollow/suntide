@@ -28,6 +28,7 @@ app.use((req, res, next) => {
 const proxyOptions = {
     target: 'https://api.tidesandcurrents.noaa.gov',
     changeOrigin: true,
+    secure: true,
     pathRewrite: {
         '^/api': '', // remove /api prefix when forwarding to target
     },

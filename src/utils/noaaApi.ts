@@ -1,4 +1,4 @@
-import { addDays, format, parse } from "date-fns";
+import { addDays, format } from "date-fns";
 
 const PROXY_BASE_URL = "http://localhost:3000/api";
 
@@ -35,42 +35,41 @@ export const fetchTideData = async (
   const url = `${PROXY_BASE_URL}/datagetter?${params}`;
   console.log(`Fetching tide data from: ${url}`);
   
-  const response = await fetch(url, {
-    method: 'GET',
-    headers: {
-      'Accept': 'application/json',
-      'Content-Type': 'application/json',
-    },
-    credentials: 'include'
-  });
-
-  if (!response.ok) {
-    console.error('API Error:', {
-      status: response.status,
-      statusText: response.statusText,
+  try {
+    const response = await fetch(url, {
+      method: 'GET',
+      headers: {
+        'Accept': 'application/json',
+        'Content-Type': 'application/json',
+      },
+      credentials: 'include',
+      mode: 'cors'
     });
-    throw new Error(`API Error (${response.status}): ${response.statusText}`);
-  }
 
-  const data: NOAAResponse = await response.json();
-  
-  if (!data.predictions || data.predictions.length === 0) {
-    console.error('No predictions in response:', data);
-    throw new Error('No tide predictions available for this location');
-  }
-  
-  return data.predictions.map(prediction => {
-    try {
-      return {
-        time: parse(prediction.t, "yyyy-MM-dd HH:mm", new Date()).toISOString(),
-        height: parseFloat(prediction.v),
-        type: prediction.type === "H" ? "high" : "low" as "high" | "low"
-      };
-    } catch (error) {
-      console.error(`Error parsing prediction:`, { prediction, error });
-      throw new Error('Failed to parse tide predictions');
+    if (!response.ok) {
+      console.error('API Error:', {
+        status: response.status,
+        statusText: response.statusText,
+      });
+      throw new Error(`API Error (${response.status}): ${response.statusText}`);
     }
-  });
+
+    const data: NOAAResponse = await response.json();
+    
+    if (!data.predictions || data.predictions.length === 0) {
+      console.error('No predictions in response:', data);
+      throw new Error('No tide predictions available for this location');
+    }
+    
+    return data.predictions.map(prediction => ({
+      time: new Date(prediction.t).toISOString(),
+      height: parseFloat(prediction.v),
+      type: prediction.type === "H" ? "high" : "low" as "high" | "low"
+    }));
+  } catch (error) {
+    console.error('Error fetching tide data:', error);
+    throw error;
+  }
 };
 
 // Map of locations to their NOAA station IDs
