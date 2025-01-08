@@ -41,6 +41,7 @@ export const fetchTideData = async (
       'Accept': 'application/json',
       'Content-Type': 'application/json',
     },
+    credentials: 'include'
   });
 
   if (!response.ok) {
