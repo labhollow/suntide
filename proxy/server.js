@@ -3,15 +3,12 @@ const { createProxyMiddleware } = require('http-proxy-middleware');
 
 const app = express();
 
-// Enable CORS for all routes - must come before other middleware
+// Enable CORS for all routes - simplified version
 app.use((req, res, next) => {
-    // Allow requests from your React app's origin
-    res.header('Access-Control-Allow-Origin', 'http://localhost:8080');
-    res.header('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
-    res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept');
-    res.header('Access-Control-Allow-Credentials', 'true');
+    res.header('Access-Control-Allow-Origin', '*');
+    res.header('Access-Control-Allow-Methods', 'GET, OPTIONS');
+    res.header('Access-Control-Allow-Headers', 'Content-Type');
     
-    // Handle preflight requests
     if (req.method === 'OPTIONS') {
         return res.status(200).end();
     }
@@ -33,14 +30,11 @@ const proxyOptions = {
         '^/api': '', // remove /api prefix when forwarding to target
     },
     onProxyReq: (proxyReq, req, res) => {
-        // Log the full URL being proxied
         console.log(`Proxying request to: ${proxyOptions.target}${proxyReq.path}`);
     },
     onProxyRes: (proxyRes, req, res) => {
         console.log(`Received response from NOAA API: ${proxyRes.statusCode}`);
-        // Add CORS headers to the proxied response
-        proxyRes.headers['Access-Control-Allow-Origin'] = 'http://localhost:8080';
-        proxyRes.headers['Access-Control-Allow-Credentials'] = 'true';
+        proxyRes.headers['Access-Control-Allow-Origin'] = '*';
     },
     onError: (err, req, res) => {
         console.error('Proxy Error:', err);

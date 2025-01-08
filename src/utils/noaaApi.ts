@@ -40,10 +40,8 @@ export const fetchTideData = async (
       method: 'GET',
       headers: {
         'Accept': 'application/json',
-        'Content-Type': 'application/json',
-      },
-      credentials: 'include',
-      mode: 'cors'
+        'Content-Type': 'application/json'
+      }
     });
 
     if (!response.ok) {
