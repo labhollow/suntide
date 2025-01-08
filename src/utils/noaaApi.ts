@@ -1,6 +1,6 @@
 import { addDays, format, parse } from "date-fns";
 
-const PROXY_BASE_URL = "/api";
+const PROXY_BASE_URL = "http://localhost:3000/api";
 
 interface NOAAResponse {
   predictions?: Array<{
@@ -32,19 +32,26 @@ export const fetchTideData = async (
     interval: "hilo"  // Only get high/low tide predictions
   });
 
-  console.log(`Fetching tide data from: ${PROXY_BASE_URL}/datagetter?${params}`);
+  const url = `${PROXY_BASE_URL}/datagetter?${params}`;
+  console.log(`Fetching tide data from: ${url}`);
   
-  const response = await fetch(`${PROXY_BASE_URL}/datagetter?${params}`);
-  const data: NOAAResponse = await response.json();
+  const response = await fetch(url, {
+    method: 'GET',
+    headers: {
+      'Accept': 'application/json',
+      'Content-Type': 'application/json',
+    },
+  });
 
   if (!response.ok) {
     console.error('API Error:', {
       status: response.status,
       statusText: response.statusText,
-      data
     });
-    throw new Error(`API Error (${response.status}): ${response.statusText}${data.error ? ` - ${data.error.message}` : ''}`);
+    throw new Error(`API Error (${response.status}): ${response.statusText}`);
   }
+
+  const data: NOAAResponse = await response.json();
   
   if (!data.predictions || data.predictions.length === 0) {
     console.error('No predictions in response:', data);
