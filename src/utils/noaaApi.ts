@@ -4,9 +4,9 @@ const PROXY_BASE_URL = "http://localhost:3000/api";
 
 interface NOAAResponse {
   predictions?: Array<{
-    t: string;  // Time of prediction
-    v: string;  // Water level
-    type: "H" | "L";  // High or Low tide
+    t: string;
+    v: string;
+    type: "H" | "L";
   }>;
   error?: {
     message: string;
@@ -21,11 +21,19 @@ interface NOAAAstronomyResponse {
   }>;
 }
 
+interface TidePrediction {
+  t: string;
+  v: string;
+  type: "H" | "L";
+  sunrise?: string;
+  sunset?: string;
+}
+
 export const fetchTideData = async (
   stationId: string,
   startDate: Date,
   days: number
-) => {
+): Promise<TidePrediction[]> => {
   const endDate = addDays(startDate, days);
   
   // First fetch tide predictions
@@ -41,7 +49,7 @@ export const fetchTideData = async (
     interval: "hilo"
   });
 
-  // Then fetch astronomy data
+  // Then fetch astronomy data with required parameters
   const astronomyParams = new URLSearchParams({
     begin_date: format(startDate, "yyyyMMdd"),
     end_date: format(endDate, "yyyyMMdd"),
@@ -50,7 +58,8 @@ export const fetchTideData = async (
     datum: "MLLW",
     time_zone: "lst_ldt",
     units: "metric",
-    format: "json"
+    format: "json",
+    application: "web_services"  // Required for astronomy data
   });
 
   try {
@@ -58,10 +67,6 @@ export const fetchTideData = async (
       fetch(`${PROXY_BASE_URL}/datagetter?${tideParams}`),
       fetch(`${PROXY_BASE_URL}/datagetter?${astronomyParams}`)
     ]);
-
-    if (!tideResponse.ok || !astronomyResponse.ok) {
-      throw new Error(`API Error (${tideResponse.status}): ${tideResponse.statusText}`);
-    }
 
     const tideData: NOAAResponse = await tideResponse.json();
     const astronomyData: NOAAAstronomyResponse = await astronomyResponse.json();
