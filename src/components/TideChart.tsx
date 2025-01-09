@@ -1,12 +1,13 @@
 import React from "react";
 import { Line, LineChart, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from "recharts";
 import { Card } from "@/components/ui/card";
-import { format } from "date-fns";
+import { format, parseISO } from "date-fns";
+import { metersToFeet } from "@/utils/tideUtils";
 
 interface TideData {
-  time: string;
-  height: number;
-  type: "high" | "low";
+  t: string;
+  v: string;
+  type: string;
 }
 
 interface TideChartProps {
@@ -15,43 +16,52 @@ interface TideChartProps {
 }
 
 const TideChart = ({ data, period }: TideChartProps) => {
-  console.log('Data passed to TideChart:', data); // Log the data being passed to the chart
+  console.log('Data passed to TideChart:', data);
 
-  const formatXAxis = (time: string) => {
-    console.log('Time passed to formatXAxis:', time); // Log the time being passed to formatXAxis
-    const date = new Date(time);
-    if (isNaN(date.getTime())) {
-      console.error('Invalid date:', time); // Log invalid date
-      return time; // Return the original string if invalid
+  const formatXAxis = (timeStr: string) => {
+    try {
+      const date = parseISO(timeStr);
+      return format(date, "h:mm a");
+    } catch (error) {
+      console.error('Error formatting date:', timeStr, error);
+      return '';
     }
-    return format(date, "h:mm a");
   };
+
+  const formattedData = data.map(item => ({
+    time: item.t,
+    height: metersToFeet(parseFloat(item.v)),
+    type: item.type === "H" ? "high" : "low"
+  }));
 
   const CustomTooltip = ({ active, payload, label }: any) => {
     if (active && payload && payload.length) {
-      const data = payload[0].payload;
-      return (
-        <Card className="p-3 bg-white/90">
-          <p className="font-medium">
-            {format(new Date(data.time), "h:mm a")}
-          </p>
-          <p>
-            The tide is {data.type === "high" ? "highest" : "lowest"} at{" "}
-            {data.height.toFixed(1)} ft
-          </p>
-        </Card>
-      );
+      try {
+        return (
+          <Card className="p-3 bg-white/90">
+            <p className="font-medium">
+              {format(parseISO(label), "h:mm a")}
+            </p>
+            <p>
+              Height: {payload[0].value.toFixed(2)} ft
+            </p>
+          </Card>
+        );
+      } catch (error) {
+        console.error('Error in tooltip:', error);
+        return null;
+      }
     }
     return null;
   };
 
   return (
     <Card className="p-6 w-full bg-white/50 backdrop-blur-sm">
-      <h3 className="text-lg font-medium mb-4 text-center">Today's Tide Levels</h3>
+      <h3 className="text-lg font-medium mb-4 text-center">Tide Levels</h3>
       <div className="w-full h-[300px]">
         <ResponsiveContainer width="100%" height="100%">
           <LineChart
-            data={data}
+            data={formattedData}
             margin={{ top: 20, right: 30, left: 20, bottom: 5 }}
           >
             <CartesianGrid strokeDasharray="3 3" opacity={0.3} />

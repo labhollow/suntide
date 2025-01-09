@@ -1,4 +1,5 @@
 import { addDays, format } from "date-fns";
+import SunCalc from "suncalc";
 
 const PROXY_BASE_URL = "http://localhost:3000/api";
 
@@ -29,7 +30,7 @@ export const fetchTideData = async (
     time_zone: "lst_ldt",
     units: "english",
     format: "json",
-    interval: "hilo"  // Only get high/low tide predictions
+    interval: "hilo"
   });
 
   const url = `${PROXY_BASE_URL}/datagetter?${params}`;
@@ -59,11 +60,17 @@ export const fetchTideData = async (
       throw new Error('No tide predictions available for this location');
     }
     
-    return data.predictions.map(prediction => ({
-      time: new Date(prediction.t).toISOString(),
-      height: parseFloat(prediction.v),
-      type: prediction.type === "H" ? "high" : "low" as "high" | "low"
-    }));
+    // Add sunrise/sunset times for each prediction
+    return data.predictions.map(prediction => {
+      const date = new Date(prediction.t);
+      const sunTimes = SunCalc.getTimes(date, 37.7749, -122.4194); // San Francisco coordinates
+      
+      return {
+        ...prediction,
+        sunrise: format(sunTimes.sunrise, "hh:mm a"),
+        sunset: format(sunTimes.sunset, "hh:mm a")
+      };
+    });
   } catch (error) {
     console.error('Error fetching tide data:', error);
     throw error;
