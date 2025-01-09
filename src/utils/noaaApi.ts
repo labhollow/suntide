@@ -13,6 +13,14 @@ interface NOAAResponse {
   };
 }
 
+interface NOAAAstronomyResponse {
+  astronomy?: Array<{
+    date: string;
+    sunrise: string;
+    sunset: string;
+  }>;
+}
+
 export const fetchTideData = async (
   stationId: string,
   startDate: Date,
@@ -20,11 +28,12 @@ export const fetchTideData = async (
 ) => {
   const endDate = addDays(startDate, days);
   
-  const params = new URLSearchParams({
+  // First fetch tide predictions
+  const tideParams = new URLSearchParams({
     begin_date: format(startDate, "yyyyMMdd"),
     end_date: format(endDate, "yyyyMMdd"),
     station: stationId,
-    product: "predictions,astronomy",  // Added astronomy to get sunrise/sunset times
+    product: "predictions",
     datum: "MLLW",
     time_zone: "lst_ldt",
     units: "metric",
@@ -32,39 +41,55 @@ export const fetchTideData = async (
     interval: "hilo"
   });
 
-  const url = `${PROXY_BASE_URL}/datagetter?${params}`;
-  console.log(`Fetching tide data from: ${url}`);
-  
-  try {
-    const response = await fetch(url, {
-      method: 'GET',
-      headers: {
-        'Accept': 'application/json',
-        'Content-Type': 'application/json'
-      }
-    });
+  // Then fetch astronomy data
+  const astronomyParams = new URLSearchParams({
+    begin_date: format(startDate, "yyyyMMdd"),
+    end_date: format(endDate, "yyyyMMdd"),
+    station: stationId,
+    product: "astronomy",
+    datum: "MLLW",
+    time_zone: "lst_ldt",
+    units: "metric",
+    format: "json"
+  });
 
-    if (!response.ok) {
-      console.error('API Error:', {
-        status: response.status,
-        statusText: response.statusText,
-      });
-      throw new Error(`API Error (${response.status}): ${response.statusText}`);
+  try {
+    const [tideResponse, astronomyResponse] = await Promise.all([
+      fetch(`${PROXY_BASE_URL}/datagetter?${tideParams}`),
+      fetch(`${PROXY_BASE_URL}/datagetter?${astronomyParams}`)
+    ]);
+
+    if (!tideResponse.ok || !astronomyResponse.ok) {
+      throw new Error(`API Error (${tideResponse.status}): ${tideResponse.statusText}`);
     }
 
-    const data: NOAAResponse = await response.json();
-    
-    if (!data.predictions || data.predictions.length === 0) {
-      console.error('No predictions in response:', data);
+    const tideData: NOAAResponse = await tideResponse.json();
+    const astronomyData: NOAAAstronomyResponse = await astronomyResponse.json();
+
+    if (!tideData.predictions || tideData.predictions.length === 0) {
+      console.error('No predictions in response:', tideData);
       throw new Error('No tide predictions available for this location');
     }
 
-    // The predictions will now include sunrise/sunset times from NOAA
-    return data.predictions.map(prediction => ({
-      ...prediction,
-      sunrise: prediction.sunrise || "",  // Use NOAA provided sunrise time
-      sunset: prediction.sunset || ""     // Use NOAA provided sunset time
-    }));
+    // Create a map of dates to astronomy data for quick lookup
+    const astronomyMap = new Map(
+      astronomyData.astronomy?.map(item => [
+        item.date,
+        { sunrise: item.sunrise, sunset: item.sunset }
+      ]) || []
+    );
+
+    // Combine tide predictions with astronomy data
+    return tideData.predictions.map(prediction => {
+      const date = format(new Date(prediction.t), "yyyyMMdd");
+      const astronomy = astronomyMap.get(date) || { sunrise: "", sunset: "" };
+      
+      return {
+        ...prediction,
+        sunrise: astronomy.sunrise,
+        sunset: astronomy.sunset
+      };
+    });
   } catch (error) {
     console.error('Error fetching tide data:', error);
     throw error;

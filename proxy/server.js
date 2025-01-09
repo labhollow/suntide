@@ -24,20 +24,21 @@ app.use((req, res, next) => {
 // Detailed logging middleware
 app.use((req, res, next) => {
     console.log(`[${new Date().toISOString()}] ${req.method} ${req.url}`);
+    console.log('Query params:', req.query);
     next();
 });
 
 const fetchData = async (req, res) => {
     try {
-        const response = await axios.get('https://api.tidesandcurrents.noaa.gov/api/prod/datagetter', {
-            params: {
-                ...req.query, // Include all query parameters
-                format: 'json' // Ensure format is set to json
-            }
+        const baseUrl = 'https://api.tidesandcurrents.noaa.gov/api/prod/datagetter';
+        const response = await axios.get(baseUrl, {
+            params: req.query
         });
+        
+        console.log('NOAA API Response:', response.data);
         res.json(response.data);
     } catch (error) {
-        console.error('Error fetching data:', error);
+        console.error('Error fetching data:', error.response?.data || error.message);
         res.status(500).json({
             error: 'Error fetching data',
             details: error.message
