@@ -9,7 +9,6 @@ import {
 } from "@/components/ui/table";
 import { format, parseISO } from "date-fns";
 import { Sunrise, Sunset } from "lucide-react";
-import { cn } from "@/lib/utils";
 import { metersToFeet } from "@/utils/tideUtils";
 
 interface TideData {

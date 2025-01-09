@@ -9,9 +9,10 @@ export interface Location {
 
 export interface TideData {
   t: string;
-  time: string;
-  height: number;
-  type: "high" | "low";
+  v: string;
+  type: string;
+  time?: string;
+  height?: number;
   sunrise?: string;
   sunset?: string;
   isNearSunriseOrSunset?: boolean;
@@ -62,6 +63,7 @@ export const generateTideData = (
       
       tidesPerDay.push({
         t: highTideTime.toISOString(),
+        v: (baseHeight + (Math.random() * 0.1)).toFixed(2),
         time: highTideTime.toISOString(),
         height: baseHeight + (Math.random() * 0.1),
         type: "high" as const,
@@ -77,6 +79,7 @@ export const generateTideData = (
       
       tidesPerDay.push({
         t: lowTideTime.toISOString(),
+        v: Math.max(0.1, baseHeight - 0.9 + (Math.random() * 0.1)).toFixed(2),
         time: lowTideTime.toISOString(),
         height: Math.max(0.1, baseHeight - 0.9 + (Math.random() * 0.1)),
         type: "low" as const,
