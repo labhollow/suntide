@@ -66,7 +66,7 @@ const TideTable = ({ data, period }: TideTableProps) => {
               </TableCell>
               <TableCell>{format(tide.date, "hh:mm a")}</TableCell>
               <TableCell className="capitalize">{tide.type}</TableCell>
-              <TableCell>{metersToFeet(tide.height).toFixed(2)}</TableCell>
+              <TableCell>{tide.height.toFixed(2)}</TableCell>
               <TableCell className="text-tide-sunrise">{tide.sunrise}</TableCell>
               <TableCell className="text-orange-500">{tide.sunset}</TableCell>
             </TableRow>

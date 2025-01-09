@@ -30,7 +30,7 @@ const TideChart = ({ data, period }: TideChartProps) => {
 
   const formattedData = data.map(item => ({
     time: item.t,
-    height: metersToFeet(parseFloat(item.v)), // Convert string to number and then to feet
+    height: parseFloat(item.v), // Convert string to number and then to feet
     type: item.type === "H" ? "high" : "low"
   }));
 
