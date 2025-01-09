@@ -28,7 +28,7 @@ export const fetchTideData = async (
     product: "predictions",
     datum: "MLLW",
     time_zone: "lst_ldt",
-    units: "english",
+    units: "metric", // Use metric to get meters which we'll convert later
     format: "json",
     interval: "hilo"
   });
@@ -63,7 +63,11 @@ export const fetchTideData = async (
     // Add sunrise/sunset times for each prediction
     return data.predictions.map(prediction => {
       const date = new Date(prediction.t);
-      const sunTimes = SunCalc.getTimes(date, 37.7749, -122.4194); // San Francisco coordinates
+      const sunTimes = SunCalc.getTimes(
+        date,
+        37.7749, // San Francisco latitude
+        -122.4194 // San Francisco longitude
+      );
       
       return {
         ...prediction,

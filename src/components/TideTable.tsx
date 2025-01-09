@@ -29,7 +29,7 @@ const TideTable = ({ data, period }: TideTableProps) => {
   
   const formattedData = data.map(tide => ({
     date: parseISO(tide.t),
-    height: metersToFeet(parseFloat(tide.v)),
+    height: parseFloat(tide.v), // Use the v property directly
     type: tide.type === "H" ? "high" : "low",
     sunrise: tide.sunrise,
     sunset: tide.sunset
@@ -66,7 +66,7 @@ const TideTable = ({ data, period }: TideTableProps) => {
               </TableCell>
               <TableCell>{format(tide.date, "hh:mm a")}</TableCell>
               <TableCell className="capitalize">{tide.type}</TableCell>
-              <TableCell>{tide.height.toFixed(2)}</TableCell>
+              <TableCell>{metersToFeet(tide.height).toFixed(2)}</TableCell>
               <TableCell className="text-tide-sunrise">{tide.sunrise}</TableCell>
               <TableCell className="text-orange-500">{tide.sunset}</TableCell>
             </TableRow>
