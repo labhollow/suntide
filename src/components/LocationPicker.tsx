@@ -14,10 +14,12 @@ import {
 import { NOAA_STATIONS } from "@/utils/noaaApi";
 
 interface LocationPickerProps {
+  id?: string;
+  name?: string;
   onLocationUpdate?: (location: { name: string; lat: number; lng: number }) => void;
 }
 
-const LocationPicker = ({ onLocationUpdate }: LocationPickerProps) => {
+const LocationPicker: React.FC<LocationPickerProps> = ({ id, name, onLocationUpdate }) => {
   const [location, setLocation] = React.useState("");
   const { toast } = useToast();
 
@@ -85,6 +87,8 @@ const LocationPicker = ({ onLocationUpdate }: LocationPickerProps) => {
         </SelectContent>
       </Select>
       <Input
+        id={id}
+        name={name}
         placeholder="Or enter custom location name"
         value={location}
         onChange={(e) => setLocation(e.target.value)}

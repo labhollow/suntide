@@ -8,6 +8,7 @@ export interface Location {
 }
 
 export interface TideData {
+  t: string;
   time: string;
   height: number;
   type: "high" | "low";
@@ -60,6 +61,7 @@ export const generateTideData = (
       const isHighTideNearSunset = sunTimes && Math.abs(differenceInHours(highTideTime, sunTimes.sunsetDate)) <= 2;
       
       tidesPerDay.push({
+        t: highTideTime.toISOString(),
         time: highTideTime.toISOString(),
         height: baseHeight + (Math.random() * 0.1),
         type: "high" as const,
@@ -74,6 +76,7 @@ export const generateTideData = (
       const isLowTideNearSunset = sunTimes && Math.abs(differenceInHours(lowTideTime, sunTimes.sunsetDate)) <= 2;
       
       tidesPerDay.push({
+        t: lowTideTime.toISOString(),
         time: lowTideTime.toISOString(),
         height: Math.max(0.1, baseHeight - 0.9 + (Math.random() * 0.1)),
         type: "low" as const,
@@ -85,7 +88,7 @@ export const generateTideData = (
   }
   
   return tidesPerDay.sort((a, b) => 
-    new Date(a.time).getTime() - new Date(b.time).getTime()
+    new Date(a.t).getTime() - new Date(b.t).getTime()
   );
 };
 
@@ -93,9 +96,9 @@ export const getUpcomingAlerts = (tideData: TideData[]): Array<{date: string; ti
   return tideData
     .filter(tide => tide.type === "low" && tide.isNearSunriseOrSunset)
     .map(tide => ({
-      date: new Date(tide.time).toLocaleDateString(),
-      time: new Date(tide.time).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
-      type: new Date(tide.time).getHours() < 12 ? "sunrise" : "sunset"
+      date: new Date(tide.t).toLocaleDateString(),
+      time: new Date(tide.t).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+      type: new Date(tide.t).getHours() < 12 ? "sunrise" : "sunset"
     }));
 };
 

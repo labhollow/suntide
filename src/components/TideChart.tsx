@@ -15,8 +15,16 @@ interface TideChartProps {
 }
 
 const TideChart = ({ data, period }: TideChartProps) => {
+  console.log('Data passed to TideChart:', data); // Log the data being passed to the chart
+
   const formatXAxis = (time: string) => {
-    return format(new Date(time), "h:mm a");
+    console.log('Time passed to formatXAxis:', time); // Log the time being passed to formatXAxis
+    const date = new Date(time);
+    if (isNaN(date.getTime())) {
+      console.error('Invalid date:', time); // Log invalid date
+      return time; // Return the original string if invalid
+    }
+    return format(date, "h:mm a");
   };
 
   const CustomTooltip = ({ active, payload, label }: any) => {
