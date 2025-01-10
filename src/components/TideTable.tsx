@@ -9,7 +9,8 @@ import {
 } from "@/components/ui/table";
 import { format, parseISO } from "date-fns";
 import { Sunrise, Sunset } from "lucide-react";
-import { metersToFeet } from "@/utils/tideUtils";
+import { metersToFeet, isWithinThreeHours } from "@/utils/tideUtils";
+import { useToast } from "@/hooks/use-toast";
 
 interface TideData {
   t: string;
@@ -26,14 +27,34 @@ interface TideTableProps {
 
 const TideTable = ({ data, period }: TideTableProps) => {
   console.log('Data received by TideTable:', data);
+  const { toast } = useToast();
   
   const formattedData = data.map(tide => ({
     date: parseISO(tide.t),
     height: parseFloat(tide.v),
     type: tide.type === "H" ? "high" : "low",
     sunrise: tide.sunrise,
-    sunset: tide.sunset
+    sunset: tide.sunset,
+    isNearSunriseOrSunset: tide.type === "L" && (
+      (tide.sunrise && isWithinThreeHours(format(parseISO(tide.t), "hh:mm a"), tide.sunrise)) ||
+      (tide.sunset && isWithinThreeHours(format(parseISO(tide.t), "hh:mm a"), tide.sunset))
+    )
   }));
+
+  React.useEffect(() => {
+    formattedData.forEach(tide => {
+      if (tide.isNearSunriseOrSunset) {
+        const timeOfDay = isWithinThreeHours(format(tide.date, "hh:mm a"), tide.sunrise || "") 
+          ? "sunrise" 
+          : "sunset";
+        
+        toast({
+          title: "Low Tide Alert",
+          description: `Low tide on ${format(tide.date, "MMM dd, yyyy")} at ${format(tide.date, "hh:mm a")} is within 3 hours of ${timeOfDay}`,
+        });
+      }
+    });
+  }, [data, toast]);
 
   return (
     <div className="w-full overflow-auto">
@@ -50,7 +71,10 @@ const TideTable = ({ data, period }: TideTableProps) => {
         </TableHeader>
         <TableBody>
           {formattedData.map((tide, index) => (
-            <TableRow key={index}>
+            <TableRow 
+              key={index}
+              className={tide.isNearSunriseOrSunset ? "bg-red-100" : ""}
+            >
               <TableCell>
                 {format(tide.date, "MMM dd, yyyy")}
               </TableCell>
