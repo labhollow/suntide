@@ -23,19 +23,22 @@ export const metersToFeet = (meters: number): number => {
 };
 
 export const generateTideData = (
-  startDate: Date,
-  days: number,
   location: Location | null
 ): TideData[] => {
   const tidesPerDay = [];
   const LUNAR_CYCLE_HOURS = 12.4;
+  const today = new Date();
 
-  for (let day = 0; day < days; day++) {
-    const dayStart = addDays(startDate, day);
+  for (let i = 0; i < 30; i++) {
+    const date = new Date(today);
+    date.setDate(today.getDate() + i);
+    console.log('Latitude:', location.lat, 'Longitude:', location.lng);
+    const { sunrise, sunset } = getSunriseSunset(location.lat, location.lng, date);
+    console.log('Sunrise:', sunrise, 'Sunset:', sunset);
     
     let sunTimes = null;
     if (location) {
-      const times = SunCalc.getTimes(dayStart, location.lat, location.lng);
+      const times = SunCalc.getTimes(date, location.lat, location.lng);
       sunTimes = {
         sunrise: times.sunrise.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
         sunset: times.sunset.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
@@ -49,7 +52,7 @@ export const generateTideData = (
       0;
     
     for (let cycle = 0; cycle < 2; cycle++) {
-      const cycleStart = addMinutes(dayStart, baseOffset + (cycle * LUNAR_CYCLE_HOURS * 60));
+      const cycleStart = addMinutes(date, baseOffset + (cycle * LUNAR_CYCLE_HOURS * 60));
       
       // More realistic tide heights based on location and moon phase
       const baseHeight = location ? 
@@ -67,8 +70,8 @@ export const generateTideData = (
         time: highTideTime.toISOString(),
         height: baseHeight + (Math.random() * 0.1),
         type: "high" as const,
-        sunrise: sunTimes?.sunrise,
-        sunset: sunTimes?.sunset,
+        sunrise: sunrise,
+        sunset: sunset,
         isNearSunriseOrSunset: isHighTideNearSunrise || isHighTideNearSunset
       });
       
@@ -83,8 +86,8 @@ export const generateTideData = (
         time: lowTideTime.toISOString(),
         height: Math.max(0.1, baseHeight - 0.9 + (Math.random() * 0.1)),
         type: "low" as const,
-        sunrise: sunTimes?.sunrise,
-        sunset: sunTimes?.sunset,
+        sunrise: sunrise,
+        sunset: sunset,
         isNearSunriseOrSunset: isLowTideNearSunrise || isLowTideNearSunset
       });
     }
@@ -106,13 +109,65 @@ export const getUpcomingAlerts = (tideData: TideData[]): Array<{date: string; ti
 };
 
 export const getLowTidesNearSunriseSunset = (
-  startDate: Date,
+  today: Date,
   location: Location | null
 ): TideData[] => {
   if (!location) return [];
   
-  const allTides = generateTideData(startDate, 30, location);
+  const allTides = generateTideData(location);
   return allTides.filter(tide => 
     tide.type === 'low' && tide.isNearSunriseOrSunset
   );
+};
+
+// Function to get sunrise and sunset times
+export const getSunriseSunset = (latitude: number, longitude: number, date: Date = new Date()) => {
+    const times = SunCalc.getTimes(date, latitude, longitude);
+    return {
+        sunrise: times.sunrise.toISOString(),
+        sunset: times.sunset.toISOString(),
+    };
+};
+
+export const calculateSunriseSunsetTimes = (latitude: number, longitude: number) => {
+    const today = new Date();
+    
+    // Today's sunrise and sunset
+    const todayTimes = SunCalc.getTimes(today, latitude, longitude);
+    const todayRiseSet = {
+        sunrise: todayTimes.sunrise.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+        sunset: todayTimes.sunset.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+    };
+
+    // This week's sunrise and sunset
+    const thisWeekRiseSet = [];
+    for (let i = 0; i < 7; i++) {
+        const date = new Date(today);
+        date.setDate(today.getDate() + i);
+        const times = SunCalc.getTimes(date, latitude, longitude);
+        thisWeekRiseSet.push({
+            date: date.toISOString(),
+            sunrise: times.sunrise.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+            sunset: times.sunset.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+        });
+    }
+
+    // This month's sunrise and sunset
+    const thisMonthRiseSet = [];
+    for (let i = 0; i < 30; i++) {
+        const date = new Date(today);
+        date.setDate(today.getDate() + i);
+        const times = SunCalc.getTimes(date, latitude, longitude);
+        thisMonthRiseSet.push({
+            date: date.toISOString(),
+            sunrise: times.sunrise.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+            sunset: times.sunset.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+        });
+    }
+
+    return {
+        todayRiseSet,
+        thisWeekRiseSet,
+        thisMonthRiseSet,
+    };
 };

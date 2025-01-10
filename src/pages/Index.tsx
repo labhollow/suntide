@@ -141,21 +141,33 @@ const Index = () => {
           
           <TabsContent value="daily">
             <TideChart data={todayTideData} period="daily" />
-            <TideTable data={todayTideData} period="daily" />
+            <TideTable 
+              data={todayTideData} 
+              location={{ lat: location.lat, lng: location.lng }} 
+              period="daily" 
+            />
           </TabsContent>
           
           <TabsContent value="weekly">
             <div className="space-y-4">
               <h2 className="text-xl font-semibold text-tide-blue">Weekly Tide Times</h2>
               <TideChart data={weeklyTideData} period="weekly" />
-              <TideTable data={weeklyTideData} period="weekly" />
+              <TideTable 
+                data={weeklyTideData} 
+                location={{ lat: location.lat, lng: location.lng }} 
+                period="weekly" 
+              />
             </div>
           </TabsContent>
           
           <TabsContent value="monthly">
             <div className="space-y-4">
               <h2 className="text-xl font-semibold text-tide-blue">Monthly Tide Times</h2>
-              <TideTable data={monthlyTideData} period="monthly" />
+              <TideTable 
+                data={monthlyTideData} 
+                location={{ lat: location.lat, lng: location.lng }} 
+                period="monthly" 
+              />
             </div>
           </TabsContent>
           
@@ -165,6 +177,7 @@ const Index = () => {
               {location && (
                 <TideTable 
                   data={getLowTidesNearSunriseSunset(today, location)} 
+                  location={{ lat: location.lat, lng: location.lng }} 
                   period="monthly" 
                 />
               )}

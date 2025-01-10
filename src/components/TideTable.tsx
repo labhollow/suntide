@@ -44,18 +44,8 @@ const TideTable = ({ data, period }: TideTableProps) => {
             <TableHead>Time</TableHead>
             <TableHead>Type</TableHead>
             <TableHead>Height (ft)</TableHead>
-            <TableHead>
-              <div className="flex items-center gap-2">
-                <Sunrise className="h-4 w-4 text-tide-sunrise" />
-                Sunrise
-              </div>
-            </TableHead>
-            <TableHead>
-              <div className="flex items-center gap-2">
-                <Sunset className="h-4 w-4 text-orange-500" />
-                Sunset
-              </div>
-            </TableHead>
+            <TableHead>Sunrise</TableHead>
+            <TableHead>Sunset</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
@@ -67,8 +57,8 @@ const TideTable = ({ data, period }: TideTableProps) => {
               <TableCell>{format(tide.date, "hh:mm a")}</TableCell>
               <TableCell className="capitalize">{tide.type}</TableCell>
               <TableCell>{tide.height.toFixed(2)}</TableCell>
-              <TableCell className="text-tide-sunrise">{tide.sunrise}</TableCell>
-              <TableCell className="text-orange-500">{tide.sunset}</TableCell>
+              <TableCell>{tide.sunrise ? format(parseISO(tide.sunrise), "hh:mm a") : 'N/A'}</TableCell>
+              <TableCell>{tide.sunset ? format(parseISO(tide.sunset), "hh:mm a") : 'N/A'}</TableCell>
             </TableRow>
           ))}
         </TableBody>
