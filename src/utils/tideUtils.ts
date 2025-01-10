@@ -61,8 +61,8 @@ export const generateTideData = (
       
       // High tide
       const highTideTime = cycleStart;
-      const isHighTideNearSunrise = sunTimes && Math.abs(differenceInHours(highTideTime, sunTimes.sunriseDate)) <= 2;
-      const isHighTideNearSunset = sunTimes && Math.abs(differenceInHours(highTideTime, sunTimes.sunsetDate)) <= 2;
+      const isHighTideNearSunrise = sunTimes && Math.abs(differenceInHours(highTideTime, sunTimes.sunriseDate)) <= 3;
+      const isHighTideNearSunset = sunTimes && Math.abs(differenceInHours(highTideTime, sunTimes.sunsetDate)) <= 3;
       
       tidesPerDay.push({
         t: highTideTime.toISOString(),
@@ -77,8 +77,8 @@ export const generateTideData = (
       
       // Low tide
       const lowTideTime = addHours(cycleStart, 6.2);
-      const isLowTideNearSunrise = sunTimes && Math.abs(differenceInHours(lowTideTime, sunTimes.sunriseDate)) <= 2;
-      const isLowTideNearSunset = sunTimes && Math.abs(differenceInHours(lowTideTime, sunTimes.sunsetDate)) <= 2;
+      const isLowTideNearSunrise = sunTimes && Math.abs(differenceInHours(lowTideTime, sunTimes.sunriseDate)) <= 3;
+      const isLowTideNearSunset = sunTimes && Math.abs(differenceInHours(lowTideTime, sunTimes.sunsetDate)) <= 3;
       
       tidesPerDay.push({
         t: lowTideTime.toISOString(),

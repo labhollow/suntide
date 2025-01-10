@@ -80,28 +80,106 @@ export const fetchTideData = async (
 
 // Map of locations to their NOAA station IDs and coordinates
 export const NOAA_STATIONS: Record<string, { id: string; name: string; lat: number; lng: number }> = {
-  "san-francisco": { 
-    id: "9414290", 
-    name: "San Francisco",
-    lat: 37.8067, 
-    lng: -122.4659
+  "san-diego": {
+    "id": "9410170",
+    "name": "San Diego",
+    "lat": 32.715556,
+    "lng": -117.176667
   },
-  "santa-cruz": { 
-    id: "9413745", 
-    name: "Santa Cruz",
-    lat: 36.9573, 
-    lng: -122.0173
+  "la-jolla": {
+    "id": "9410230",
+    "name": "La Jolla",
+    "lat": 32.866889,
+    "lng": -117.257139
   },
-  "monterey": { 
-    id: "9413450", 
-    name: "Monterey",
-    lat: 36.6051, 
-    lng: -121.8884
+  "los-angeles": {
+    "id": "9410660",
+    "name": "Los Angeles",
+    "lat": 33.72,
+    "lng": -118.271944
   },
-  "los-angeles": { 
-    id: "9410660", 
-    name: "Los Angeles",
-    lat: 33.7201, 
-    lng: -118.2737
+  "santa-monica": {
+    "id": "9410840",
+    "name": "Santa Monica",
+    "lat": 34.0083,
+    "lng": -118.5
+  },
+  "santa-barbara": {
+    "id": "9411340",
+    "name": "Santa Barbara",
+    "lat": 34.404589,
+    "lng": -119.692494
+  },
+  "port-san-luis": {
+    "id": "9412110",
+    "name": "Port San Luis",
+    "lat": 35.168889,
+    "lng": -120.754167
+  },
+  "monterey": {
+    "id": "9413450",
+    "name": "Monterey",
+    "lat": 36.608889,
+    "lng": -121.891389
+  },
+  "san-francisco": {
+    "id": "9414290",
+    "name": "San Francisco",
+    "lat": 37.806306,
+    "lng": -122.465889
+  },
+  "redwood-city": {
+    "id": "9414523",
+    "name": "Redwood City",
+    "lat": 37.506814,
+    "lng": -122.211906
+  },
+  "alameda": {
+    "id": "9414750",
+    "name": "Alameda",
+    "lat": 37.771953,
+    "lng": -122.300261
+  },
+  "richmond": {
+    "id": "9414863",
+    "name": "Richmond",
+    "lat": 37.928299,
+    "lng": -122.400002
+  },
+  "point-reyes": {
+    "id": "9415020",
+    "name": "Point Reyes",
+    "lat": 37.994167,
+    "lng": -122.973611
+  },
+  "martinez-amorco-pier": {
+    "id": "9415102",
+    "name": "Martinez-Amorco Pier",
+    "lat": 38.034639,
+    "lng": -122.125194
+  },
+  "port-chicago": {
+    "id": "9415144",
+    "name": "Port Chicago",
+    "lat": 38.056,
+    "lng": -122.0395
+  },
+  "arena-cove": {
+    "id": "9416841",
+    "name": "Arena Cove",
+    "lat": 38.914556,
+    "lng": -123.711083
+  },
+  "north-spit": {
+    "id": "9418767",
+    "name": "North Spit",
+    "lat": 40.76691,
+    "lng": -124.21734
+  },
+  "crescent-city": {
+    "id": "9419750",
+    "name": "Crescent City",
+    "lat": 41.74561,
+    "lng": -124.18439
   }
 };
