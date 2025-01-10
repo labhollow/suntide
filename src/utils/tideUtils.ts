@@ -22,6 +22,25 @@ export const metersToFeet = (meters: number): number => {
   return meters * 3.28084;
 };
 
+export const isWithinThreeHours = (time1: string, time2: string): boolean => {
+  const [hours1, minutes1, period1] = time1.match(/(\d+):(\d+)\s*(AM|PM)/)?.slice(1) || [];
+  const [hours2, minutes2, period2] = time2.match(/(\d+):(\d+)\s*(AM|PM)/)?.slice(1) || [];
+
+  if (!hours1 || !hours2) return false;
+
+  let hour1 = parseInt(hours1);
+  let hour2 = parseInt(hours2);
+
+  // Convert to 24-hour format
+  if (period1 === 'PM' && hour1 !== 12) hour1 += 12;
+  if (period1 === 'AM' && hour1 === 12) hour1 = 0;
+  if (period2 === 'PM' && hour2 !== 12) hour2 += 12;
+  if (period2 === 'AM' && hour2 === 12) hour2 = 0;
+
+  const diff = Math.abs(hour1 - hour2 + (parseInt(minutes1) - parseInt(minutes2)) / 60);
+  return diff <= 3;
+};
+
 export const generateTideData = (
   location: Location | null
 ): TideData[] => {
