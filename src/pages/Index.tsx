@@ -5,13 +5,14 @@ import TideTable from "@/components/TideTable";
 import LocationPicker from "@/components/LocationPicker";
 import TideAlerts from "@/components/TideAlerts";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { startOfToday } from "date-fns";
+import { startOfToday, format } from "date-fns";
 import { getLowTidesNearSunriseSunset, getUpcomingAlerts } from "@/utils/tideUtils";
 import type { Location } from "@/utils/tideUtils";
 import { fetchTideData, NOAA_STATIONS } from "@/utils/noaaApi";
 import { useQuery } from "@tanstack/react-query";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Loader2 } from "lucide-react";
+import SunCalc from "suncalc";
 
 const DEFAULT_LOCATION = {
   name: "San Francisco",
@@ -35,6 +36,18 @@ const Index = () => {
       localStorage.setItem("savedLocation", JSON.stringify(DEFAULT_LOCATION));
     }
   }, []);
+
+  const addSunriseSunsetToData = (data: any[], lat: number, lng: number) => {
+    return data.map(item => {
+      const date = new Date(item.t);
+      const times = SunCalc.getTimes(date, lat, lng);
+      return {
+        ...item,
+        sunrise: format(times.sunrise, 'hh:mm a'),
+        sunset: format(times.sunset, 'hh:mm a')
+      };
+    });
+  };
 
   const { data: tideData, isLoading, error } = useQuery({
     queryKey: ['tides', location?.name],
@@ -73,9 +86,12 @@ const Index = () => {
         });
 
         if (response.data && response.data.predictions) {
+          const locationKey = location.name.toLowerCase().replace(/\s+/g, '-');
+          const station = NOAA_STATIONS[locationKey];
+          
           const weeklyData = response.data.predictions.filter((item: any) => {
             const date = new Date(item.t);
-            return date >= new Date();
+            return date >= new Date() && date <= new Date(today.getTime() + 7 * 24 * 60 * 60 * 1000);
           });
 
           const monthlyData = response.data.predictions.filter((item: any) => {
@@ -88,9 +104,9 @@ const Index = () => {
             return date.toDateString() === new Date().toDateString();
           });
 
-          setWeeklyTideData(weeklyData);
-          setMonthlyTideData(monthlyData);
-          setTodayTideData(todayData);
+          setWeeklyTideData(addSunriseSunsetToData(weeklyData, station.lat, station.lng));
+          setMonthlyTideData(addSunriseSunsetToData(monthlyData, station.lat, station.lng));
+          setTodayTideData(addSunriseSunsetToData(todayData, station.lat, station.lng));
         }
       } catch (error) {
         console.error('Error fetching data:', error);
@@ -98,7 +114,7 @@ const Index = () => {
     };
 
     fetchData();
-  }, [stationId]);
+  }, [stationId, location]);
 
   const handleLocationChange = (newLocation: Location) => {
     const locationKey = newLocation.name.toLowerCase().replace(/\s+/g, '-');
