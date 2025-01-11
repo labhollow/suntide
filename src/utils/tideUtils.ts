@@ -1,4 +1,4 @@
-import { addDays, addHours, addMinutes, startOfToday, differenceInHours } from "date-fns";
+import { addDays, addHours, addMinutes, startOfToday, differenceInHours, parse, format } from "date-fns";
 import SunCalc from "suncalc";
 
 export interface Location {
@@ -23,22 +23,38 @@ export const metersToFeet = (meters: number): number => {
 };
 
 export const isWithinThreeHours = (time1: string, time2: string): boolean => {
-  const [hours1, minutes1, period1] = time1.match(/(\d+):(\d+)\s*(AM|PM)/)?.slice(1) || [];
-  const [hours2, minutes2, period2] = time2.match(/(\d+):(\d+)\s*(AM|PM)/)?.slice(1) || [];
+  try {
+    // Parse times into Date objects for comparison
+    const parseTime = (timeStr: string) => {
+      // Handle both 24h and 12h formats
+      const is24Hour = timeStr.includes(':') && !timeStr.includes('AM') && !timeStr.includes('PM');
+      
+      if (is24Hour) {
+        return parse(timeStr, 'HH:mm', new Date());
+      } else {
+        return parse(timeStr, 'hh:mm a', new Date());
+      }
+    };
 
-  if (!hours1 || !hours2) return false;
+    const date1 = parseTime(time1);
+    const date2 = parseTime(time2);
+    
+    console.log('Comparing times:', {
+      time1,
+      time2,
+      parsed1: format(date1, 'HH:mm'),
+      parsed2: format(date2, 'HH:mm')
+    });
 
-  let hour1 = parseInt(hours1);
-  let hour2 = parseInt(hours2);
-
-  // Convert to 24-hour format
-  if (period1 === 'PM' && hour1 !== 12) hour1 += 12;
-  if (period1 === 'AM' && hour1 === 12) hour1 = 0;
-  if (period2 === 'PM' && hour2 !== 12) hour2 += 12;
-  if (period2 === 'AM' && hour2 === 12) hour2 = 0;
-
-  const diff = Math.abs(hour1 - hour2 + (parseInt(minutes1) - parseInt(minutes2)) / 60);
-  return diff <= 3;
+    // Calculate difference in hours
+    const diffInHours = Math.abs(differenceInHours(date1, date2));
+    console.log('Time difference in hours:', diffInHours);
+    
+    return diffInHours <= 3;
+  } catch (error) {
+    console.error('Error comparing times:', error, { time1, time2 });
+    return false;
+  }
 };
 
 export const generateTideData = (
