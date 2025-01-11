@@ -5,7 +5,7 @@ import TideTable from "@/components/TideTable";
 import LocationPicker from "@/components/LocationPicker";
 import TideAlerts from "@/components/TideAlerts";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { startOfToday, format } from "date-fns";
+import { startOfToday, format, isToday } from "date-fns";
 import { getLowTidesNearSunriseSunset, getUpcomingAlerts } from "@/utils/tideUtils";
 import type { Location } from "@/utils/tideUtils";
 import { fetchTideData, NOAA_STATIONS } from "@/utils/noaaApi";
@@ -101,7 +101,7 @@ const Index = () => {
 
           const todayData = response.data.predictions.filter((item: any) => {
             const date = new Date(item.t);
-            return date.toDateString() === new Date().toDateString();
+            return isToday(date);
           });
 
           setWeeklyTideData(addSunriseSunsetToData(weeklyData, station.lat, station.lng));
