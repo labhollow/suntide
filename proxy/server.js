@@ -25,23 +25,42 @@ app.use((req, res, next) => {
 app.use((req, res, next) => {
     console.log(`[${new Date().toISOString()}] ${req.method} ${req.url}`);
     console.log('Query params:', req.query);
+    console.log('Begin date:', req.query.begin_date);
+    console.log('End date:', req.query.end_date);
     next();
 });
 
 const fetchData = async (req, res) => {
     try {
         const baseUrl = 'https://api.tidesandcurrents.noaa.gov/api/prod/datagetter';
+        
+        // Log the full URL that will be requested
+        const fullUrl = `${baseUrl}?${new URLSearchParams(req.query).toString()}`;
+        console.log('Requesting URL:', fullUrl);
+        
         const response = await axios.get(baseUrl, {
             params: req.query
         });
         
-        console.log('NOAA API Response:', response.data);
+        console.log('NOAA API Response status:', response.status);
+        console.log('NOAA API Response data:', JSON.stringify(response.data, null, 2));
+        
+        if (!response.data.predictions || response.data.predictions.length === 0) {
+            console.warn('No predictions found in response');
+        } else {
+            console.log('Number of predictions:', response.data.predictions.length);
+            console.log('First prediction:', response.data.predictions[0]);
+            console.log('Last prediction:', response.data.predictions[response.data.predictions.length - 1]);
+        }
+        
         res.json(response.data);
     } catch (error) {
         console.error('Error fetching data:', error.response?.data || error.message);
+        console.error('Full error object:', error);
         res.status(500).json({
             error: 'Error fetching data',
-            details: error.message
+            details: error.message,
+            response: error.response?.data
         });
     }
 };
