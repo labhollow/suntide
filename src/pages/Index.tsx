@@ -5,7 +5,7 @@ import TideTable from "@/components/TideTable";
 import LocationPicker from "@/components/LocationPicker";
 import TideAlerts from "@/components/TideAlerts";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { startOfToday, format, isToday, parseISO } from "date-fns";
+import { startOfToday, format, isToday, parseISO, startOfDay, endOfDay } from "date-fns";
 import { getLowTidesNearSunriseSunset, getUpcomingAlerts } from "@/utils/tideUtils";
 import type { Location } from "@/utils/tideUtils";
 import { fetchTideData, NOAA_STATIONS } from "@/utils/noaaApi";
@@ -39,7 +39,7 @@ const Index = () => {
 
   const addSunriseSunsetToData = (data: any[], lat: number, lng: number) => {
     return data.map(item => {
-      const date = new Date(item.t);
+      const date = parseISO(item.t);
       const times = SunCalc.getTimes(date, lat, lng);
       return {
         ...item,
@@ -89,6 +89,11 @@ const Index = () => {
           const locationKey = location.name.toLowerCase().replace(/\s+/g, '-');
           const station = NOAA_STATIONS[locationKey];
           
+          const todayStart = startOfDay(new Date());
+          const todayEnd = endOfDay(new Date());
+          
+          console.log('Filtering dates between:', todayStart, 'and', todayEnd);
+          
           const weeklyData = response.data.predictions.filter((item: any) => {
             const date = parseISO(item.t);
             return date >= new Date() && date <= new Date(today.getTime() + 7 * 24 * 60 * 60 * 1000);
@@ -101,16 +106,21 @@ const Index = () => {
 
           const todayData = response.data.predictions.filter((item: any) => {
             const date = parseISO(item.t);
-            return isToday(date);
+            return date >= todayStart && date <= todayEnd;
           });
 
+          console.log('Raw predictions:', response.data.predictions);
           console.log('Today data before processing:', todayData);
 
-          setWeeklyTideData(addSunriseSunsetToData(weeklyData, station.lat, station.lng));
-          setMonthlyTideData(addSunriseSunsetToData(monthlyData, station.lat, station.lng));
-          setTodayTideData(addSunriseSunsetToData(todayData, station.lat, station.lng));
-          
-          console.log('Today data after processing:', addSunriseSunsetToData(todayData, station.lat, station.lng));
+          const processedTodayData = addSunriseSunsetToData(todayData, station.lat, station.lng);
+          const processedWeeklyData = addSunriseSunsetToData(weeklyData, station.lat, station.lng);
+          const processedMonthlyData = addSunriseSunsetToData(monthlyData, station.lat, station.lng);
+
+          console.log('Today data after processing:', processedTodayData);
+
+          setWeeklyTideData(processedWeeklyData);
+          setMonthlyTideData(processedMonthlyData);
+          setTodayTideData(processedTodayData);
         }
       } catch (error) {
         console.error('Error fetching data:', error);
