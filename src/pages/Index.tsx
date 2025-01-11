@@ -5,7 +5,7 @@ import TideTable from "@/components/TideTable";
 import LocationPicker from "@/components/LocationPicker";
 import TideAlerts from "@/components/TideAlerts";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { startOfToday, format, isToday } from "date-fns";
+import { startOfToday, format, isToday, parseISO } from "date-fns";
 import { getLowTidesNearSunriseSunset, getUpcomingAlerts } from "@/utils/tideUtils";
 import type { Location } from "@/utils/tideUtils";
 import { fetchTideData, NOAA_STATIONS } from "@/utils/noaaApi";
@@ -90,23 +90,27 @@ const Index = () => {
           const station = NOAA_STATIONS[locationKey];
           
           const weeklyData = response.data.predictions.filter((item: any) => {
-            const date = new Date(item.t);
+            const date = parseISO(item.t);
             return date >= new Date() && date <= new Date(today.getTime() + 7 * 24 * 60 * 60 * 1000);
           });
 
           const monthlyData = response.data.predictions.filter((item: any) => {
-            const date = new Date(item.t);
+            const date = parseISO(item.t);
             return date >= new Date();
           });
 
           const todayData = response.data.predictions.filter((item: any) => {
-            const date = new Date(item.t);
+            const date = parseISO(item.t);
             return isToday(date);
           });
+
+          console.log('Today data before processing:', todayData);
 
           setWeeklyTideData(addSunriseSunsetToData(weeklyData, station.lat, station.lng));
           setMonthlyTideData(addSunriseSunsetToData(monthlyData, station.lat, station.lng));
           setTodayTideData(addSunriseSunsetToData(todayData, station.lat, station.lng));
+          
+          console.log('Today data after processing:', addSunriseSunsetToData(todayData, station.lat, station.lng));
         }
       } catch (error) {
         console.error('Error fetching data:', error);
