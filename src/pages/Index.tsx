@@ -5,7 +5,8 @@ import TideTable from "@/components/TideTable";
 import LocationPicker from "@/components/LocationPicker";
 import TideAlerts from "@/components/TideAlerts";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { startOfToday, format, isToday, parseISO, startOfDay, endOfDay } from "date-fns";
+import { startOfToday, format, parseISO, startOfDay, endOfDay } from "date-fns";
+import { zonedTimeToUtc, utcToZonedTime } from 'date-fns-tz';
 import { getLowTidesNearSunriseSunset, getUpcomingAlerts } from "@/utils/tideUtils";
 import type { Location } from "@/utils/tideUtils";
 import { fetchTideData, NOAA_STATIONS } from "@/utils/noaaApi";
@@ -27,6 +28,7 @@ const Index = () => {
   const [monthlyTideData, setMonthlyTideData] = useState([]);
   const [todayTideData, setTodayTideData] = useState([]);
   const [stationId, setStationId] = useState('9414290');
+  const timeZone = 'America/Los_Angeles'; // Using Pacific Time as default for NOAA stations
 
   React.useEffect(() => {
     const savedLocation = localStorage.getItem("savedLocation");
@@ -39,12 +41,12 @@ const Index = () => {
 
   const addSunriseSunsetToData = (data: any[], lat: number, lng: number) => {
     return data.map(item => {
-      const date = parseISO(item.t);
+      const date = utcToZonedTime(parseISO(item.t), timeZone);
       const times = SunCalc.getTimes(date, lat, lng);
       return {
         ...item,
-        sunrise: format(times.sunrise, 'hh:mm a'),
-        sunset: format(times.sunset, 'hh:mm a')
+        sunrise: format(utcToZonedTime(times.sunrise, timeZone), 'hh:mm a'),
+        sunset: format(utcToZonedTime(times.sunset, timeZone), 'hh:mm a')
       };
     });
   };
@@ -89,27 +91,29 @@ const Index = () => {
           const locationKey = location.name.toLowerCase().replace(/\s+/g, '-');
           const station = NOAA_STATIONS[locationKey];
           
-          const todayStart = startOfDay(new Date());
-          const todayEnd = endOfDay(new Date());
+          const todayStart = zonedTimeToUtc(startOfDay(new Date()), timeZone);
+          const todayEnd = zonedTimeToUtc(endOfDay(new Date()), timeZone);
           
-          console.log('Filtering dates between:', todayStart, 'and', todayEnd);
+          console.log('Filtering dates between:', {
+            todayStart: todayStart.toISOString(),
+            todayEnd: todayEnd.toISOString()
+          });
           
           const weeklyData = response.data.predictions.filter((item: any) => {
-            const date = parseISO(item.t);
-            return date >= new Date() && date <= new Date(today.getTime() + 7 * 24 * 60 * 60 * 1000);
+            const itemDate = zonedTimeToUtc(parseISO(item.t), timeZone);
+            return itemDate >= new Date() && itemDate <= new Date(today.getTime() + 7 * 24 * 60 * 60 * 1000);
           });
 
           const monthlyData = response.data.predictions.filter((item: any) => {
-            const date = parseISO(item.t);
-            return date >= new Date();
+            const itemDate = zonedTimeToUtc(parseISO(item.t), timeZone);
+            return itemDate >= new Date();
           });
 
           const todayData = response.data.predictions.filter((item: any) => {
-            const date = parseISO(item.t);
-            return date >= todayStart && date <= todayEnd;
+            const itemDate = zonedTimeToUtc(parseISO(item.t), timeZone);
+            return itemDate >= todayStart && itemDate <= todayEnd;
           });
 
-          console.log('Raw predictions:', response.data.predictions);
           console.log('Today data before processing:', todayData);
 
           const processedTodayData = addSunriseSunsetToData(todayData, station.lat, station.lng);

@@ -1,4 +1,5 @@
 import { addDays, addHours, addMinutes, startOfToday, differenceInHours, parse, format } from "date-fns";
+import { zonedTimeToUtc, utcToZonedTime } from 'date-fns-tz';
 import SunCalc from "suncalc";
 
 export interface Location {
@@ -18,6 +19,8 @@ export interface TideData {
   isNearSunriseOrSunset?: boolean;
 }
 
+const timeZone = 'America/Los_Angeles';
+
 export const metersToFeet = (meters: number): number => {
   return meters * 3.28084;
 };
@@ -26,14 +29,17 @@ export const isWithinThreeHours = (time1: string, time2: string): boolean => {
   try {
     // Parse times into Date objects for comparison
     const parseTime = (timeStr: string) => {
-      // Handle both 24h and 12h formats
+      const today = new Date();
       const is24Hour = timeStr.includes(':') && !timeStr.includes('AM') && !timeStr.includes('PM');
       
+      let parsedDate;
       if (is24Hour) {
-        return parse(timeStr, 'HH:mm', new Date());
+        parsedDate = parse(timeStr, 'HH:mm', today);
       } else {
-        return parse(timeStr, 'hh:mm a', new Date());
+        parsedDate = parse(timeStr, 'hh:mm a', today);
       }
+      
+      return zonedTimeToUtc(parsedDate, timeZone);
     };
 
     const date1 = parseTime(time1);
@@ -42,8 +48,8 @@ export const isWithinThreeHours = (time1: string, time2: string): boolean => {
     console.log('Comparing times:', {
       time1,
       time2,
-      parsed1: format(date1, 'HH:mm'),
-      parsed2: format(date2, 'HH:mm')
+      parsed1: format(utcToZonedTime(date1, timeZone), 'HH:mm'),
+      parsed2: format(utcToZonedTime(date2, timeZone), 'HH:mm')
     });
 
     // Calculate difference in hours
