@@ -1,5 +1,5 @@
 import { addDays, addHours, addMinutes, startOfToday, differenceInHours, parse, format } from "date-fns";
-import { zonedTimeToUtc, utcToZonedTime } from 'date-fns-tz';
+import { fromZonedTime, toZonedTime } from 'date-fns-tz';
 import SunCalc from "suncalc";
 
 export interface Location {
@@ -39,7 +39,7 @@ export const isWithinThreeHours = (time1: string, time2: string): boolean => {
         parsedDate = parse(timeStr, 'hh:mm a', today);
       }
       
-      return zonedTimeToUtc(parsedDate, timeZone);
+      return fromZonedTime(parsedDate, timeZone);
     };
 
     const date1 = parseTime(time1);
@@ -48,8 +48,8 @@ export const isWithinThreeHours = (time1: string, time2: string): boolean => {
     console.log('Comparing times:', {
       time1,
       time2,
-      parsed1: format(utcToZonedTime(date1, timeZone), 'HH:mm'),
-      parsed2: format(utcToZonedTime(date2, timeZone), 'HH:mm')
+      parsed1: format(toZonedTime(date1, timeZone), 'HH:mm'),
+      parsed2: format(toZonedTime(date2, timeZone), 'HH:mm')
     });
 
     // Calculate difference in hours

@@ -6,7 +6,7 @@ import LocationPicker from "@/components/LocationPicker";
 import TideAlerts from "@/components/TideAlerts";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { startOfToday, format, parseISO, startOfDay, endOfDay } from "date-fns";
-import { zonedTimeToUtc, utcToZonedTime } from 'date-fns-tz';
+import { fromZonedTime, toZonedTime } from 'date-fns-tz';
 import { getLowTidesNearSunriseSunset, getUpcomingAlerts } from "@/utils/tideUtils";
 import type { Location } from "@/utils/tideUtils";
 import { fetchTideData, NOAA_STATIONS } from "@/utils/noaaApi";
@@ -41,12 +41,12 @@ const Index = () => {
 
   const addSunriseSunsetToData = (data: any[], lat: number, lng: number) => {
     return data.map(item => {
-      const date = utcToZonedTime(parseISO(item.t), timeZone);
+      const date = toZonedTime(parseISO(item.t), timeZone);
       const times = SunCalc.getTimes(date, lat, lng);
       return {
         ...item,
-        sunrise: format(utcToZonedTime(times.sunrise, timeZone), 'hh:mm a'),
-        sunset: format(utcToZonedTime(times.sunset, timeZone), 'hh:mm a')
+        sunrise: format(toZonedTime(times.sunrise, timeZone), 'hh:mm a'),
+        sunset: format(toZonedTime(times.sunset, timeZone), 'hh:mm a')
       };
     });
   };
@@ -91,8 +91,8 @@ const Index = () => {
           const locationKey = location.name.toLowerCase().replace(/\s+/g, '-');
           const station = NOAA_STATIONS[locationKey];
           
-          const todayStart = zonedTimeToUtc(startOfDay(new Date()), timeZone);
-          const todayEnd = zonedTimeToUtc(endOfDay(new Date()), timeZone);
+          const todayStart = fromZonedTime(startOfDay(new Date()), timeZone);
+          const todayEnd = fromZonedTime(endOfDay(new Date()), timeZone);
           
           console.log('Filtering dates between:', {
             todayStart: todayStart.toISOString(),
@@ -100,17 +100,17 @@ const Index = () => {
           });
           
           const weeklyData = response.data.predictions.filter((item: any) => {
-            const itemDate = zonedTimeToUtc(parseISO(item.t), timeZone);
+            const itemDate = fromZonedTime(parseISO(item.t), timeZone);
             return itemDate >= new Date() && itemDate <= new Date(today.getTime() + 7 * 24 * 60 * 60 * 1000);
           });
 
           const monthlyData = response.data.predictions.filter((item: any) => {
-            const itemDate = zonedTimeToUtc(parseISO(item.t), timeZone);
+            const itemDate = fromZonedTime(parseISO(item.t), timeZone);
             return itemDate >= new Date();
           });
 
           const todayData = response.data.predictions.filter((item: any) => {
-            const itemDate = zonedTimeToUtc(parseISO(item.t), timeZone);
+            const itemDate = fromZonedTime(parseISO(item.t), timeZone);
             return itemDate >= todayStart && itemDate <= todayEnd;
           });
 
