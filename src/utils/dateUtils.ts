@@ -1,35 +1,33 @@
-import { addDays, addHours, addMinutes, startOfToday, differenceInHours, parse, format } from "date-fns";
-import { fromZonedTime, toZonedTime } from 'date-fns-tz';
-
-const timeZone = 'America/Los_Angeles';
+import { parse, format } from "date-fns";
 
 export const isWithinThreeHours = (time1: string, time2: string): boolean => {
-  try {
-    const parseTime = (timeStr: string) => {
-      const today = new Date();
-      const is24Hour = timeStr.includes(':') && !timeStr.includes('AM') && !timeStr.includes('PM');
-      
-      let parsedDate;
-      if (is24Hour) {
-        parsedDate = parse(timeStr, 'HH:mm', today);
-      } else {
-        parsedDate = parse(timeStr, 'hh:mm a', today);
-      }
-      
-      return fromZonedTime(parsedDate, timeZone);
-    };
-
-    const date1 = parseTime(time1);
-    const date2 = parseTime(time2);
+  const parseTime = (timeStr: string) => {
+    // Convert time string to minutes since midnight
+    const [time, period] = timeStr.split(' ');
+    const [hours, minutes] = time.split(':').map(Number);
+    let totalMinutes = hours * 60 + minutes;
     
-    const diffInHours = Math.abs(differenceInHours(date1, date2));
-    return diffInHours <= 3;
-  } catch (error) {
-    console.error('Error comparing times:', error, { time1, time2 });
-    return false;
-  }
+    if (period === 'PM' && hours !== 12) {
+      totalMinutes += 12 * 60;
+    }
+    if (period === 'AM' && hours === 12) {
+      totalMinutes -= 12 * 60;
+    }
+    
+    return totalMinutes;
+  };
+
+  const time1Minutes = parseTime(time1);
+  const time2Minutes = parseTime(time2);
+  
+  // Handle cases where times cross midnight
+  const diff1 = Math.abs(time1Minutes - time2Minutes);
+  const diff2 = 1440 - diff1; // 1440 = minutes in a day
+  const minDiff = Math.min(diff1, diff2);
+  
+  return minDiff <= 180; // 3 hours = 180 minutes
 };
 
 export const formatTime = (date: Date): string => {
-  return format(date, "HH:mm");
+  return format(date, "hh:mm a");
 };

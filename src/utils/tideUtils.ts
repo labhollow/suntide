@@ -1,5 +1,6 @@
 import { addDays, parse, format, parseISO } from "date-fns";
 import { getSunriseSunset } from "./sunUtils";
+import { isWithinThreeHours } from "./dateUtils";
 
 export interface Location {
   name: string;
@@ -20,28 +21,6 @@ export interface TideData {
 
 export const metersToFeet = (meters: number): number => {
   return meters * 3.28084;
-};
-
-export const isWithinThreeHours = (time1: string, time2: string): boolean => {
-  const parseTime = (timeStr: string) => {
-    const [time, period] = timeStr.split(' ');
-    const [hours, minutes] = time.split(':').map(Number);
-    let totalMinutes = hours * 60 + minutes;
-    
-    if (period === 'PM' && hours !== 12) {
-      totalMinutes += 12 * 60;
-    }
-    if (period === 'AM' && hours === 12) {
-      totalMinutes -= 12 * 60;
-    }
-    
-    return totalMinutes;
-  };
-
-  const time1Minutes = parseTime(time1);
-  const time2Minutes = parseTime(time2);
-  const diffMinutes = Math.abs(time1Minutes - time2Minutes);
-  return diffMinutes <= 180;
 };
 
 export const enrichTideDataWithSunriseSunset = (tideData: TideData[], location: Location): TideData[] => {
@@ -73,7 +52,7 @@ export const getUpcomingAlerts = (tideData: TideData[]): Array<{date: string; ti
     .map(tide => {
       const tideDate = parseISO(tide.t);
       const tideTime = format(tideDate, 'hh:mm a');
-      const isNearSunrise = tide.sunrise && isWithinThreeHours(tideTime, tide.sunrise);
+      const isNearSunrise = isWithinThreeHours(tideTime, tide.sunrise || '');
       
       return {
         date: format(tideDate, 'MMM dd, yyyy'),
@@ -84,8 +63,6 @@ export const getUpcomingAlerts = (tideData: TideData[]): Array<{date: string; ti
 };
 
 export const getLowTidesNearSunriseSunset = (today: Date, location: Location): TideData[] => {
-  if (!location) return [];
-  
   const endDate = addDays(today, 30);
   const allTides: TideData[] = [];
   
