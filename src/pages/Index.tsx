@@ -68,9 +68,15 @@ const Index = () => {
             return itemDate >= today && itemDate <= addDays(today, 7);
           });
 
-          setTodayTideData(todayData);
-          setWeeklyTideData(weeklyData);
-          setMonthlyTideData(enrichedData);
+          if (JSON.stringify(todayData) !== JSON.stringify(todayTideData)) {
+            setTodayTideData(todayData);
+          }
+          if (JSON.stringify(weeklyData) !== JSON.stringify(weeklyTideData)) {
+            setWeeklyTideData(weeklyData);
+          }
+          if (JSON.stringify(enrichedData) !== JSON.stringify(monthlyTideData)) {
+            setMonthlyTideData(enrichedData);
+          }
         }
       } catch (error) {
         console.error('Error fetching data:', error);
