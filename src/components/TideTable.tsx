@@ -9,7 +9,8 @@ import {
 } from "@/components/ui/table";
 import { format, parseISO } from "date-fns";
 import { Sunrise, Sunset } from "lucide-react";
-import { metersToFeet, isWithinThreeHours } from "@/utils/tideUtils";
+import { metersToFeet } from "@/utils/tideUtils";
+import { isWithinThreeHours } from "@/utils/dateUtils";
 import { useToast } from "@/hooks/use-toast";
 
 interface TideData {
