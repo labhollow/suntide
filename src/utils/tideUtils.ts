@@ -1,4 +1,4 @@
-import { addDays } from "date-fns";
+import { addDays, parse, format } from "date-fns";
 import { getSunriseSunset } from "./sunUtils";
 
 export interface Location {
@@ -17,6 +17,39 @@ export interface TideData {
   sunset?: string;
   isNearSunriseOrSunset?: boolean;
 }
+
+export const metersToFeet = (meters: number): number => {
+  return meters * 3.28084;
+};
+
+export const isWithinThreeHours = (time1: string, time2: string): boolean => {
+  const parseTime = (timeStr: string) => {
+    // Parse time in 12-hour format (e.g., "06:00 AM")
+    const [time, period] = timeStr.split(' ');
+    const [hours, minutes] = time.split(':').map(Number);
+    let totalMinutes = hours * 60 + minutes;
+    
+    // Adjust for PM times
+    if (period === 'PM' && hours !== 12) {
+      totalMinutes += 12 * 60;
+    }
+    // Adjust for 12 AM
+    if (period === 'AM' && hours === 12) {
+      totalMinutes -= 12 * 60;
+    }
+    
+    return totalMinutes;
+  };
+
+  const time1Minutes = parseTime(time1);
+  const time2Minutes = parseTime(time2);
+  
+  // Calculate absolute difference in minutes
+  const diffMinutes = Math.abs(time1Minutes - time2Minutes);
+  
+  // Check if within 3 hours (180 minutes)
+  return diffMinutes <= 180;
+};
 
 export const generateTideData = (location: Location | null): TideData[] => {
   if (!location) return [];
