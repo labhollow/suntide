@@ -30,18 +30,60 @@ app.use((req, res, next) => {
     next();
 });
 
+const fetchAlphanumericStationData = async (stationId) => {
+    const stationUrl = `https://api.tidesandcurrents.noaa.gov/mdapi/prod/webapi/stations/${stationId}.json`;
+    const response = await axios.get(stationUrl);
+    const stationData = response.data.stations[0];
+    
+    if (stationData) {
+        const referenceId = stationData.reference_id; // Use the numeric reference ID
+        const tidePredOffsetsUrl = stationData.tidepredoffsets.self; // Get the tide prediction offsets URL
+        return { referenceId, tidePredOffsetsUrl, lat: stationData.lat, lng: stationData.lng };
+    }
+    
+    throw new Error('Station data not found');
+};
+
 const fetchData = async (req, res) => {
     try {
+        const stationId = req.query.station;
+        
+        // Check if the station ID is alphanumeric
+        const isAlphanumeric = /^[A-Za-z0-9-()]+$/.test(stationId);
+        
+        let referenceId, lat, lng, tidePredOffsetsUrl;
+
+        if (isAlphanumeric) {
+            // Handle alphanumeric station ID
+            const stationDetails = await fetchAlphanumericStationData(stationId);
+            referenceId = stationDetails.referenceId;
+            lat = stationDetails.lat;
+            lng = stationDetails.lng;
+            tidePredOffsetsUrl = stationDetails.tidePredOffsetsUrl;
+        } else {
+            // Handle numeric station ID as before
+            referenceId = stationId; // Assuming it's numeric
+            // NOAA_STATIONS object is not defined in the original code, so it's commented out
+            // lat = NOAA_STATIONS[stationId].lat;
+            // lng = NOAA_STATIONS[stationId].lng;
+        }
+
+        // Now fetch tide data using referenceId, lat, and lng
         const baseUrl = 'https://api.tidesandcurrents.noaa.gov/api/prod/datagetter';
-        
-        // Log the full URL that will be requested
-        const fullUrl = `${baseUrl}?${new URLSearchParams(req.query).toString()}`;
-        console.log('Requesting URL:', fullUrl);
-        
         const response = await axios.get(baseUrl, {
-            params: req.query
+            params: {
+                station: referenceId,
+                product: 'predictions',
+                datum: 'MLLW',
+                format: 'json',
+                units: 'english',
+                time_zone: 'lst_ldt',
+                begin_date: req.query.begin_date,
+                end_date: req.query.end_date
+            }
         });
-        
+
+        // Log and respond with the data as before
         console.log('NOAA API Response status:', response.status);
         console.log('NOAA API Response data:', JSON.stringify(response.data, null, 2));
         

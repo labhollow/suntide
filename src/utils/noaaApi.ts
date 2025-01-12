@@ -92,6 +92,12 @@ export const NOAA_STATIONS: Record<string, { id: string; name: string; lat: numb
     "lat": 32.866889,
     "lng": -117.257139
   },
+  "los-patos-(highway-bridge)": {
+    "id": "TWC0427",
+    "name": "Los Patos (highway bridge)",
+    "lat": 33.71666666666701,
+    "lng": -118.05
+  },
   "los-angeles": {
     "id": "9410660",
     "name": "Los Angeles",
