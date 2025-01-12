@@ -8,6 +8,7 @@ import { NOAA_STATIONS } from "@/utils/noaaApi";
 import TideAlerts from "@/components/TideAlerts";
 import TideHeader from "@/components/TideHeader";
 import TideView from "@/components/TideView";
+import TideCalendar from '@/components/TideCalendar';
 
 const DEFAULT_LOCATION = {
   name: "San Francisco",
@@ -22,6 +23,7 @@ const Index = () => {
   const [monthlyTideData, setMonthlyTideData] = useState([]);
   const [todayTideData, setTodayTideData] = useState([]);
   const [stationId, setStationId] = useState('9414290');
+  const [activeTab, setActiveTab] = useState('daily'); // Default active tab
 
   React.useEffect(() => {
     const savedLocation = localStorage.getItem("savedLocation");
@@ -96,6 +98,10 @@ const Index = () => {
     localStorage.setItem("savedLocation", JSON.stringify(newLocation));
   };
 
+  const handleTabChange = (tab) => {
+    setActiveTab(tab);
+  };
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-orange-50 to-yellow-50 p-6">
       <div className="max-w-4xl mx-auto space-y-6">
@@ -103,10 +109,10 @@ const Index = () => {
         
         <Tabs defaultValue="daily" className="w-full">
           <TabsList className="grid w-full grid-cols-4 bg-white/50 backdrop-blur-sm">
-            <TabsTrigger value="daily">Today</TabsTrigger>
-            <TabsTrigger value="weekly">This Week</TabsTrigger>
-            <TabsTrigger value="monthly">This Month</TabsTrigger>
-            <TabsTrigger value="sunrise-sunset">Near Sunrise/Sunset</TabsTrigger>
+            <TabsTrigger value="daily" onClick={() => handleTabChange('daily')}>Today</TabsTrigger>
+            <TabsTrigger value="weekly" onClick={() => handleTabChange('weekly')}>This Week</TabsTrigger>
+            <TabsTrigger value="monthly" onClick={() => handleTabChange('monthly')}>This Month</TabsTrigger>
+            <TabsTrigger value="sunrise-sunset" onClick={() => handleTabChange('sunrise-sunset')}>Near Sunrise/Sunset</TabsTrigger>
           </TabsList>
           
           <TabsContent value="daily">
@@ -135,6 +141,7 @@ const Index = () => {
               period="monthly" 
               title="Low Tides Near Sunrise/Sunset"
             />
+            {activeTab === 'sunrise-sunset' && <TideCalendar tideData={todayTideData} />}
           </TabsContent>
         </Tabs>
 
