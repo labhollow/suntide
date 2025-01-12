@@ -187,5 +187,83 @@ export const NOAA_STATIONS: Record<string, { id: string; name: string; lat: numb
     "name": "Crescent City",
     "lat": 41.74561,
     "lng": -124.18439
+  },
+  "san-clemente": {
+    "id": "TWC0419",
+    "name": "San Clemente",
+    "lat": 33.416666666667005,
+    "lng": -117.61666666666996
+  },
+  "balboa-pier,-newport-beach": {
+    "id": "9410583",
+    "name": "Balboa Pier, Newport Beach",
+    "lat": 33.6,
+    "lng": -117.9
+  },
+  "santa-ana-river-entrance-(inside)": {
+    "id": "9410599",
+    "name": "Santa Ana River entrance (inside)",
+    "lat": 33.63,
+    "lng": -117.958
+  },
+  "avalon,-santa-catalina-island": {
+    "id": "9410079",
+    "name": "Avalon, Santa Catalina Island",
+    "lat": 33.345001220703125,
+    "lng": -118.32499694824219
+  },
+  "catalina-harbor,-santa-catalina-island": {
+    "id": "9410092",
+    "name": "Catalina Harbor, Santa Catalina Island",
+    "lat": 33.4317,
+    "lng": -118.503
+  },
+  "imperial-beach": {
+    "id": "9410120",
+    "name": "Imperial Beach",
+    "lat": 32.5783,
+    "lng": -117.135
+  },
+  "south-san-diego-bay": {
+    "id": "9410135",
+    "name": "South San Diego Bay",
+    "lat": 32.62910079956055,
+    "lng": -117.10780334472656
+  },
+  "national-city,-san-diego-bay": {
+    "id": "9410152",
+    "name": "National City, San Diego Bay",
+    "lat": 32.665,
+    "lng": -117.118
+  },
+  "san-diego,-quarantine-station": {
+    "id": "9410166",
+    "name": "San Diego, Quarantine Station",
+    "lat": 32.7033,
+    "lng": -117.235
+  },
+  "san-diego-(broadway)": {
+    "id": "9410170",
+    "name": "SAN DIEGO (Broadway)",
+    "lat": 32.71555555555555,
+    "lng": -117.1766666666667
+  },
+  "mission-bay,-campland": {
+    "id": "9410196",
+    "name": "Mission Bay, Campland",
+    "lat": 32.793701171875,
+    "lng": -117.22380065917969
+  },
+  "la-jolla-(scripps-institution-wharf)": {
+    "id": "9410230",
+    "name": "La Jolla (Scripps Institution Wharf)",
+    "lat": 32.86688888888889,
+    "lng": -117.2571388888889
+  },
+  "newport-bay-entrance,-corona-del-mar": {
+    "id": "9410580",
+    "name": "Newport Bay Entrance, Corona del Mar",
+    "lat": 33.6033,
+    "lng": -117.883
   }
 };
