@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { startOfToday, format, parseISO, startOfDay, endOfDay, addDays } from "date-fns";
-import { getLowTidesNearSunriseSunset, getUpcomingAlerts } from "@/utils/tideUtils";
+import { getLowTidesNearSunriseSunset, getUpcomingAlerts, enrichTideDataWithSunriseSunset } from "@/utils/tideUtils";
 import type { Location } from "@/utils/tideUtils";
 import { NOAA_STATIONS } from "@/utils/noaaApi";
 import TideAlerts from "@/components/TideAlerts";
@@ -35,7 +35,6 @@ const Index = () => {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const today = new Date();
         const beginDate = format(today, 'yyyyMMdd');
         const endDate = format(addDays(today, 30), 'yyyyMMdd');
 
@@ -54,25 +53,24 @@ const Index = () => {
         });
 
         if (response.data && response.data.predictions) {
-          const locationKey = location.name.toLowerCase().replace(/\s+/g, '-');
-          const station = NOAA_STATIONS[locationKey];
+          const enrichedData = enrichTideDataWithSunriseSunset(response.data.predictions, location);
           
           const todayStart = startOfDay(today);
           const todayEnd = endOfDay(today);
           
-          const todayData = response.data.predictions.filter((item: any) => {
+          const todayData = enrichedData.filter((item: any) => {
             const itemDate = parseISO(item.t);
             return itemDate >= todayStart && itemDate <= todayEnd;
           });
 
-          const weeklyData = response.data.predictions.filter((item: any) => {
+          const weeklyData = enrichedData.filter((item: any) => {
             const itemDate = parseISO(item.t);
             return itemDate >= today && itemDate <= addDays(today, 7);
           });
 
           setTodayTideData(todayData);
           setWeeklyTideData(weeklyData);
-          setMonthlyTideData(response.data.predictions);
+          setMonthlyTideData(enrichedData);
         }
       } catch (error) {
         console.error('Error fetching data:', error);
@@ -80,7 +78,7 @@ const Index = () => {
     };
 
     fetchData();
-  }, [stationId, location]);
+  }, [stationId, location, today]);
 
   const handleLocationChange = (newLocation: Location) => {
     const locationKey = newLocation.name.toLowerCase().replace(/\s+/g, '-');
@@ -89,6 +87,7 @@ const Index = () => {
       setStationId(station.id);
     }
     setLocation(newLocation);
+    localStorage.setItem("savedLocation", JSON.stringify(newLocation));
   };
 
   return (
