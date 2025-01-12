@@ -5,7 +5,7 @@ import TideTable from "@/components/TideTable";
 import LocationPicker from "@/components/LocationPicker";
 import TideAlerts from "@/components/TideAlerts";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { startOfToday, format, parseISO, startOfDay, endOfDay } from "date-fns";
+import { startOfToday, format, parseISO, startOfDay, endOfDay, addDays } from "date-fns";
 import { fromZonedTime, toZonedTime } from 'date-fns-tz';
 import { getLowTidesNearSunriseSunset, getUpcomingAlerts } from "@/utils/tideUtils";
 import type { Location } from "@/utils/tideUtils";
@@ -27,8 +27,8 @@ const Index = () => {
   const [weeklyTideData, setWeeklyTideData] = useState([]);
   const [monthlyTideData, setMonthlyTideData] = useState([]);
   const [todayTideData, setTodayTideData] = useState([]);
-  const [stationId, setStationId] = useState('9414290');
-  const timeZone = 'America/Los_Angeles'; // Using Pacific Time as default for NOAA stations
+  const [stationId, setStationId] = useState('9414290'); // San Francisco station
+  const timeZone = 'America/Los_Angeles';
 
   React.useEffect(() => {
     const savedLocation = localStorage.getItem("savedLocation");
@@ -41,37 +41,22 @@ const Index = () => {
 
   const addSunriseSunsetToData = (data: any[], lat: number, lng: number) => {
     return data.map(item => {
-      const date = toZonedTime(parseISO(item.t), timeZone);
+      const date = parseISO(item.t);
       const times = SunCalc.getTimes(date, lat, lng);
       return {
         ...item,
-        sunrise: format(toZonedTime(times.sunrise, timeZone), 'hh:mm a'),
-        sunset: format(toZonedTime(times.sunset, timeZone), 'hh:mm a')
+        sunrise: format(times.sunrise, 'hh:mm a'),
+        sunset: format(times.sunset, 'hh:mm a')
       };
     });
   };
-
-  const { data: tideData, isLoading, error } = useQuery({
-    queryKey: ['tides', location?.name],
-    queryFn: async () => {
-      const locationKey = location.name.toLowerCase().replace(/\s+/g, '-');
-      const station = NOAA_STATIONS[locationKey];
-      if (!station) {
-        throw new Error('Location not supported');
-      }
-      return fetchTideData(station.id, today, 30);
-    },
-    enabled: !!location?.name
-  });
 
   useEffect(() => {
     const fetchData = async () => {
       try {
         const today = new Date();
-        const beginDate = today.toISOString().split('T')[0].replace(/-/g, '');
-        const endDate = new Date(today);
-        endDate.setDate(today.getDate() + 30);
-        const formattedEndDate = endDate.toISOString().split('T')[0].replace(/-/g, '');
+        const beginDate = format(today, 'yyyyMMdd');
+        const endDate = format(addDays(today, 30), 'yyyyMMdd');
 
         const response = await axios.get('https://api.tidesandcurrents.noaa.gov/api/prod/datagetter', {
           params: {
@@ -82,37 +67,31 @@ const Index = () => {
             units: 'english',
             time_zone: 'lst_ldt',
             begin_date: beginDate,
-            end_date: formattedEndDate,
+            end_date: endDate,
             interval: 'hilo'
           }
         });
+
+        console.log('API Response:', response.data);
 
         if (response.data && response.data.predictions) {
           const locationKey = location.name.toLowerCase().replace(/\s+/g, '-');
           const station = NOAA_STATIONS[locationKey];
           
-          const todayStart = fromZonedTime(startOfDay(new Date()), timeZone);
-          const todayEnd = fromZonedTime(endOfDay(new Date()), timeZone);
+          const todayStart = startOfDay(today);
+          const todayEnd = endOfDay(today);
           
-          console.log('Filtering dates between:', {
-            todayStart: todayStart.toISOString(),
-            todayEnd: todayEnd.toISOString()
-          });
-          
-          const weeklyData = response.data.predictions.filter((item: any) => {
-            const itemDate = fromZonedTime(parseISO(item.t), timeZone);
-            return itemDate >= new Date() && itemDate <= new Date(today.getTime() + 7 * 24 * 60 * 60 * 1000);
-          });
-
-          const monthlyData = response.data.predictions.filter((item: any) => {
-            const itemDate = fromZonedTime(parseISO(item.t), timeZone);
-            return itemDate >= new Date();
-          });
-
           const todayData = response.data.predictions.filter((item: any) => {
-            const itemDate = fromZonedTime(parseISO(item.t), timeZone);
+            const itemDate = parseISO(item.t);
             return itemDate >= todayStart && itemDate <= todayEnd;
           });
+
+          const weeklyData = response.data.predictions.filter((item: any) => {
+            const itemDate = parseISO(item.t);
+            return itemDate >= today && itemDate <= addDays(today, 7);
+          });
+
+          const monthlyData = response.data.predictions;
 
           console.log('Today data before processing:', todayData);
 
@@ -122,9 +101,9 @@ const Index = () => {
 
           console.log('Today data after processing:', processedTodayData);
 
+          setTodayTideData(processedTodayData);
           setWeeklyTideData(processedWeeklyData);
           setMonthlyTideData(processedMonthlyData);
-          setTodayTideData(processedTodayData);
         }
       } catch (error) {
         console.error('Error fetching data:', error);
@@ -143,72 +122,18 @@ const Index = () => {
   };
 
   const renderContent = () => {
-    if (isLoading) {
+    if (todayTideData.length === 0) {
       return (
-        <div className="flex items-center justify-center p-8">
-          <Loader2 className="h-8 w-8 animate-spin text-tide-blue" />
+        <div className="text-center p-4">
+          No tide data available for today
         </div>
       );
     }
-
-    if (error) {
-      return (
-        <Alert variant="destructive">
-          <AlertDescription>
-            {error instanceof Error ? error.message : 'Failed to load tide data. Please try again later.'}
-          </AlertDescription>
-        </Alert>
-      );
-    }
-
-    const upcomingAlerts = getUpcomingAlerts(monthlyTideData);
 
     return (
       <>
-        <Tabs defaultValue="daily" className="w-full">
-          <TabsList className="grid w-full grid-cols-4 bg-white/50 backdrop-blur-sm">
-            <TabsTrigger value="daily">Today</TabsTrigger>
-            <TabsTrigger value="weekly">This Week</TabsTrigger>
-            <TabsTrigger value="monthly">This Month</TabsTrigger>
-            <TabsTrigger value="sunrise-sunset">Near Sunrise/Sunset</TabsTrigger>
-          </TabsList>
-          
-          <TabsContent value="daily">
-            <TideChart data={todayTideData} period="daily" />
-            <TideTable data={todayTideData} period="daily" />
-          </TabsContent>
-          
-          <TabsContent value="weekly">
-            <div className="space-y-4">
-              <h2 className="text-xl font-semibold text-tide-blue">Weekly Tide Times</h2>
-              <TideChart data={weeklyTideData} period="weekly" />
-              <TideTable data={weeklyTideData} period="weekly" />
-            </div>
-          </TabsContent>
-          
-          <TabsContent value="monthly">
-            <div className="space-y-4">
-              <h2 className="text-xl font-semibold text-tide-blue">Monthly Tide Times</h2>
-              <TideTable data={monthlyTideData} period="monthly" />
-            </div>
-          </TabsContent>
-          
-          <TabsContent value="sunrise-sunset">
-            <div className="space-y-4">
-              <h2 className="text-xl font-semibold text-tide-blue">Low Tides Near Sunrise/Sunset</h2>
-              {location && (
-                <TideTable 
-                  data={getLowTidesNearSunriseSunset(today, location)} 
-                  period="monthly" 
-                />
-              )}
-            </div>
-          </TabsContent>
-        </Tabs>
-
-        <div className="mt-6">
-          <TideAlerts upcomingAlerts={upcomingAlerts} />
-        </div>
+        <TideChart data={todayTideData} period="daily" />
+        <TideTable data={todayTideData} period="daily" />
       </>
     );
   };
@@ -235,7 +160,67 @@ const Index = () => {
           </div>
         )}
 
-        {renderContent()}
+        <Tabs defaultValue="daily" className="w-full">
+          <TabsList className="grid w-full grid-cols-4 bg-white/50 backdrop-blur-sm">
+            <TabsTrigger value="daily">Today</TabsTrigger>
+            <TabsTrigger value="weekly">This Week</TabsTrigger>
+            <TabsTrigger value="monthly">This Month</TabsTrigger>
+            <TabsTrigger value="sunrise-sunset">Near Sunrise/Sunset</TabsTrigger>
+          </TabsList>
+          
+          <TabsContent value="daily">
+            {renderContent()}
+          </TabsContent>
+          
+          <TabsContent value="weekly">
+            <div className="space-y-4">
+              <h2 className="text-xl font-semibold text-tide-blue">Weekly Tide Times</h2>
+              {weeklyTideData.length > 0 ? (
+                <>
+                  <TideChart data={weeklyTideData} period="weekly" />
+                  <TideTable data={weeklyTideData} period="weekly" />
+                </>
+              ) : (
+                <div className="text-center p-4">
+                  No tide data available for this week
+                </div>
+              )}
+            </div>
+          </TabsContent>
+          
+          <TabsContent value="monthly">
+            <div className="space-y-4">
+              <h2 className="text-xl font-semibold text-tide-blue">Monthly Tide Times</h2>
+              {monthlyTideData.length > 0 ? (
+                <TideTable data={monthlyTideData} period="monthly" />
+              ) : (
+                <div className="text-center p-4">
+                  No tide data available for this month
+                </div>
+              )}
+            </div>
+          </TabsContent>
+          
+          <TabsContent value="sunrise-sunset">
+            <div className="space-y-4">
+              <h2 className="text-xl font-semibold text-tide-blue">Low Tides Near Sunrise/Sunset</h2>
+              {location && monthlyTideData.length > 0 ? (
+                <TideTable 
+                  data={getLowTidesNearSunriseSunset(today, location)} 
+                  period="monthly" 
+                />
+              ) : (
+                <div className="text-center p-4">
+                  No tide data available near sunrise/sunset
+                </div>
+              )}
+            </div>
+          </TabsContent>
+        </Tabs>
+
+        <div className="mt-6">
+          <TideAlerts upcomingAlerts={getUpcomingAlerts(monthlyTideData)} />
+        </div>
       </div>
     </div>
   );
