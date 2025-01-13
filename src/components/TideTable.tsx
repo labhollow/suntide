@@ -110,22 +110,22 @@ const TideTable = ({ data, period }: TideTableProps) => {
               key={index}
               className={tide.isNearSunriseOrSunset ? "bg-[#0EA5E9]" : ""}
             >
-              <TableCell className={tide.isNearSunriseOrSunset ? "text-white font-medium" : "text-gray-300"}>
+              <TableCell className={tide.isNearSunriseOrSunset ? "text-white font-semibold" : "text-gray-300"}>
                 {format(tide.date, "MMM dd, yyyy")}
               </TableCell>
-              <TableCell className={tide.isNearSunriseOrSunset ? "text-white font-medium" : "text-gray-300"}>
+              <TableCell className={tide.isNearSunriseOrSunset ? "text-white font-semibold" : "text-gray-300"}>
                 {format(tide.date, "hh:mm a")}
               </TableCell>
-              <TableCell className={tide.isNearSunriseOrSunset ? "text-white font-medium capitalize" : "text-gray-300 capitalize"}>
+              <TableCell className={tide.isNearSunriseOrSunset ? "text-white font-semibold capitalize" : "text-gray-300 capitalize"}>
                 {tide.type}
               </TableCell>
-              <TableCell className={tide.isNearSunriseOrSunset ? "text-white font-medium" : "text-gray-300"}>
+              <TableCell className={tide.isNearSunriseOrSunset ? "text-white font-semibold" : "text-gray-300"}>
                 {tide.height.toFixed(2)}
               </TableCell>
-              <TableCell className={tide.isNearSunriseOrSunset ? "text-white font-medium" : "text-gray-300"}>
+              <TableCell className={tide.isNearSunriseOrSunset ? "text-white font-semibold" : "text-gray-300"}>
                 {tide.sunrise || 'N/A'}
               </TableCell>
-              <TableCell className={tide.isNearSunriseOrSunset ? "text-white font-medium" : "text-gray-300"}>
+              <TableCell className={tide.isNearSunriseOrSunset ? "text-white font-semibold" : "text-gray-300"}>
                 {tide.sunset || 'N/A'}
               </TableCell>
             </TableRow>
