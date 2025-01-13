@@ -30,17 +30,33 @@ const TideTable = ({ data, period }: TideTableProps) => {
   console.log('Data received by TideTable:', data);
   const { toast } = useToast();
   
-  const formattedData = data.map(tide => ({
-    date: parseISO(tide.t),
-    height: parseFloat(tide.v),
-    type: tide.type === "H" ? "high" : "low",
-    sunrise: tide.sunrise,
-    sunset: tide.sunset,
-    isNearSunriseOrSunset: tide.type === "L" && (
-      (tide.sunrise && isWithinThreeHours(format(parseISO(tide.t), "hh:mm a"), tide.sunrise)) ||
-      (tide.sunset && isWithinThreeHours(format(parseISO(tide.t), "hh:mm a"), tide.sunset))
-    )
-  }));
+  const formattedData = data
+    .filter(tide => tide && tide.t) // Filter out undefined or invalid entries
+    .map(tide => {
+      try {
+        const date = parseISO(tide.t);
+        if (isNaN(date.getTime())) {
+          console.error('Invalid date:', tide.t);
+          return null;
+        }
+
+        return {
+          date,
+          height: parseFloat(tide.v),
+          type: tide.type === "H" ? "high" : "low",
+          sunrise: tide.sunrise,
+          sunset: tide.sunset,
+          isNearSunriseOrSunset: tide.type === "L" && (
+            (tide.sunrise && isWithinThreeHours(format(date, "hh:mm a"), tide.sunrise)) ||
+            (tide.sunset && isWithinThreeHours(format(date, "hh:mm a"), tide.sunset))
+          )
+        };
+      } catch (error) {
+        console.error('Error processing tide data:', error);
+        return null;
+      }
+    })
+    .filter(Boolean); // Remove null entries
 
   React.useEffect(() => {
     formattedData.forEach(tide => {
@@ -56,6 +72,14 @@ const TideTable = ({ data, period }: TideTableProps) => {
       }
     });
   }, [data, toast]);
+
+  if (!data || data.length === 0) {
+    return (
+      <div className="w-full p-4 text-center text-gray-500">
+        No tide data available
+      </div>
+    );
+  }
 
   return (
     <div className="w-full overflow-auto">
