@@ -40,6 +40,8 @@ const LocationPicker: React.FC<LocationPickerProps> = ({ id, name, onLocationUpd
 
   // Filter and sort stations based on search term
   const filteredStations = useMemo(() => {
+    if (!NOAA_STATIONS) return [];
+    
     return Object.entries(NOAA_STATIONS)
       .filter(([_, station]) => 
         station.name.toLowerCase().includes(searchTerm.toLowerCase())
@@ -48,6 +50,8 @@ const LocationPicker: React.FC<LocationPickerProps> = ({ id, name, onLocationUpd
   }, [searchTerm]);
 
   const handleStationSelect = (stationKey: string) => {
+    if (!NOAA_STATIONS || !NOAA_STATIONS[stationKey]) return;
+    
     const locationData = {
       name: NOAA_STATIONS[stationKey].name,
       lat: NOAA_STATIONS[stationKey].lat,
@@ -57,7 +61,6 @@ const LocationPicker: React.FC<LocationPickerProps> = ({ id, name, onLocationUpd
     onLocationUpdate?.(locationData);
     setSelectedLocation(locationData.name);
     setOpen(false);
-    // Toast disabled as requested
   };
 
   const handleSaveLocation = () => {
@@ -71,14 +74,13 @@ const LocationPicker: React.FC<LocationPickerProps> = ({ id, name, onLocationUpd
           };
           localStorage.setItem("savedLocation", JSON.stringify(locationData));
           onLocationUpdate?.(locationData);
-          // Toast disabled as requested
         },
         (error) => {
-          // Toast disabled as requested
+          console.error("Error getting location:", error);
         }
       );
     } else {
-      // Toast disabled as requested
+      console.error("Geolocation is not supported by this browser.");
     }
   };
 
