@@ -30,48 +30,58 @@ const TideTable = ({ data, period }: TideTableProps) => {
   console.log('Data received by TideTable:', data);
   const { toast } = useToast();
   
-  const formattedData = data
-    .filter(tide => tide && tide.t) // Filter out undefined or invalid entries
-    .map(tide => {
-      try {
-        const date = parseISO(tide.t);
-        if (isNaN(date.getTime())) {
-          console.error('Invalid date:', tide.t);
+  const formattedData = React.useMemo(() => {
+    return data
+      .filter(tide => tide && tide.t)
+      .map(tide => {
+        try {
+          const date = parseISO(tide.t);
+          if (isNaN(date.getTime())) {
+            console.error('Invalid date:', tide.t);
+            return null;
+          }
+
+          return {
+            date,
+            height: parseFloat(tide.v),
+            type: tide.type === "H" ? "high" : "low",
+            sunrise: tide.sunrise,
+            sunset: tide.sunset,
+            isNearSunriseOrSunset: tide.type === "L" && (
+              (tide.sunrise && isWithinThreeHours(format(date, "hh:mm a"), tide.sunrise)) ||
+              (tide.sunset && isWithinThreeHours(format(date, "hh:mm a"), tide.sunset))
+            )
+          };
+        } catch (error) {
+          console.error('Error processing tide data:', error);
           return null;
         }
+      })
+      .filter(Boolean);
+  }, [data]);
 
-        return {
-          date,
-          height: parseFloat(tide.v),
-          type: tide.type === "H" ? "high" : "low",
-          sunrise: tide.sunrise,
-          sunset: tide.sunset,
-          isNearSunriseOrSunset: tide.type === "L" && (
-            (tide.sunrise && isWithinThreeHours(format(date, "hh:mm a"), tide.sunrise)) ||
-            (tide.sunset && isWithinThreeHours(format(date, "hh:mm a"), tide.sunset))
-          )
-        };
-      } catch (error) {
-        console.error('Error processing tide data:', error);
-        return null;
-      }
-    })
-    .filter(Boolean); // Remove null entries
+  const shownToasts = React.useRef(new Set());
 
   React.useEffect(() => {
     formattedData.forEach(tide => {
       if (tide.isNearSunriseOrSunset) {
-        const timeOfDay = isWithinThreeHours(format(tide.date, "hh:mm a"), tide.sunrise || "") 
-          ? "sunrise" 
-          : "sunset";
+        const toastKey = `${format(tide.date, "yyyy-MM-dd HH:mm")}`;
         
-        toast({
-          title: "Low Tide Alert",
-          description: `Low tide on ${format(tide.date, "MMM dd, yyyy")} at ${format(tide.date, "hh:mm a")} is within 3 hours of ${timeOfDay}`,
-        });
+        if (!shownToasts.current.has(toastKey)) {
+          const timeOfDay = isWithinThreeHours(format(tide.date, "hh:mm a"), tide.sunrise || "") 
+            ? "sunrise" 
+            : "sunset";
+          
+          toast({
+            title: "Low Tide Alert",
+            description: `Low tide on ${format(tide.date, "MMM dd, yyyy")} at ${format(tide.date, "hh:mm a")} is within 3 hours of ${timeOfDay}`,
+          });
+          
+          shownToasts.current.add(toastKey);
+        }
       }
     });
-  }, [data, toast]);
+  }, [formattedData, toast]);
 
   if (!data || data.length === 0) {
     return (
