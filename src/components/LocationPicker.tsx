@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState, useMemo } from "react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -20,8 +20,26 @@ interface LocationPickerProps {
 }
 
 const LocationPicker: React.FC<LocationPickerProps> = ({ id, name, onLocationUpdate }) => {
-  const [location, setLocation] = React.useState("");
+  const [searchTerm, setSearchTerm] = useState("");
   const { toast } = useToast();
+
+  // Function to convert text to proper case
+  const toProperCase = (str: string) => {
+    return str
+      .toLowerCase()
+      .split(' ')
+      .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+      .join(' ');
+  };
+
+  // Filter and sort stations based on search term
+  const filteredStations = useMemo(() => {
+    return Object.entries(NOAA_STATIONS)
+      .filter(([_, station]) => 
+        station.name.toLowerCase().includes(searchTerm.toLowerCase())
+      )
+      .sort((a, b) => a[1].name.localeCompare(b[1].name));
+  }, [searchTerm]);
 
   const handleStationSelect = (stationKey: string) => {
     const locationData = {
@@ -31,11 +49,12 @@ const LocationPicker: React.FC<LocationPickerProps> = ({ id, name, onLocationUpd
     };
     localStorage.setItem("savedLocation", JSON.stringify(locationData));
     onLocationUpdate?.(locationData);
-    setLocation(locationData.name);
-    toast({
-      title: "Location updated",
-      description: `Now showing tide data for ${locationData.name}`,
-    });
+    setSearchTerm(locationData.name);
+    // Toast disabled as requested
+    // toast({
+    //   title: "Location updated",
+    //   description: `Now showing tide data for ${locationData.name}`,
+    // });
   };
 
   const handleSaveLocation = () => {
@@ -43,31 +62,34 @@ const LocationPicker: React.FC<LocationPickerProps> = ({ id, name, onLocationUpd
       navigator.geolocation.getCurrentPosition(
         (position) => {
           const locationData = {
-            name: location,
+            name: searchTerm,
             lat: position.coords.latitude,
             lng: position.coords.longitude,
           };
           localStorage.setItem("savedLocation", JSON.stringify(locationData));
           onLocationUpdate?.(locationData);
-          toast({
-            title: "Location saved",
-            description: `Saved ${location} for tide tracking`,
-          });
+          // Toast disabled as requested
+          // toast({
+          //   title: "Location saved",
+          //   description: `Saved ${searchTerm} for tide tracking`,
+          // });
         },
         (error) => {
-          toast({
-            title: "Error saving location",
-            description: "Please enable location services and try again",
-            variant: "destructive",
-          });
+          // Toast disabled as requested
+          // toast({
+          //   title: "Error saving location",
+          //   description: "Please enable location services and try again",
+          //   variant: "destructive",
+          // });
         }
       );
     } else {
-      toast({
-        title: "Location services not available",
-        description: "Your browser doesn't support location services",
-        variant: "destructive",
-      });
+      // Toast disabled as requested
+      // toast({
+      //   title: "Location services not available",
+      //   description: "Your browser doesn't support location services",
+      //   variant: "destructive",
+      // });
     }
   };
 
@@ -78,10 +100,10 @@ const LocationPicker: React.FC<LocationPickerProps> = ({ id, name, onLocationUpd
         <SelectTrigger className="w-[180px] bg-white/10 border-white/10 text-white">
           <SelectValue placeholder="Select station" />
         </SelectTrigger>
-        <SelectContent className="bg-slate-800 border-white/10">
-          {Object.entries(NOAA_STATIONS).map(([key, station]) => (
+        <SelectContent className="bg-slate-800 border-white/10 max-h-[300px]">
+          {filteredStations.map(([key, station]) => (
             <SelectItem key={key} value={key} className="text-white hover:bg-white/10">
-              {station.name}
+              {toProperCase(station.name)}
             </SelectItem>
           ))}
         </SelectContent>
@@ -89,9 +111,9 @@ const LocationPicker: React.FC<LocationPickerProps> = ({ id, name, onLocationUpd
       <Input
         id={id}
         name={name}
-        placeholder="Or enter custom location name"
-        value={location}
-        onChange={(e) => setLocation(e.target.value)}
+        placeholder="Search locations..."
+        value={searchTerm}
+        onChange={(e) => setSearchTerm(e.target.value)}
         className="bg-white/10 border-white/10 text-white placeholder:text-white/50"
       />
       <Button onClick={handleSaveLocation} variant="default" className="bg-blue-500 hover:bg-blue-600">
