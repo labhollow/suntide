@@ -27,6 +27,8 @@ const LocationPicker: React.FC<LocationPickerProps> = ({ id, name, onLocationUpd
   const [open, setOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedLocation, setSelectedLocation] = useState<string>(() => {
+    if (typeof window === 'undefined') return "";
+    
     try {
       const saved = localStorage.getItem("savedLocation");
       return saved ? JSON.parse(saved).name : "";
@@ -53,36 +55,28 @@ const LocationPicker: React.FC<LocationPickerProps> = ({ id, name, onLocationUpd
       return [];
     }
 
-    try {
-      // Ensure we're working with a valid object
-      const entries = Object.entries(NOAA_STATIONS).filter(([_, station]) => {
-        return station && 
-               typeof station === 'object' && 
-               'name' in station &&
-               typeof station.name === 'string';
-      });
+    const searchTermLower = searchTerm.toLowerCase();
+    const entries = Object.entries(NOAA_STATIONS);
 
-      if (!entries.length) {
-        console.warn('No valid entries found in NOAA_STATIONS');
-        return [];
-      }
-
-      const searchTermLower = searchTerm.toLowerCase();
-      return entries
-        .filter(([_, station]) => {
-          const stationName = station.name.toLowerCase();
-          return stationName.includes(searchTermLower);
-        })
-        .sort((a, b) => {
-          const nameA = a[1].name;
-          const nameB = b[1].name;
-          return nameA.localeCompare(nameB);
-        })
-        .slice(0, 100);
-    } catch (error) {
-      console.error('Error filtering stations:', error);
+    if (!entries.length) {
+      console.warn('No entries found in NOAA_STATIONS');
       return [];
     }
+
+    return entries
+      .filter(([_, station]) => {
+        if (!station || typeof station !== 'object' || !('name' in station)) {
+          return false;
+        }
+        const stationName = station.name.toLowerCase();
+        return stationName.includes(searchTermLower);
+      })
+      .sort((a, b) => {
+        const nameA = a[1].name;
+        const nameB = b[1].name;
+        return nameA.localeCompare(nameB);
+      })
+      .slice(0, 100);
   }, [searchTerm]);
 
   const handleStationSelect = (stationKey: string) => {
