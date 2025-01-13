@@ -72,15 +72,15 @@ const LocationPicker: React.FC<LocationPickerProps> = ({ id, name, onLocationUpd
   };
 
   return (
-    <Card className="p-4 flex gap-4 items-center">
-      <MapPin className="text-tide-blue" />
+    <Card className="p-4 flex gap-4 items-center bg-white/5 backdrop-blur-sm border-white/10">
+      <MapPin className="text-blue-400" />
       <Select onValueChange={handleStationSelect}>
-        <SelectTrigger className="w-[180px]">
+        <SelectTrigger className="w-[180px] bg-white/10 border-white/10 text-white">
           <SelectValue placeholder="Select station" />
         </SelectTrigger>
-        <SelectContent>
+        <SelectContent className="bg-slate-800 border-white/10">
           {Object.entries(NOAA_STATIONS).map(([key, station]) => (
-            <SelectItem key={key} value={key}>
+            <SelectItem key={key} value={key} className="text-white hover:bg-white/10">
               {station.name}
             </SelectItem>
           ))}
@@ -92,8 +92,9 @@ const LocationPicker: React.FC<LocationPickerProps> = ({ id, name, onLocationUpd
         placeholder="Or enter custom location name"
         value={location}
         onChange={(e) => setLocation(e.target.value)}
+        className="bg-white/10 border-white/10 text-white placeholder:text-white/50"
       />
-      <Button onClick={handleSaveLocation} variant="default">
+      <Button onClick={handleSaveLocation} variant="default" className="bg-blue-500 hover:bg-blue-600">
         Save Custom Location
       </Button>
     </Card>

@@ -38,7 +38,7 @@ const TideChart = ({ data, period }: TideChartProps) => {
     if (active && payload && payload.length) {
       try {
         return (
-          <Card className="p-3 bg-white/90">
+          <Card className="p-3 bg-slate-800/90 border-white/10 text-white">
             <p className="font-medium">
               {format(parseISO(label), "h:mm a")}
             </p>
@@ -56,47 +56,49 @@ const TideChart = ({ data, period }: TideChartProps) => {
   };
 
   return (
-    <Card className="p-6 w-full bg-white/50 backdrop-blur-sm">
-      <h3 className="text-lg font-medium mb-4 text-center">Tide Levels</h3>
+    <Card className="p-6 w-full bg-white/5 backdrop-blur-sm border-white/10">
+      <h3 className="text-lg font-medium mb-4 text-center text-blue-200">Tide Levels</h3>
       <div className="w-full h-[300px]">
         <ResponsiveContainer width="100%" height="100%">
           <LineChart
             data={formattedData}
             margin={{ top: 20, right: 30, left: 20, bottom: 15 }}
           >
-            <CartesianGrid strokeDasharray="3 3" opacity={0.3} />
+            <CartesianGrid strokeDasharray="3 3" opacity={0.1} stroke="white" />
             <XAxis 
               dataKey="time" 
               tickFormatter={formatXAxis}
+              stroke="white"
               label={{ 
                 value: 'Time of Day', 
                 position: 'bottom', 
                 offset: 0,
-                style: { fontSize: '0.75rem' }
+                style: { fontSize: '0.75rem', fill: 'white' }
               }}
-              tick={{ fontSize: 10 }}
+              tick={{ fontSize: 10, fill: 'white' }}
             />
             <YAxis 
+              stroke="white"
               label={{ 
                 value: 'Tide Height (feet)', 
                 angle: -90, 
                 position: 'insideLeft',
                 offset: 10,
-                style: { fontSize: '0.75rem' }
+                style: { fontSize: '0.75rem', fill: 'white' }
               }}
-              tick={{ fontSize: 10 }}
+              tick={{ fontSize: 10, fill: 'white' }}
             />
             <Tooltip content={<CustomTooltip />} />
             <Line
               type="monotone"
               dataKey="height"
-              stroke="#1e3a8a"
+              stroke="#60a5fa"
               strokeWidth={2}
               dot={{
-                stroke: '#1e3a8a',
+                stroke: '#60a5fa',
                 strokeWidth: 2,
                 r: 4,
-                fill: 'white'
+                fill: '#1e1b4b'
               }}
             />
           </LineChart>

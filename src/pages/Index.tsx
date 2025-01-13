@@ -9,6 +9,7 @@ import TideAlerts from "@/components/TideAlerts";
 import TideHeader from "@/components/TideHeader";
 import TideView from "@/components/TideView";
 import TideCalendar from '@/components/TideCalendar';
+import { Moon, Sun, Waves } from 'lucide-react';
 
 const DEFAULT_LOCATION = {
   name: "San Francisco",
@@ -94,17 +95,30 @@ const Index = () => {
     return getTideAndSunriseSunsetData(monthlyTideData, location);
   }, [monthlyTideData, location]);
 
-return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-orange-50 to-yellow-50 p-6">
-      <div className="max-w-4xl mx-auto space-y-6">
+  return (
+    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 p-6 font-sans">
+      <div className="max-w-4xl mx-auto space-y-6 relative">
+        <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAwIiBoZWlnaHQ9IjIwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZGVmcz48cGF0dGVybiBpZD0ic3RhcnMiIHg9IjAiIHk9IjAiIHdpZHRoPSI1MCIgaGVpZ2h0PSI1MCIgcGF0dGVyblVuaXRzPSJ1c2VyU3BhY2VPblVzZSI+PGNpcmNsZSBjeD0iMSIgY3k9IjEiIHI9IjEiIGZpbGw9InJnYmEoMjU1LCAyNTUsIDI1NSwgMC4yKSIvPjwvcGF0dGVybj48L2RlZnM+PHJlY3Qgd2lkdGg9IjEwMCUiIGhlaWdodD0iMTAwJSIgZmlsbD0idXJsKCNzdGFycykiLz48L3N2Zz4=')] opacity-30 pointer-events-none" />
+        
         <TideHeader location={location} onLocationUpdate={handleLocationChange} />
         
         <Tabs defaultValue="daily" className="w-full">
-          <TabsList className="grid w-full grid-cols-4 bg-white/50 backdrop-blur-sm">
-            <TabsTrigger value="daily">Today</TabsTrigger>
-            <TabsTrigger value="weekly">This Week</TabsTrigger>
-            <TabsTrigger value="monthly">This Month</TabsTrigger>
-            <TabsTrigger value="sunrise-sunset">Calendar</TabsTrigger>
+          <TabsList className="grid w-full grid-cols-4 bg-white/5 backdrop-blur-sm border border-white/10 rounded-lg">
+            <TabsTrigger value="daily" className="data-[state=active]:bg-white/10">
+              <Sun className="w-4 h-4 mr-2" />
+              Today
+            </TabsTrigger>
+            <TabsTrigger value="weekly" className="data-[state=active]:bg-white/10">
+              <Moon className="w-4 h-4 mr-2" />
+              This Week
+            </TabsTrigger>
+            <TabsTrigger value="monthly" className="data-[state=active]:bg-white/10">
+              <Waves className="w-4 h-4 mr-2" />
+              This Month
+            </TabsTrigger>
+            <TabsTrigger value="sunrise-sunset" className="data-[state=active]:bg-white/10">
+              Calendar
+            </TabsTrigger>
           </TabsList>
           
           <TabsContent value="daily">
