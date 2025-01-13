@@ -116,13 +116,13 @@ const TideTable = ({ data, period }: TideTableProps) => {
                   <div className="flex flex-col items-center">
                     {isWithinThreeHours(format(tide.date, "hh:mm a"), tide.sunrise || "") ? (
                       <>
-                        <span className="text-xs text-white/80">rise</span>
+                        <span className="text-xs text-white/80 font-light">rise</span>
                         <ArrowUp className="w-4 h-4" />
                       </>
                     ) : (
                       <>
                         <ArrowDown className="w-4 h-4" />
-                        <span className="text-xs text-white/80">set</span>
+                        <span className="text-xs text-white/80 font-light">set</span>
                       </>
                     )}
                   </div>
