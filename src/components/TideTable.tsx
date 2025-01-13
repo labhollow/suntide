@@ -96,28 +96,38 @@ const TideTable = ({ data, period }: TideTableProps) => {
       <Table>
         <TableHeader>
           <TableRow>
-            <TableHead>Date</TableHead>
-            <TableHead>Time</TableHead>
-            <TableHead>Type</TableHead>
-            <TableHead>Height (ft)</TableHead>
-            <TableHead>Sunrise</TableHead>
-            <TableHead>Sunset</TableHead>
+            <TableHead className="text-gray-300">Date</TableHead>
+            <TableHead className="text-gray-300">Time</TableHead>
+            <TableHead className="text-gray-300">Type</TableHead>
+            <TableHead className="text-gray-300">Height (ft)</TableHead>
+            <TableHead className="text-gray-300">Sunrise</TableHead>
+            <TableHead className="text-gray-300">Sunset</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
           {formattedData.map((tide, index) => (
             <TableRow 
               key={index}
-              className={tide.isNearSunriseOrSunset ? "bg-red-100" : ""}
+              className={tide.isNearSunriseOrSunset ? "bg-[#0EA5E9] font-medium" : ""}
             >
-              <TableCell>
+              <TableCell className={tide.isNearSunriseOrSunset ? "text-white" : "text-gray-300"}>
                 {format(tide.date, "MMM dd, yyyy")}
               </TableCell>
-              <TableCell>{format(tide.date, "hh:mm a")}</TableCell>
-              <TableCell className="capitalize">{tide.type}</TableCell>
-              <TableCell>{tide.height.toFixed(2)}</TableCell>
-              <TableCell>{tide.sunrise || 'N/A'}</TableCell>
-              <TableCell>{tide.sunset || 'N/A'}</TableCell>
+              <TableCell className={tide.isNearSunriseOrSunset ? "text-white" : "text-gray-300"}>
+                {format(tide.date, "hh:mm a")}
+              </TableCell>
+              <TableCell className={tide.isNearSunriseOrSunset ? "text-white capitalize" : "text-gray-300 capitalize"}>
+                {tide.type}
+              </TableCell>
+              <TableCell className={tide.isNearSunriseOrSunset ? "text-white" : "text-gray-300"}>
+                {tide.height.toFixed(2)}
+              </TableCell>
+              <TableCell className={tide.isNearSunriseOrSunset ? "text-white" : "text-gray-300"}>
+                {tide.sunrise || 'N/A'}
+              </TableCell>
+              <TableCell className={tide.isNearSunriseOrSunset ? "text-white" : "text-gray-300"}>
+                {tide.sunset || 'N/A'}
+              </TableCell>
             </TableRow>
           ))}
         </TableBody>
