@@ -40,23 +40,29 @@ const LocationPicker: React.FC<LocationPickerProps> = ({ id, name, onLocationUpd
 
   // Filter and sort stations based on search term
   const filteredStations = useMemo(() => {
-    if (!NOAA_STATIONS || typeof NOAA_STATIONS !== 'object') {
-      console.log('NOAA_STATIONS is undefined or not an object');
-      return [];
-    }
-    
     try {
-      const entries = Object.entries(NOAA_STATIONS);
-      if (!entries || !entries.length) {
-        console.log('No entries found in NOAA_STATIONS');
+      if (!NOAA_STATIONS || typeof NOAA_STATIONS !== 'object') {
+        console.log('NOAA_STATIONS is undefined or not an object');
+        return [];
+      }
+
+      const entries = Object.entries(NOAA_STATIONS).filter(Boolean);
+      if (!entries || entries.length === 0) {
+        console.log('No valid entries found in NOAA_STATIONS');
         return [];
       }
 
       return entries
         .filter(([_, station]) => 
-          station?.name?.toLowerCase().includes(searchTerm.toLowerCase())
+          station && 
+          typeof station === 'object' && 
+          station.name && 
+          station.name.toLowerCase().includes(searchTerm.toLowerCase())
         )
-        .sort((a, b) => a[1].name.localeCompare(b[1].name))
+        .sort((a, b) => {
+          if (!a[1]?.name || !b[1]?.name) return 0;
+          return a[1].name.localeCompare(b[1].name);
+        })
         .slice(0, 100); // Limit results to improve performance
     } catch (error) {
       console.error('Error filtering stations:', error);
@@ -69,6 +75,11 @@ const LocationPicker: React.FC<LocationPickerProps> = ({ id, name, onLocationUpd
       const station = NOAA_STATIONS?.[stationKey];
       if (!station || !station.name || typeof station.lat !== 'number' || typeof station.lng !== 'number') {
         console.error('Invalid station data:', station);
+        toast({
+          title: "Error",
+          description: "Invalid station data. Please try another location.",
+          variant: "destructive",
+        });
         return;
       }
       
