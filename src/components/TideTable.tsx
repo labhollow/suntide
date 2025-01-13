@@ -108,7 +108,7 @@ const TideTable = ({ data, period }: TideTableProps) => {
           {formattedData.map((tide, index) => (
             <TableRow 
               key={index}
-              className={tide.isNearSunriseOrSunset ? "bg-purple-400" : ""}
+              className={tide.isNearSunriseOrSunset ? "bg-purple-600" : ""}
             >
               <TableCell className={tide.isNearSunriseOrSunset ? "text-white font-semibold flex items-center gap-2" : "text-gray-300"}>
                 {format(tide.date, "MMM dd, yyyy")}
