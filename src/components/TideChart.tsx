@@ -30,7 +30,7 @@ const TideChart = ({ data, period }: TideChartProps) => {
 
   const formattedData = data.map(item => ({
     time: item.t,
-    height: parseFloat(item.v), // Convert string to number and then to feet
+    height: parseFloat(item.v),
     type: item.type === "H" ? "high" : "low"
   }));
 
@@ -62,21 +62,29 @@ const TideChart = ({ data, period }: TideChartProps) => {
         <ResponsiveContainer width="100%" height="100%">
           <LineChart
             data={formattedData}
-            margin={{ top: 20, right: 30, left: 20, bottom: 5 }}
+            margin={{ top: 20, right: 30, left: 20, bottom: 15 }}
           >
             <CartesianGrid strokeDasharray="3 3" opacity={0.3} />
             <XAxis 
               dataKey="time" 
               tickFormatter={formatXAxis}
-              label={{ value: 'Time of Day', position: 'bottom', offset: 0 }}
+              label={{ 
+                value: 'Time of Day', 
+                position: 'bottom', 
+                offset: 0,
+                style: { fontSize: '0.75rem' }
+              }}
+              tick={{ fontSize: 10 }}
             />
             <YAxis 
               label={{ 
                 value: 'Tide Height (feet)', 
                 angle: -90, 
                 position: 'insideLeft',
-                offset: 10
+                offset: 10,
+                style: { fontSize: '0.75rem' }
               }}
+              tick={{ fontSize: 10 }}
             />
             <Tooltip content={<CustomTooltip />} />
             <Line
