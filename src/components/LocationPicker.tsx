@@ -26,17 +26,7 @@ interface LocationPickerProps {
 const LocationPicker: React.FC<LocationPickerProps> = ({ id, name, onLocationUpdate }) => {
   const [open, setOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
-  const [selectedLocation, setSelectedLocation] = useState<string>(() => {
-    if (typeof window === 'undefined') return "";
-    
-    try {
-      const saved = localStorage.getItem("savedLocation");
-      return saved ? JSON.parse(saved).name : "";
-    } catch (error) {
-      console.error('Error reading from localStorage:', error);
-      return "";
-    }
-  });
+  const [selectedLocation, setSelectedLocation] = useState<string>("");
   const { toast } = useToast();
 
   // Function to convert text to proper case
@@ -56,27 +46,26 @@ const LocationPicker: React.FC<LocationPickerProps> = ({ id, name, onLocationUpd
     }
 
     const searchTermLower = searchTerm.toLowerCase();
-    const entries = Object.entries(NOAA_STATIONS);
-
-    if (!entries.length) {
-      console.warn('No entries found in NOAA_STATIONS');
+    
+    try {
+      return Object.entries(NOAA_STATIONS)
+        .filter(([_, station]) => {
+          if (!station || typeof station !== 'object' || !('name' in station)) {
+            return false;
+          }
+          const stationName = station.name.toLowerCase();
+          return stationName.includes(searchTermLower);
+        })
+        .sort((a, b) => {
+          const nameA = a[1].name;
+          const nameB = b[1].name;
+          return nameA.localeCompare(nameB);
+        })
+        .slice(0, 100);
+    } catch (error) {
+      console.error('Error processing stations:', error);
       return [];
     }
-
-    return entries
-      .filter(([_, station]) => {
-        if (!station || typeof station !== 'object' || !('name' in station)) {
-          return false;
-        }
-        const stationName = station.name.toLowerCase();
-        return stationName.includes(searchTermLower);
-      })
-      .sort((a, b) => {
-        const nameA = a[1].name;
-        const nameB = b[1].name;
-        return nameA.localeCompare(nameB);
-      })
-      .slice(0, 100);
   }, [searchTerm]);
 
   const handleStationSelect = (stationKey: string) => {
@@ -141,6 +130,19 @@ const LocationPicker: React.FC<LocationPickerProps> = ({ id, name, onLocationUpd
       });
     }
   };
+
+  // Initialize selectedLocation from localStorage
+  React.useEffect(() => {
+    try {
+      const saved = localStorage.getItem("savedLocation");
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        setSelectedLocation(parsed.name || "");
+      }
+    } catch (error) {
+      console.error('Error reading from localStorage:', error);
+    }
+  }, []);
 
   return (
     <Card className="p-4 flex gap-4 items-center bg-white/5 backdrop-blur-sm border-white/10">
