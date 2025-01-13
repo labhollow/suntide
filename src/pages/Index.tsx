@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { startOfToday, format, parseISO, startOfDay, endOfDay, addDays } from "date-fns";
-import { getLowTidesNearSunriseSunset, getUpcomingAlerts, enrichTideDataWithSunriseSunset } from "@/utils/tideUtils";
+import { getLowTidesNearSunriseSunset, getUpcomingAlerts, enrichTideDataWithSunriseSunset, getTideAndSunriseSunsetData, getTideAndSunriseSunsetEvents } from "@/utils/tideUtils";
 import type { Location } from "@/utils/tideUtils";
 import { NOAA_STATIONS } from "@/utils/noaaApi";
 import TideAlerts from "@/components/TideAlerts";
@@ -35,10 +35,14 @@ const Index = () => {
   }, []);
 
   useEffect(() => {
+    console.log('Fetching tide data...'); // Log to confirm useEffect is triggered
     const fetchData = async () => {
       try {
         const beginDate = format(today, 'yyyyMMdd');
         const endDate = format(addDays(today, 30), 'yyyyMMdd');
+
+        console.log('Begin Date:', beginDate); // Log the begin date
+        console.log('End Date:', endDate); // Log the end date
 
         const response = await axios.get('https://api.tidesandcurrents.noaa.gov/api/prod/datagetter', {
           params: {
@@ -54,7 +58,10 @@ const Index = () => {
           }
         });
 
+        console.log('API Response:', response.data); // Log the API response
+
         if (response.data && response.data.predictions) {
+          console.log('Predictions Found:', response.data.predictions); // Log predictions
           const enrichedData = enrichTideDataWithSunriseSunset(response.data.predictions, location);
           
           const todayStart = startOfDay(today);
@@ -79,12 +86,65 @@ const Index = () => {
           if (JSON.stringify(enrichedData) !== JSON.stringify(monthlyTideData)) {
             setMonthlyTideData(enrichedData);
           }
+        } else {
+          console.error('No predictions found in API response:', response.data); // Log if predictions are missing
         }
       } catch (error) {
         console.error('Error fetching data:', error);
       }
     };
 
+    fetchData();
+  }, [stationId, location, today]);
+
+  useEffect(() => {
+    const tideEvents = getTideAndSunriseSunsetEvents(getTideAndSunriseSunsetData(monthlyTideData, location));
+    console.log('Tide Events to Calendar:', tideEvents); // Log the events being passed
+  }, [monthlyTideData, location]);
+
+  useEffect(() => {
+    const tideEvents = getTideAndSunriseSunsetEvents(getTideAndSunriseSunsetData(monthlyTideData, location));
+    console.log('Tide Events to Calendar:', tideEvents); // Log the events being passed
+    setWeeklyTideData(tideEvents); // Update state with tide events
+  }, [monthlyTideData, location]);
+
+  useEffect(() => {
+    console.log('Fetching tide data...'); // Log to confirm useEffect is triggered
+    const fetchData = async () => {
+      try {
+        const beginDate = format(today, 'yyyyMMdd');
+        const endDate = format(addDays(today, 30), 'yyyyMMdd');
+
+        console.log('Begin Date:', beginDate); // Log the begin date
+        console.log('End Date:', endDate); // Log the end date
+
+        const response = await axios.get('https://api.tidesandcurrents.noaa.gov/api/prod/datagetter', {
+          params: {
+            station: stationId,
+            product: 'predictions',
+            datum: 'MLLW',
+            format: 'json',
+            units: 'english',
+            time_zone: 'lst_ldt',
+            begin_date: beginDate,
+            end_date: endDate
+          }
+        });
+
+        console.log('API Response:', response.data); // Log the API response
+
+        if (response.data && Array.isArray(response.data.predictions)) {
+          console.log('Predictions Found:', response.data.predictions); // Log predictions
+          const tideEvents = getTideAndSunriseSunsetEvents(response.data.predictions); // Process tide events
+          console.log('Tide Events to Calendar:', tideEvents); // Log the events being passed
+          setWeeklyTideData(tideEvents); // Update state with tide events
+        } else {
+          console.error('No predictions found in API response or predictions is not an array:', response.data); // Log if predictions are missing or not an array
+        }
+      } catch (error) {
+        console.error('Error fetching tide data:', error); // Log any errors
+      }
+    };
     fetchData();
   }, [stationId, location, today]);
 
@@ -100,6 +160,15 @@ const Index = () => {
 
   const handleTabChange = (tab) => {
     setActiveTab(tab);
+  };
+
+  const formatDataForCalendar = (data) => {
+    return data.map(item => ({
+      start: new Date(item.time), 
+      end: new Date(item.time),
+      title: `${item.type === 'H' ? '↑' : '↓'} Tide at ${item.time} - Sunrise: ${item.sunrise}, Sunset: ${item.sunset}`,
+      allDay: true,
+    }));
   };
 
   return (
@@ -141,7 +210,14 @@ const Index = () => {
               period="monthly" 
               title="Low Tides Near Sunrise/Sunset"
             />
-            {activeTab === 'sunrise-sunset' && <TideCalendar tideData={todayTideData} />}
+            {activeTab === 'sunrise-sunset' && (
+              (() => {
+                const tideEvents = getTideAndSunriseSunsetEvents(getTideAndSunriseSunsetData(monthlyTideData, location));
+                console.log('Tide Events for Calendar:', tideEvents);
+                console.log('Tide Events for Calendar (formatted):', formatDataForCalendar(tideEvents));
+                return <TideCalendar tideData={formatDataForCalendar(tideEvents)} />;
+              })()
+            )}
           </TabsContent>
         </Tabs>
 
