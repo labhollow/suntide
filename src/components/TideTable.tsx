@@ -8,7 +8,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { format, parseISO } from "date-fns";
-import { Sunrise, Sunset } from "lucide-react";
+import { ArrowUp, ArrowDown } from "lucide-react";
 import { metersToFeet } from "@/utils/tideUtils";
 import { isWithinThreeHours } from "@/utils/dateUtils";
 import { useToast } from "@/hooks/use-toast";
@@ -110,8 +110,13 @@ const TideTable = ({ data, period }: TideTableProps) => {
               key={index}
               className={tide.isNearSunriseOrSunset ? "bg-[#0EA5E9]" : ""}
             >
-              <TableCell className={tide.isNearSunriseOrSunset ? "text-white font-semibold" : "text-gray-300"}>
+              <TableCell className={tide.isNearSunriseOrSunset ? "text-white font-semibold flex items-center gap-2" : "text-gray-300"}>
                 {format(tide.date, "MMM dd, yyyy")}
+                {tide.isNearSunriseOrSunset && (
+                  isWithinThreeHours(format(tide.date, "hh:mm a"), tide.sunrise || "") 
+                    ? <ArrowUp className="w-4 h-4" />
+                    : <ArrowDown className="w-4 h-4" />
+                )}
               </TableCell>
               <TableCell className={tide.isNearSunriseOrSunset ? "text-white font-semibold" : "text-gray-300"}>
                 {format(tide.date, "hh:mm a")}
