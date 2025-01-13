@@ -1,8 +1,8 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useMemo } from 'react';
 import axios from 'axios';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { startOfToday, format, parseISO, startOfDay, endOfDay, addDays } from "date-fns";
-import { getLowTidesNearSunriseSunset, getUpcomingAlerts, enrichTideDataWithSunriseSunset, getTideAndSunriseSunsetData, getTideAndSunriseSunsetEvents } from "@/utils/tideUtils";
+import { getLowTidesNearSunriseSunset, getUpcomingAlerts, enrichTideDataWithSunriseSunset, getTideAndSunriseSunsetData } from "@/utils/tideUtils";
 import type { Location } from "@/utils/tideUtils";
 import { NOAA_STATIONS } from "@/utils/noaaApi";
 import TideAlerts from "@/components/TideAlerts";
@@ -17,15 +17,12 @@ const DEFAULT_LOCATION = {
 };
 
 const Index = () => {
-  const [location, setLocation] = React.useState<Location>(DEFAULT_LOCATION);
+  const [location, setLocation] = useState<Location>(DEFAULT_LOCATION);
   const today = startOfToday();
-  const [weeklyTideData, setWeeklyTideData] = useState([]);
   const [monthlyTideData, setMonthlyTideData] = useState([]);
-  const [todayTideData, setTodayTideData] = useState([]);
   const [stationId, setStationId] = useState('9414290');
-  const [activeTab, setActiveTab] = useState('daily'); // Default active tab
 
-  React.useEffect(() => {
+  useEffect(() => {
     const savedLocation = localStorage.getItem("savedLocation");
     if (savedLocation) {
       setLocation(JSON.parse(savedLocation));
@@ -35,14 +32,10 @@ const Index = () => {
   }, []);
 
   useEffect(() => {
-    console.log('Fetching tide data...'); // Log to confirm useEffect is triggered
     const fetchData = async () => {
       try {
         const beginDate = format(today, 'yyyyMMdd');
         const endDate = format(addDays(today, 30), 'yyyyMMdd');
-
-        console.log('Begin Date:', beginDate); // Log the begin date
-        console.log('End Date:', endDate); // Log the end date
 
         const response = await axios.get('https://api.tidesandcurrents.noaa.gov/api/prod/datagetter', {
           params: {
@@ -58,27 +51,8 @@ const Index = () => {
           }
         });
 
-        console.log('API Response:', response.data); // Log the API response
-
         if (response.data && response.data.predictions) {
-          console.log('Predictions Found:', response.data.predictions); // Log predictions
           const enrichedData = enrichTideDataWithSunriseSunset(response.data.predictions, location);
-          
-          const todayStart = startOfDay(today);
-          const todayEnd = endOfDay(today);
-          
-          const todayData = enrichedData.filter((item: any) => {
-            const itemDate = parseISO(item.t);
-            return itemDate >= todayStart && itemDate <= todayEnd;
-          });
-
-          const weeklyData = enrichedData.filter((item: any) => {
-            const itemDate = parseISO(item.t);
-            return itemDate >= today && itemDate <= addDays(today, 7);
-          });
-
-          setTodayTideData(todayData);
-          setWeeklyTideData(weeklyData);
           setMonthlyTideData(enrichedData);
         }
       } catch (error) {
@@ -89,16 +63,22 @@ const Index = () => {
     fetchData();
   }, [stationId, location, today]);
 
-  useEffect(() => {
-    const tideEvents = getTideAndSunriseSunsetEvents(getTideAndSunriseSunsetData(monthlyTideData, location));
-    console.log('Tide Events to Calendar:', tideEvents); // Log the events being passed
-  }, [monthlyTideData, location]);
+  const todayTideData = useMemo(() => {
+    const todayStart = startOfDay(today);
+    const todayEnd = endOfDay(today);
+    
+    return monthlyTideData.filter((item: any) => {
+      const itemDate = parseISO(item.t);
+      return itemDate >= todayStart && itemDate <= todayEnd;
+    });
+  }, [monthlyTideData, today]);
 
-  useEffect(() => {
-    const tideEvents = getTideAndSunriseSunsetEvents(getTideAndSunriseSunsetData(monthlyTideData, location));
-    console.log('Tide Events to Calendar:', tideEvents); // Log the events being passed
-    setWeeklyTideData(tideEvents); // Update state with tide events
-  }, [monthlyTideData, location]);
+  const weeklyTideData = useMemo(() => {
+    return monthlyTideData.filter((item: any) => {
+      const itemDate = parseISO(item.t);
+      return itemDate >= today && itemDate <= addDays(today, 7);
+    });
+  }, [monthlyTideData, today]);
 
   const handleLocationChange = (newLocation: Location) => {
     const locationKey = newLocation.name.toLowerCase().replace(/\s+/g, '-');
@@ -110,18 +90,9 @@ const Index = () => {
     localStorage.setItem("savedLocation", JSON.stringify(newLocation));
   };
 
-  const handleTabChange = (tab) => {
-    setActiveTab(tab);
-  };
-
-  const formatDataForCalendar = (data) => {
-    return data.map(item => ({
-      start: new Date(item.time), 
-      end: new Date(item.time),
-      title: `${item.type === 'H' ? '↑' : '↓'} Tide at ${item.time} - Sunrise: ${item.sunrise}, Sunset: ${item.sunset}`,
-      allDay: true,
-    }));
-  };
+  const tideEvents = useMemo(() => {
+    return getTideAndSunriseSunsetData(monthlyTideData, location);
+  }, [monthlyTideData, location]);
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-orange-50 to-yellow-50 p-6">
