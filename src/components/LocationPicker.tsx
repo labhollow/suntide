@@ -26,8 +26,8 @@ const LocationPicker: React.FC<LocationPickerProps> = ({ id, name, onLocationUpd
   const handleStationSelect = (stationKey: string) => {
     const locationData = {
       name: NOAA_STATIONS[stationKey].name,
-      lat: parseFloat(NOAA_STATIONS[stationKey].lat),
-      lng: parseFloat(NOAA_STATIONS[stationKey].lng),
+      lat: NOAA_STATIONS[stationKey].lat,
+      lng: NOAA_STATIONS[stationKey].lng,
     };
     localStorage.setItem("savedLocation", JSON.stringify(locationData));
     onLocationUpdate?.(locationData);
