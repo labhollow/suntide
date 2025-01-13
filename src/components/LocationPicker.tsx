@@ -42,7 +42,10 @@ const LocationPicker: React.FC<LocationPickerProps> = ({ id, name, onLocationUpd
   const filteredStations = useMemo(() => {
     if (!NOAA_STATIONS) return [];
     
-    return Object.entries(NOAA_STATIONS)
+    const entries = Object.entries(NOAA_STATIONS);
+    if (!entries.length) return [];
+
+    return entries
       .filter(([_, station]) => 
         station.name.toLowerCase().includes(searchTerm.toLowerCase())
       )
@@ -51,9 +54,9 @@ const LocationPicker: React.FC<LocationPickerProps> = ({ id, name, onLocationUpd
   }, [searchTerm]);
 
   const handleStationSelect = (stationKey: string) => {
-    if (!NOAA_STATIONS || !NOAA_STATIONS[stationKey]) return;
+    const station = NOAA_STATIONS?.[stationKey];
+    if (!station) return;
     
-    const station = NOAA_STATIONS[stationKey];
     const locationData = {
       name: station.name,
       lat: station.lat,
@@ -80,10 +83,19 @@ const LocationPicker: React.FC<LocationPickerProps> = ({ id, name, onLocationUpd
         },
         (error) => {
           console.error("Error getting location:", error);
+          toast({
+            title: "Error",
+            description: "Could not get your location. Please try again.",
+            variant: "destructive",
+          });
         }
       );
     } else {
-      console.error("Geolocation is not supported by this browser.");
+      toast({
+        title: "Error",
+        description: "Geolocation is not supported by your browser.",
+        variant: "destructive",
+      });
     }
   };
 
