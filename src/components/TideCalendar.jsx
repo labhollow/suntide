@@ -3,7 +3,7 @@ import { Calendar, momentLocalizer } from 'react-big-calendar';
 import moment from 'moment';
 import 'react-big-calendar/lib/css/react-big-calendar.css';
 import { isWithinThreeHours } from '@/utils/dateUtils';
-import { format } from 'date-fns';
+import { format, parseISO } from 'date-fns';
 
 const localizer = momentLocalizer(moment);
 
@@ -11,25 +11,43 @@ const TideCalendar = ({ tideData }) => {
     console.log('Received Tide Data:', tideData);
 
     const events = tideData.map(tide => {
-        const tideDate = new Date(tide.t);
-        const tideTime = format(tideDate, 'hh:mm a');
-        const isNearSunriseOrSunset = tide.type === 'L' && (
-            (tide.sunrise && isWithinThreeHours(tideTime, tide.sunrise)) ||
-            (tide.sunset && isWithinThreeHours(tideTime, tide.sunset))
-        );
+        // Ensure we have a valid date before proceeding
+        if (!tide.t) {
+            console.warn('Invalid tide data entry:', tide);
+            return null;
+        }
 
-        return {
-            start: tideDate,
-            end: tideDate,
-            title: `${tide.type === 'H' ? '↑' : '↓'} Tide at ${format(tideDate, 'hh:mm a')} - ${tide.v}ft`,
-            isNearSunriseOrSunset: isNearSunriseOrSunset,
-            allDay: false,
-            resource: {
-                sunrise: tide.sunrise,
-                sunset: tide.sunset
+        try {
+            const tideDate = new Date(tide.t);
+            
+            // Validate the date is valid
+            if (isNaN(tideDate.getTime())) {
+                console.warn('Invalid date from tide data:', tide.t);
+                return null;
             }
-        };
-    });
+
+            const tideTime = format(tideDate, 'hh:mm a');
+            const isNearSunriseOrSunset = tide.type === 'L' && (
+                (tide.sunrise && isWithinThreeHours(tideTime, tide.sunrise)) ||
+                (tide.sunset && isWithinThreeHours(tideTime, tide.sunset))
+            );
+
+            return {
+                start: tideDate,
+                end: tideDate,
+                title: `${tide.type === 'H' ? '↑' : '↓'} Tide at ${format(tideDate, 'hh:mm a')} - ${tide.v}ft`,
+                isNearSunriseOrSunset: isNearSunriseOrSunset,
+                allDay: false,
+                resource: {
+                    sunrise: tide.sunrise,
+                    sunset: tide.sunset
+                }
+            };
+        } catch (error) {
+            console.error('Error processing tide data:', error, tide);
+            return null;
+        }
+    }).filter(Boolean); // Remove any null entries
 
     console.log('Processed Calendar Events:', events);
 
@@ -58,6 +76,7 @@ const TideCalendar = ({ tideData }) => {
                 style={{ height: 500 }}
                 eventPropGetter={eventStyleGetter}
                 tooltipAccessor={(event) => {
+                    if (!event.start) return '';
                     const timeStr = format(event.start, 'hh:mm a');
                     const sunriseStr = event.resource.sunrise ? `Sunrise: ${event.resource.sunrise}` : '';
                     const sunsetStr = event.resource.sunset ? `Sunset: ${event.resource.sunset}` : '';
