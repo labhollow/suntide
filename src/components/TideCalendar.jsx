@@ -12,10 +12,8 @@ const TideCalendar = ({ tideData }) => {
 
     const events = tideData.map(tide => {
         try {
-            // Parse the date string to a Date object
             const tideDate = parseISO(tide.t);
             
-            // Validate the date is valid
             if (isNaN(tideDate.getTime())) {
                 console.warn('Invalid date from tide data:', tide.t);
                 return null;
@@ -27,12 +25,10 @@ const TideCalendar = ({ tideData }) => {
                 (tide.sunset && isWithinThreeHours(tideTime, tide.sunset))
             );
 
-            // Only return events for low tides near sunrise/sunset
             if (!isNearSunriseOrSunset) {
                 return null;
             }
 
-            // Determine if it's near sunrise or sunset for the title
             const isNearSunrise = tide.sunrise && isWithinThreeHours(tideTime, tide.sunrise);
             const timeOfDay = isNearSunrise ? 'Sunrise' : 'Sunset';
             const relevantTime = isNearSunrise ? tide.sunrise : tide.sunset;
@@ -40,7 +36,7 @@ const TideCalendar = ({ tideData }) => {
             return {
                 start: tideDate,
                 end: tideDate,
-                title: `Low Tide at ${format(tideDate, 'hh:mm a')} - Near ${timeOfDay} (${relevantTime})`,
+                title: `${timeOfDay}: ${relevantTime}\nLow Tide: ${format(tideDate, 'hh:mm a')}`,
                 isNearSunriseOrSunset: true,
                 allDay: false,
                 resource: {
@@ -52,7 +48,7 @@ const TideCalendar = ({ tideData }) => {
             console.error('Error processing tide data:', error, tide);
             return null;
         }
-    }).filter(Boolean); // Remove any null entries
+    }).filter(Boolean);
 
     console.log('Processed Calendar Events:', events);
 
@@ -64,7 +60,9 @@ const TideCalendar = ({ tideData }) => {
                 opacity: 0.8,
                 color: 'white',
                 border: '0px',
-                display: 'block'
+                display: 'block',
+                fontSize: '0.5rem', // Decreased font size by half
+                whiteSpace: 'pre-line' // This allows \n to create new lines
             }
         };
     };
