@@ -27,11 +27,21 @@ const TideCalendar = ({ tideData }) => {
                 (tide.sunset && isWithinThreeHours(tideTime, tide.sunset))
             );
 
+            // Only return events for low tides near sunrise/sunset
+            if (!isNearSunriseOrSunset) {
+                return null;
+            }
+
+            // Determine if it's near sunrise or sunset for the title
+            const isNearSunrise = tide.sunrise && isWithinThreeHours(tideTime, tide.sunrise);
+            const timeOfDay = isNearSunrise ? 'Sunrise' : 'Sunset';
+            const relevantTime = isNearSunrise ? tide.sunrise : tide.sunset;
+
             return {
                 start: tideDate,
                 end: tideDate,
-                title: `${tide.type === 'H' ? '↑' : '↓'} Tide at ${format(tideDate, 'hh:mm a')} - ${tide.v}ft`,
-                isNearSunriseOrSunset: isNearSunriseOrSunset,
+                title: `Low Tide at ${format(tideDate, 'hh:mm a')} - Near ${timeOfDay} (${relevantTime})`,
+                isNearSunriseOrSunset: true,
                 allDay: false,
                 resource: {
                     sunrise: tide.sunrise,
@@ -47,17 +57,15 @@ const TideCalendar = ({ tideData }) => {
     console.log('Processed Calendar Events:', events);
 
     const eventStyleGetter = (event) => {
-        let style = {
-            backgroundColor: event.isNearSunriseOrSunset ? '#ea384c' : (event.title.includes('↑') ? 'lightblue' : 'lightcoral'),
-            borderRadius: '5px',
-            opacity: 0.8,
-            color: 'white',
-            border: '0px',
-            display: 'block'
-        };
-
         return {
-            style: style
+            style: {
+                backgroundColor: '#ea384c',
+                borderRadius: '5px',
+                opacity: 0.8,
+                color: 'white',
+                border: '0px',
+                display: 'block'
+            }
         };
     };
 
