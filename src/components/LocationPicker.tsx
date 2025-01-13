@@ -48,7 +48,7 @@ const LocationPicker: React.FC<LocationPickerProps> = ({ id, name, onLocationUpd
     const searchTermLower = searchTerm.toLowerCase();
     
     try {
-      return Object.entries(NOAA_STATIONS)
+      const stations = Object.entries(NOAA_STATIONS)
         .filter(([_, station]) => {
           if (!station || typeof station !== 'object' || !('name' in station)) {
             return false;
@@ -62,6 +62,8 @@ const LocationPicker: React.FC<LocationPickerProps> = ({ id, name, onLocationUpd
           return nameA.localeCompare(nameB);
         })
         .slice(0, 100);
+      
+      return stations;
     } catch (error) {
       console.error('Error processing stations:', error);
       return [];
