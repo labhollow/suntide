@@ -40,33 +40,56 @@ const LocationPicker: React.FC<LocationPickerProps> = ({ id, name, onLocationUpd
 
   // Filter and sort stations based on search term
   const filteredStations = useMemo(() => {
-    if (!NOAA_STATIONS) return [];
+    if (!NOAA_STATIONS || typeof NOAA_STATIONS !== 'object') {
+      console.log('NOAA_STATIONS is undefined or not an object');
+      return [];
+    }
     
-    const entries = Object.entries(NOAA_STATIONS);
-    if (!entries.length) return [];
+    try {
+      const entries = Object.entries(NOAA_STATIONS);
+      if (!entries || !entries.length) {
+        console.log('No entries found in NOAA_STATIONS');
+        return [];
+      }
 
-    return entries
-      .filter(([_, station]) => 
-        station.name.toLowerCase().includes(searchTerm.toLowerCase())
-      )
-      .sort((a, b) => a[1].name.localeCompare(b[1].name))
-      .slice(0, 100); // Limit results to improve performance
+      return entries
+        .filter(([_, station]) => 
+          station?.name?.toLowerCase().includes(searchTerm.toLowerCase())
+        )
+        .sort((a, b) => a[1].name.localeCompare(b[1].name))
+        .slice(0, 100); // Limit results to improve performance
+    } catch (error) {
+      console.error('Error filtering stations:', error);
+      return [];
+    }
   }, [searchTerm]);
 
   const handleStationSelect = (stationKey: string) => {
-    const station = NOAA_STATIONS?.[stationKey];
-    if (!station) return;
-    
-    const locationData = {
-      name: station.name,
-      lat: station.lat,
-      lng: station.lng,
-    };
-    
-    localStorage.setItem("savedLocation", JSON.stringify(locationData));
-    onLocationUpdate?.(locationData);
-    setSelectedLocation(locationData.name);
-    setOpen(false);
+    try {
+      const station = NOAA_STATIONS?.[stationKey];
+      if (!station || !station.name || typeof station.lat !== 'number' || typeof station.lng !== 'number') {
+        console.error('Invalid station data:', station);
+        return;
+      }
+      
+      const locationData = {
+        name: station.name,
+        lat: station.lat,
+        lng: station.lng,
+      };
+      
+      localStorage.setItem("savedLocation", JSON.stringify(locationData));
+      onLocationUpdate?.(locationData);
+      setSelectedLocation(locationData.name);
+      setOpen(false);
+    } catch (error) {
+      console.error('Error selecting station:', error);
+      toast({
+        title: "Error",
+        description: "Could not select this location. Please try another one.",
+        variant: "destructive",
+      });
+    }
   };
 
   const handleSaveLocation = () => {
