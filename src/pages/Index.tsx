@@ -94,7 +94,7 @@ const Index = () => {
     return getTideAndSunriseSunsetData(monthlyTideData, location);
   }, [monthlyTideData, location]);
 
-  return (
+return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-orange-50 to-yellow-50 p-6">
       <div className="max-w-4xl mx-auto space-y-6">
         <TideHeader location={location} onLocationUpdate={handleLocationChange} />
@@ -104,7 +104,7 @@ const Index = () => {
             <TabsTrigger value="daily">Today</TabsTrigger>
             <TabsTrigger value="weekly">This Week</TabsTrigger>
             <TabsTrigger value="monthly">This Month</TabsTrigger>
-            <TabsTrigger value="sunrise-sunset">Near Sunrise/Sunset</TabsTrigger>
+            <TabsTrigger value="sunrise-sunset">Calendar</TabsTrigger>
           </TabsList>
           
           <TabsContent value="daily">
@@ -120,11 +120,6 @@ const Index = () => {
           </TabsContent>
           
           <TabsContent value="sunrise-sunset">
-            <TideView 
-              data={getLowTidesNearSunriseSunset(today, location)} 
-              period="monthly" 
-              title="Low Tides Near Sunrise/Sunset"
-            />
             <TideCalendar tideData={monthlyTideData} />
           </TabsContent>
         </Tabs>
