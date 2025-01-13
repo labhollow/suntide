@@ -46,17 +46,20 @@ const LocationPicker: React.FC<LocationPickerProps> = ({ id, name, onLocationUpd
       .filter(([_, station]) => 
         station.name.toLowerCase().includes(searchTerm.toLowerCase())
       )
-      .sort((a, b) => a[1].name.localeCompare(b[1].name));
+      .sort((a, b) => a[1].name.localeCompare(b[1].name))
+      .slice(0, 100); // Limit results to improve performance
   }, [searchTerm]);
 
   const handleStationSelect = (stationKey: string) => {
     if (!NOAA_STATIONS || !NOAA_STATIONS[stationKey]) return;
     
+    const station = NOAA_STATIONS[stationKey];
     const locationData = {
-      name: NOAA_STATIONS[stationKey].name,
-      lat: NOAA_STATIONS[stationKey].lat,
-      lng: NOAA_STATIONS[stationKey].lng,
+      name: station.name,
+      lat: station.lat,
+      lng: station.lng,
     };
+    
     localStorage.setItem("savedLocation", JSON.stringify(locationData));
     onLocationUpdate?.(locationData);
     setSelectedLocation(locationData.name);
@@ -68,7 +71,7 @@ const LocationPicker: React.FC<LocationPickerProps> = ({ id, name, onLocationUpd
       navigator.geolocation.getCurrentPosition(
         (position) => {
           const locationData = {
-            name: selectedLocation,
+            name: selectedLocation || "Custom Location",
             lat: position.coords.latitude,
             lng: position.coords.longitude,
           };
