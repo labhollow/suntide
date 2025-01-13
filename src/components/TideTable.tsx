@@ -109,7 +109,7 @@ const TideTable = ({ data, period }: TideTableProps) => {
             <TableRow 
               key={index}
               className={`
-                ${tide.isNearSunriseOrSunset ? "bg-purple-800 hover:bg-purple-900" : "hover:bg-slate-800"}
+                ${tide.isNearSunriseOrSunset ? "bg-purple-800 hover:bg-purple-850" : "hover:bg-slate-800"}
               `}
             >
               <TableCell className={tide.isNearSunriseOrSunset ? "text-white font-semibold flex items-center gap-2" : "text-gray-300"}>

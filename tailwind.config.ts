@@ -26,7 +26,10 @@ export default {
             dark: "#172554",
           },
           sunrise: "#f97316",
-          sunset: "#f97316", // Changed from yellow to orange
+          sunset: "#f97316",
+        },
+        purple: {
+          '850': '#2c1667', // Custom value between purple-800 (#3730a3) and purple-900 (#1e1b4b)
         },
         border: "hsl(var(--border))",
         input: "hsl(var(--input))",
