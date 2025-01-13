@@ -14,7 +14,7 @@ const TideHeader = ({ location, onLocationUpdate }: TideHeaderProps) => {
       <div className="flex items-center justify-center gap-4 mb-8">
         <Waves className="w-10 h-10 text-blue-400 animate-wave" />
         <h1 className="text-4xl font-bold bg-gradient-to-r from-blue-400 to-purple-400 bg-clip-text text-transparent">
-          Tide Tracker
+          Suntide
         </h1>
       </div>
       
