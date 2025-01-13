@@ -27,8 +27,13 @@ const LocationPicker: React.FC<LocationPickerProps> = ({ id, name, onLocationUpd
   const [open, setOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedLocation, setSelectedLocation] = useState(() => {
-    const saved = localStorage.getItem("savedLocation");
-    return saved ? JSON.parse(saved).name : "";
+    try {
+      const saved = localStorage.getItem("savedLocation");
+      return saved ? JSON.parse(saved).name : "";
+    } catch (error) {
+      console.error('Error reading from localStorage:', error);
+      return "";
+    }
   });
   const { toast } = useToast();
 
@@ -63,7 +68,8 @@ const LocationPicker: React.FC<LocationPickerProps> = ({ id, name, onLocationUpd
       const searchTermLower = searchTerm.toLowerCase();
       return entries
         .filter(([_, station]) => {
-          const stationName = station.name?.toLowerCase() || '';
+          if (!station || typeof station.name !== 'string') return false;
+          const stationName = station.name.toLowerCase();
           return stationName.includes(searchTermLower);
         })
         .sort((a, b) => {
@@ -141,7 +147,7 @@ const LocationPicker: React.FC<LocationPickerProps> = ({ id, name, onLocationUpd
     }
   };
 
-  // Ensure we have valid data for the Command component
+  // Initialize command items with an empty array if filteredStations is undefined
   const commandItems = filteredStations || [];
 
   return (
