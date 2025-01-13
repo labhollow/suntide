@@ -40,15 +40,16 @@ const LocationPicker: React.FC<LocationPickerProps> = ({ id, name, onLocationUpd
 
   // Filter and sort stations based on search term
   const filteredStations = useMemo(() => {
+    // Early return if NOAA_STATIONS is not yet loaded
     if (!NOAA_STATIONS || typeof NOAA_STATIONS !== 'object') {
-      console.warn('NOAA_STATIONS is undefined or not an object');
+      console.warn('NOAA_STATIONS is not available');
       return [];
     }
 
     const searchTermLower = searchTerm.toLowerCase();
     
     try {
-      const stations = Object.entries(NOAA_STATIONS)
+      return Object.entries(NOAA_STATIONS)
         .filter(([_, station]) => {
           if (!station || typeof station !== 'object' || !('name' in station)) {
             return false;
@@ -62,8 +63,6 @@ const LocationPicker: React.FC<LocationPickerProps> = ({ id, name, onLocationUpd
           return nameA.localeCompare(nameB);
         })
         .slice(0, 100);
-      
-      return stations;
     } catch (error) {
       console.error('Error processing stations:', error);
       return [];
