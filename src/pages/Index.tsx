@@ -104,19 +104,31 @@ const Index = () => {
         
         <Tabs defaultValue="daily" className="w-full">
           <TabsList className="grid w-full grid-cols-4 bg-white/5 backdrop-blur-sm border border-white/10 rounded-lg">
-            <TabsTrigger value="daily" className="data-[state=active]:bg-white/10">
+            <TabsTrigger 
+              value="daily" 
+              className="data-[state=active]:bg-blue-200/10 data-[state=active]:text-blue-200"
+            >
               <Sun className="w-4 h-4 mr-2" />
               Today
             </TabsTrigger>
-            <TabsTrigger value="weekly" className="data-[state=active]:bg-white/10">
+            <TabsTrigger 
+              value="weekly" 
+              className="data-[state=active]:bg-blue-200/10 data-[state=active]:text-blue-200"
+            >
               <Moon className="w-4 h-4 mr-2" />
               This Week
             </TabsTrigger>
-            <TabsTrigger value="monthly" className="data-[state=active]:bg-white/10">
+            <TabsTrigger 
+              value="monthly" 
+              className="data-[state=active]:bg-blue-200/10 data-[state=active]:text-blue-200"
+            >
               <Waves className="w-4 h-4 mr-2" />
               This Month
             </TabsTrigger>
-            <TabsTrigger value="sunrise-sunset" className="data-[state=active]:bg-white/10">
+            <TabsTrigger 
+              value="sunrise-sunset" 
+              className="data-[state=active]:bg-blue-200/10 data-[state=active]:text-blue-200"
+            >
               Calendar
             </TabsTrigger>
           </TabsList>
