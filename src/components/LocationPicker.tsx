@@ -29,7 +29,6 @@ const LocationPicker: React.FC<LocationPickerProps> = ({ id, name, onLocationUpd
   const [selectedLocation, setSelectedLocation] = useState<string>("");
   const { toast } = useToast();
 
-  // Function to convert text to proper case
   const toProperCase = (str: string) => {
     return str
       .toLowerCase()
@@ -38,67 +37,40 @@ const LocationPicker: React.FC<LocationPickerProps> = ({ id, name, onLocationUpd
       .join(' ');
   };
 
-  // Filter and sort stations based on search term
   const filteredStations = useMemo(() => {
-    if (!NOAA_STATIONS || typeof NOAA_STATIONS !== 'object') {
-      console.warn('NOAA_STATIONS is not available');
-      return [];
-    }
-
-    const searchTermLower = searchTerm.toLowerCase();
+    if (!NOAA_STATIONS) return [];
     
-    try {
-      return Object.entries(NOAA_STATIONS)
-        .filter(([_, station]) => {
-          if (!station || typeof station !== 'object' || !('name' in station)) {
-            return false;
-          }
-          const stationName = station.name.toLowerCase();
-          return stationName.includes(searchTermLower);
-        })
-        .sort((a, b) => {
-          const nameA = a[1].name;
-          const nameB = b[1].name;
-          return nameA.localeCompare(nameB);
-        })
-        .slice(0, 100);
-    } catch (error) {
-      console.error('Error processing stations:', error);
-      return [];
-    }
+    const searchTermLower = searchTerm.toLowerCase();
+    return Object.entries(NOAA_STATIONS)
+      .filter(([_, station]) => {
+        if (!station?.name) return false;
+        return station.name.toLowerCase().includes(searchTermLower);
+      })
+      .sort((a, b) => a[1].name.localeCompare(b[1].name))
+      .slice(0, 100);
   }, [searchTerm]);
 
   const handleStationSelect = (stationKey: string) => {
-    try {
-      const station = NOAA_STATIONS?.[stationKey];
-      
-      if (!station || !station.name || typeof station.lat !== 'number' || typeof station.lng !== 'number') {
-        toast({
-          title: "Error",
-          description: "Invalid station data. Please try another location.",
-          variant: "destructive",
-        });
-        return;
-      }
-      
-      const locationData = {
-        name: station.name,
-        lat: station.lat,
-        lng: station.lng,
-      };
-      
-      localStorage.setItem("savedLocation", JSON.stringify(locationData));
-      onLocationUpdate?.(locationData);
-      setSelectedLocation(locationData.name);
-      setOpen(false);
-    } catch (error) {
-      console.error('Error selecting station:', error);
+    const station = NOAA_STATIONS?.[stationKey];
+    if (!station) {
       toast({
         title: "Error",
         description: "Could not select this location. Please try another one.",
         variant: "destructive",
       });
+      return;
     }
+
+    const locationData = {
+      name: station.name,
+      lat: station.lat,
+      lng: station.lng,
+    };
+    
+    localStorage.setItem("savedLocation", JSON.stringify(locationData));
+    onLocationUpdate?.(locationData);
+    setSelectedLocation(locationData.name);
+    setOpen(false);
   };
 
   const handleSaveLocation = () => {
@@ -131,7 +103,6 @@ const LocationPicker: React.FC<LocationPickerProps> = ({ id, name, onLocationUpd
     }
   };
 
-  // Initialize selectedLocation from localStorage
   React.useEffect(() => {
     try {
       const saved = localStorage.getItem("savedLocation");
@@ -168,7 +139,7 @@ const LocationPicker: React.FC<LocationPickerProps> = ({ id, name, onLocationUpd
             />
             <CommandEmpty className="text-white/50 py-2">No location found.</CommandEmpty>
             <CommandGroup>
-              {Array.isArray(filteredStations) && filteredStations.map(([key, station]) => (
+              {filteredStations.map(([key, station]) => (
                 <CommandItem
                   key={key}
                   value={station.name}
