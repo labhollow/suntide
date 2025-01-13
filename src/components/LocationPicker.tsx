@@ -26,7 +26,10 @@ interface LocationPickerProps {
 const LocationPicker: React.FC<LocationPickerProps> = ({ id, name, onLocationUpdate }) => {
   const [open, setOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
-  const [selectedLocation, setSelectedLocation] = useState("");
+  const [selectedLocation, setSelectedLocation] = useState(() => {
+    const saved = localStorage.getItem("savedLocation");
+    return saved ? JSON.parse(saved).name : "";
+  });
   const { toast } = useToast();
 
   // Function to convert text to proper case
@@ -40,33 +43,27 @@ const LocationPicker: React.FC<LocationPickerProps> = ({ id, name, onLocationUpd
 
   // Filter and sort stations based on search term
   const filteredStations = useMemo(() => {
-    console.log('NOAA_STATIONS:', NOAA_STATIONS);
-    
     if (!NOAA_STATIONS || typeof NOAA_STATIONS !== 'object') {
-      console.log('NOAA_STATIONS is undefined or not an object');
+      console.warn('NOAA_STATIONS is undefined or not an object');
       return [];
     }
 
     try {
-      // Convert object to array of entries and ensure they are valid
       const entries = Object.entries(NOAA_STATIONS).filter(entry => {
         if (!Array.isArray(entry) || entry.length !== 2) return false;
         const [_, station] = entry;
         return station && typeof station === 'object' && 'name' in station;
       });
 
-      console.log('Filtered entries:', entries);
-
       if (entries.length === 0) {
-        console.log('No valid entries found in NOAA_STATIONS');
+        console.warn('No valid entries found in NOAA_STATIONS');
         return [];
       }
 
-      // Filter by search term and sort alphabetically
-      const filtered = entries
+      const searchTermLower = searchTerm.toLowerCase();
+      return entries
         .filter(([_, station]) => {
           const stationName = station.name?.toLowerCase() || '';
-          const searchTermLower = searchTerm.toLowerCase();
           return stationName.includes(searchTermLower);
         })
         .sort((a, b) => {
@@ -74,10 +71,7 @@ const LocationPicker: React.FC<LocationPickerProps> = ({ id, name, onLocationUpd
           const nameB = b[1]?.name || '';
           return nameA.localeCompare(nameB);
         })
-        .slice(0, 100); // Limit results for performance
-
-      console.log('Final filtered stations:', filtered);
-      return filtered;
+        .slice(0, 100);
     } catch (error) {
       console.error('Error filtering stations:', error);
       return [];
@@ -89,7 +83,6 @@ const LocationPicker: React.FC<LocationPickerProps> = ({ id, name, onLocationUpd
       const station = NOAA_STATIONS?.[stationKey];
       
       if (!station || !station.name || typeof station.lat !== 'number' || typeof station.lng !== 'number') {
-        console.error('Invalid station data:', station);
         toast({
           title: "Error",
           description: "Invalid station data. Please try another location.",
@@ -103,8 +96,6 @@ const LocationPicker: React.FC<LocationPickerProps> = ({ id, name, onLocationUpd
         lat: station.lat,
         lng: station.lng,
       };
-      
-      console.log('Selected location data:', locationData);
       
       localStorage.setItem("savedLocation", JSON.stringify(locationData));
       onLocationUpdate?.(locationData);
@@ -151,7 +142,7 @@ const LocationPicker: React.FC<LocationPickerProps> = ({ id, name, onLocationUpd
   };
 
   // Ensure we have valid data for the Command component
-  const commandItems = Array.isArray(filteredStations) ? filteredStations : [];
+  const commandItems = filteredStations || [];
 
   return (
     <Card className="p-4 flex gap-4 items-center bg-white/5 backdrop-blur-sm border-white/10">
