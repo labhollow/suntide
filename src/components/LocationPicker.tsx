@@ -40,7 +40,6 @@ const LocationPicker: React.FC<LocationPickerProps> = ({ id, name, onLocationUpd
 
   // Filter and sort stations based on search term
   const filteredStations = useMemo(() => {
-    // Early return if NOAA_STATIONS is not yet loaded
     if (!NOAA_STATIONS || typeof NOAA_STATIONS !== 'object') {
       console.warn('NOAA_STATIONS is not available');
       return [];
@@ -169,7 +168,7 @@ const LocationPicker: React.FC<LocationPickerProps> = ({ id, name, onLocationUpd
             />
             <CommandEmpty className="text-white/50 py-2">No location found.</CommandEmpty>
             <CommandGroup>
-              {(filteredStations || []).map(([key, station]) => (
+              {Array.isArray(filteredStations) && filteredStations.map(([key, station]) => (
                 <CommandItem
                   key={key}
                   value={station.name}
