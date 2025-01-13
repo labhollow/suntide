@@ -1,20 +1,15 @@
-import React, { useState, useMemo } from "react";
+import React, { useState, useEffect } from "react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { MapPin } from "lucide-react";
 import { useToast } from "@/components/ui/use-toast";
 import {
-  Command,
-  CommandEmpty,
-  CommandGroup,
-  CommandInput,
-  CommandItem,
-} from "@/components/ui/command";
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover";
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { NOAA_STATIONS } from "@/utils/noaaApi";
 
 interface LocationPickerProps {
@@ -24,8 +19,6 @@ interface LocationPickerProps {
 }
 
 const LocationPicker: React.FC<LocationPickerProps> = ({ id, name, onLocationUpdate }) => {
-  const [open, setOpen] = useState(false);
-  const [searchTerm, setSearchTerm] = useState("");
   const [selectedLocation, setSelectedLocation] = useState<string>("");
   const { toast } = useToast();
 
@@ -36,19 +29,6 @@ const LocationPicker: React.FC<LocationPickerProps> = ({ id, name, onLocationUpd
       .map(word => word.charAt(0).toUpperCase() + word.slice(1))
       .join(' ');
   };
-
-  const filteredStations = useMemo(() => {
-    if (!NOAA_STATIONS) return [];
-    
-    const searchTermLower = searchTerm.toLowerCase();
-    return Object.entries(NOAA_STATIONS)
-      .filter(([_, station]) => {
-        if (!station?.name) return false;
-        return station.name.toLowerCase().includes(searchTermLower);
-      })
-      .sort((a, b) => a[1].name.localeCompare(b[1].name))
-      .slice(0, 100);
-  }, [searchTerm]);
 
   const handleStationSelect = (stationKey: string) => {
     const station = NOAA_STATIONS?.[stationKey];
@@ -70,7 +50,6 @@ const LocationPicker: React.FC<LocationPickerProps> = ({ id, name, onLocationUpd
     localStorage.setItem("savedLocation", JSON.stringify(locationData));
     onLocationUpdate?.(locationData);
     setSelectedLocation(locationData.name);
-    setOpen(false);
   };
 
   const handleSaveLocation = () => {
@@ -103,7 +82,7 @@ const LocationPicker: React.FC<LocationPickerProps> = ({ id, name, onLocationUpd
     }
   };
 
-  React.useEffect(() => {
+  useEffect(() => {
     try {
       const saved = localStorage.getItem("savedLocation");
       if (saved) {
@@ -115,44 +94,29 @@ const LocationPicker: React.FC<LocationPickerProps> = ({ id, name, onLocationUpd
     }
   }, []);
 
+  const stationsList = Object.entries(NOAA_STATIONS || {})
+    .sort((a, b) => a[1].name.localeCompare(b[1].name))
+    .slice(0, 100);
+
   return (
     <Card className="p-4 flex gap-4 items-center bg-white/5 backdrop-blur-sm border-white/10">
       <MapPin className="text-blue-400" />
-      <Popover open={open} onOpenChange={setOpen}>
-        <PopoverTrigger asChild>
-          <Button
-            variant="outline"
-            role="combobox"
-            aria-expanded={open}
-            className="w-[300px] justify-between bg-white/10 border-white/10 text-white"
-          >
-            {selectedLocation || "Select location..."}
-          </Button>
-        </PopoverTrigger>
-        <PopoverContent className="w-[300px] p-0 bg-slate-800 border-white/10">
-          <Command>
-            <CommandInput 
-              placeholder="Search locations..." 
-              className="h-9 text-white bg-transparent"
-              value={searchTerm}
-              onValueChange={setSearchTerm}
-            />
-            <CommandEmpty className="text-white/50 py-2">No location found.</CommandEmpty>
-            <CommandGroup>
-              {filteredStations.map(([key, station]) => (
-                <CommandItem
-                  key={key}
-                  value={station.name}
-                  onSelect={() => handleStationSelect(key)}
-                  className="text-white hover:bg-white/10"
-                >
-                  {toProperCase(station.name)}
-                </CommandItem>
-              ))}
-            </CommandGroup>
-          </Command>
-        </PopoverContent>
-      </Popover>
+      <Select onValueChange={handleStationSelect} value={selectedLocation || undefined}>
+        <SelectTrigger className="w-[300px] bg-white/10 border-white/10 text-white">
+          <SelectValue placeholder="Select location..." />
+        </SelectTrigger>
+        <SelectContent className="bg-slate-800 border-white/10">
+          {stationsList.map(([key, station]) => (
+            <SelectItem 
+              key={key} 
+              value={key}
+              className="text-white hover:bg-white/10"
+            >
+              {toProperCase(station.name)}
+            </SelectItem>
+          ))}
+        </SelectContent>
+      </Select>
       <Button onClick={handleSaveLocation} variant="default" className="bg-blue-500 hover:bg-blue-600">
         Save Custom Location
       </Button>
