@@ -11,14 +11,9 @@ const TideCalendar = ({ tideData }) => {
     console.log('Received Tide Data:', tideData);
 
     const events = tideData.map(tide => {
-        // Ensure we have a valid date before proceeding
-        if (!tide.t) {
-            console.warn('Invalid tide data entry:', tide);
-            return null;
-        }
-
         try {
-            const tideDate = new Date(tide.t);
+            // Parse the date string to a Date object
+            const tideDate = parseISO(tide.t);
             
             // Validate the date is valid
             if (isNaN(tideDate.getTime())) {

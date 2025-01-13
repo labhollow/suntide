@@ -77,17 +77,9 @@ const Index = () => {
             return itemDate >= today && itemDate <= addDays(today, 7);
           });
 
-          if (JSON.stringify(todayData) !== JSON.stringify(todayTideData)) {
-            setTodayTideData(todayData);
-          }
-          if (JSON.stringify(weeklyData) !== JSON.stringify(weeklyTideData)) {
-            setWeeklyTideData(weeklyData);
-          }
-          if (JSON.stringify(enrichedData) !== JSON.stringify(monthlyTideData)) {
-            setMonthlyTideData(enrichedData);
-          }
-        } else {
-          console.error('No predictions found in API response:', response.data); // Log if predictions are missing
+          setTodayTideData(todayData);
+          setWeeklyTideData(weeklyData);
+          setMonthlyTideData(enrichedData);
         }
       } catch (error) {
         console.error('Error fetching data:', error);
@@ -107,46 +99,6 @@ const Index = () => {
     console.log('Tide Events to Calendar:', tideEvents); // Log the events being passed
     setWeeklyTideData(tideEvents); // Update state with tide events
   }, [monthlyTideData, location]);
-
-  useEffect(() => {
-    console.log('Fetching tide data...'); // Log to confirm useEffect is triggered
-    const fetchData = async () => {
-      try {
-        const beginDate = format(today, 'yyyyMMdd');
-        const endDate = format(addDays(today, 30), 'yyyyMMdd');
-
-        console.log('Begin Date:', beginDate); // Log the begin date
-        console.log('End Date:', endDate); // Log the end date
-
-        const response = await axios.get('https://api.tidesandcurrents.noaa.gov/api/prod/datagetter', {
-          params: {
-            station: stationId,
-            product: 'predictions',
-            datum: 'MLLW',
-            format: 'json',
-            units: 'english',
-            time_zone: 'lst_ldt',
-            begin_date: beginDate,
-            end_date: endDate
-          }
-        });
-
-        console.log('API Response:', response.data); // Log the API response
-
-        if (response.data && Array.isArray(response.data.predictions)) {
-          console.log('Predictions Found:', response.data.predictions); // Log predictions
-          const tideEvents = getTideAndSunriseSunsetEvents(response.data.predictions); // Process tide events
-          console.log('Tide Events to Calendar:', tideEvents); // Log the events being passed
-          setWeeklyTideData(tideEvents); // Update state with tide events
-        } else {
-          console.error('No predictions found in API response or predictions is not an array:', response.data); // Log if predictions are missing or not an array
-        }
-      } catch (error) {
-        console.error('Error fetching tide data:', error); // Log any errors
-      }
-    };
-    fetchData();
-  }, [stationId, location, today]);
 
   const handleLocationChange = (newLocation: Location) => {
     const locationKey = newLocation.name.toLowerCase().replace(/\s+/g, '-');
@@ -178,10 +130,10 @@ const Index = () => {
         
         <Tabs defaultValue="daily" className="w-full">
           <TabsList className="grid w-full grid-cols-4 bg-white/50 backdrop-blur-sm">
-            <TabsTrigger value="daily" onClick={() => handleTabChange('daily')}>Today</TabsTrigger>
-            <TabsTrigger value="weekly" onClick={() => handleTabChange('weekly')}>This Week</TabsTrigger>
-            <TabsTrigger value="monthly" onClick={() => handleTabChange('monthly')}>This Month</TabsTrigger>
-            <TabsTrigger value="sunrise-sunset" onClick={() => handleTabChange('sunrise-sunset')}>Near Sunrise/Sunset</TabsTrigger>
+            <TabsTrigger value="daily">Today</TabsTrigger>
+            <TabsTrigger value="weekly">This Week</TabsTrigger>
+            <TabsTrigger value="monthly">This Month</TabsTrigger>
+            <TabsTrigger value="sunrise-sunset">Near Sunrise/Sunset</TabsTrigger>
           </TabsList>
           
           <TabsContent value="daily">
@@ -189,19 +141,11 @@ const Index = () => {
           </TabsContent>
           
           <TabsContent value="weekly">
-            <TideView 
-              data={weeklyTideData} 
-              period="weekly" 
-              title="Weekly Tide Times"
-            />
+            <TideView data={weeklyTideData} period="weekly" />
           </TabsContent>
           
           <TabsContent value="monthly">
-            <TideView 
-              data={monthlyTideData} 
-              period="monthly" 
-              title="Monthly Tide Times"
-            />
+            <TideView data={monthlyTideData} period="monthly" />
           </TabsContent>
           
           <TabsContent value="sunrise-sunset">
@@ -210,14 +154,7 @@ const Index = () => {
               period="monthly" 
               title="Low Tides Near Sunrise/Sunset"
             />
-            {activeTab === 'sunrise-sunset' && (
-              (() => {
-                const tideEvents = getTideAndSunriseSunsetEvents(getTideAndSunriseSunsetData(monthlyTideData, location));
-                console.log('Tide Events for Calendar:', tideEvents);
-                console.log('Tide Events for Calendar (formatted):', formatDataForCalendar(tideEvents));
-                return <TideCalendar tideData={formatDataForCalendar(tideEvents)} />;
-              })()
-            )}
+            <TideCalendar tideData={monthlyTideData} />
           </TabsContent>
         </Tabs>
 
