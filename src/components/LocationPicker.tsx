@@ -40,28 +40,35 @@ const LocationPicker: React.FC<LocationPickerProps> = ({ id, name, onLocationUpd
 
   // Filter and sort stations based on search term
   const filteredStations = useMemo(() => {
-    try {
-      if (!NOAA_STATIONS || typeof NOAA_STATIONS !== 'object') {
-        console.log('NOAA_STATIONS is undefined or not an object');
-        return [];
-      }
+    if (!NOAA_STATIONS || typeof NOAA_STATIONS !== 'object') {
+      console.log('NOAA_STATIONS is undefined or not an object');
+      return [];
+    }
 
-      const entries = Object.entries(NOAA_STATIONS).filter(Boolean);
+    try {
+      // Ensure we have valid entries to work with
+      const entries = Object.entries(NOAA_STATIONS)
+        .filter(entry => entry && Array.isArray(entry) && entry.length === 2);
+
       if (!entries || entries.length === 0) {
         console.log('No valid entries found in NOAA_STATIONS');
         return [];
       }
 
+      // Filter and sort the entries
       return entries
-        .filter(([_, station]) => 
-          station && 
-          typeof station === 'object' && 
-          station.name && 
-          station.name.toLowerCase().includes(searchTerm.toLowerCase())
-        )
+        .filter(([_, station]) => {
+          if (!station || typeof station !== 'object') return false;
+          const stationName = station.name;
+          return stationName && 
+                 typeof stationName === 'string' && 
+                 stationName.toLowerCase().includes(searchTerm.toLowerCase());
+        })
         .sort((a, b) => {
-          if (!a[1]?.name || !b[1]?.name) return 0;
-          return a[1].name.localeCompare(b[1].name);
+          const nameA = a[1]?.name;
+          const nameB = b[1]?.name;
+          if (!nameA || !nameB) return 0;
+          return nameA.localeCompare(nameB);
         })
         .slice(0, 100); // Limit results to improve performance
     } catch (error) {
@@ -157,7 +164,7 @@ const LocationPicker: React.FC<LocationPickerProps> = ({ id, name, onLocationUpd
             />
             <CommandEmpty className="text-white/50 py-2">No location found.</CommandEmpty>
             <CommandGroup className="max-h-[300px] overflow-auto">
-              {filteredStations.map(([key, station]) => (
+              {(filteredStations || []).map(([key, station]) => (
                 <CommandItem
                   key={key}
                   value={station.name}
