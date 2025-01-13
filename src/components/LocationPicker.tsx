@@ -54,14 +54,9 @@ const LocationPicker: React.FC<LocationPickerProps> = ({ id, name, onLocationUpd
     }
 
     try {
-      const entries = Object.entries(NOAA_STATIONS).filter(entry => {
-        if (!Array.isArray(entry) || entry.length !== 2) return false;
-        const [_, station] = entry;
-        return station && typeof station === 'object' && 'name' in station;
-      });
-
-      if (entries.length === 0) {
-        console.warn('No valid entries found in NOAA_STATIONS');
+      const entries = Object.entries(NOAA_STATIONS);
+      if (!entries.length) {
+        console.warn('No entries found in NOAA_STATIONS');
         return [];
       }
 
@@ -147,9 +142,6 @@ const LocationPicker: React.FC<LocationPickerProps> = ({ id, name, onLocationUpd
     }
   };
 
-  // Initialize command items with an empty array if filteredStations is undefined
-  const commandItems = filteredStations || [];
-
   return (
     <Card className="p-4 flex gap-4 items-center bg-white/5 backdrop-blur-sm border-white/10">
       <MapPin className="text-blue-400" />
@@ -173,8 +165,8 @@ const LocationPicker: React.FC<LocationPickerProps> = ({ id, name, onLocationUpd
               onValueChange={setSearchTerm}
             />
             <CommandEmpty className="text-white/50 py-2">No location found.</CommandEmpty>
-            <CommandGroup className="max-h-[300px] overflow-auto">
-              {commandItems.map(([key, station]) => (
+            <CommandGroup>
+              {filteredStations.map(([key, station]) => (
                 <CommandItem
                   key={key}
                   value={station.name}
