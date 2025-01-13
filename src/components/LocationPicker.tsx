@@ -1,16 +1,20 @@
 import React, { useState, useMemo } from "react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { MapPin } from "lucide-react";
 import { useToast } from "@/components/ui/use-toast";
 import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
+  Command,
+  CommandEmpty,
+  CommandGroup,
+  CommandInput,
+  CommandItem,
+} from "@/components/ui/command";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
 import { NOAA_STATIONS } from "@/utils/noaaApi";
 
 interface LocationPickerProps {
@@ -20,7 +24,9 @@ interface LocationPickerProps {
 }
 
 const LocationPicker: React.FC<LocationPickerProps> = ({ id, name, onLocationUpdate }) => {
+  const [open, setOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
+  const [selectedLocation, setSelectedLocation] = useState("");
   const { toast } = useToast();
 
   // Function to convert text to proper case
@@ -49,12 +55,9 @@ const LocationPicker: React.FC<LocationPickerProps> = ({ id, name, onLocationUpd
     };
     localStorage.setItem("savedLocation", JSON.stringify(locationData));
     onLocationUpdate?.(locationData);
-    setSearchTerm(locationData.name);
+    setSelectedLocation(locationData.name);
+    setOpen(false);
     // Toast disabled as requested
-    // toast({
-    //   title: "Location updated",
-    //   description: `Now showing tide data for ${locationData.name}`,
-    // });
   };
 
   const handleSaveLocation = () => {
@@ -62,60 +65,61 @@ const LocationPicker: React.FC<LocationPickerProps> = ({ id, name, onLocationUpd
       navigator.geolocation.getCurrentPosition(
         (position) => {
           const locationData = {
-            name: searchTerm,
+            name: selectedLocation,
             lat: position.coords.latitude,
             lng: position.coords.longitude,
           };
           localStorage.setItem("savedLocation", JSON.stringify(locationData));
           onLocationUpdate?.(locationData);
           // Toast disabled as requested
-          // toast({
-          //   title: "Location saved",
-          //   description: `Saved ${searchTerm} for tide tracking`,
-          // });
         },
         (error) => {
           // Toast disabled as requested
-          // toast({
-          //   title: "Error saving location",
-          //   description: "Please enable location services and try again",
-          //   variant: "destructive",
-          // });
         }
       );
     } else {
       // Toast disabled as requested
-      // toast({
-      //   title: "Location services not available",
-      //   description: "Your browser doesn't support location services",
-      //   variant: "destructive",
-      // });
     }
   };
 
   return (
     <Card className="p-4 flex gap-4 items-center bg-white/5 backdrop-blur-sm border-white/10">
       <MapPin className="text-blue-400" />
-      <Select onValueChange={handleStationSelect}>
-        <SelectTrigger className="w-[180px] bg-white/10 border-white/10 text-white">
-          <SelectValue placeholder="Select station" />
-        </SelectTrigger>
-        <SelectContent className="bg-slate-800 border-white/10 max-h-[300px]">
-          {filteredStations.map(([key, station]) => (
-            <SelectItem key={key} value={key} className="text-white hover:bg-white/10">
-              {toProperCase(station.name)}
-            </SelectItem>
-          ))}
-        </SelectContent>
-      </Select>
-      <Input
-        id={id}
-        name={name}
-        placeholder="Search locations..."
-        value={searchTerm}
-        onChange={(e) => setSearchTerm(e.target.value)}
-        className="bg-white/10 border-white/10 text-white placeholder:text-white/50"
-      />
+      <Popover open={open} onOpenChange={setOpen}>
+        <PopoverTrigger asChild>
+          <Button
+            variant="outline"
+            role="combobox"
+            aria-expanded={open}
+            className="w-[300px] justify-between bg-white/10 border-white/10 text-white"
+          >
+            {selectedLocation || "Select location..."}
+          </Button>
+        </PopoverTrigger>
+        <PopoverContent className="w-[300px] p-0 bg-slate-800 border-white/10">
+          <Command>
+            <CommandInput 
+              placeholder="Search locations..." 
+              className="h-9 text-white bg-transparent"
+              value={searchTerm}
+              onValueChange={setSearchTerm}
+            />
+            <CommandEmpty className="text-white/50 py-2">No location found.</CommandEmpty>
+            <CommandGroup className="max-h-[300px] overflow-auto">
+              {filteredStations.map(([key, station]) => (
+                <CommandItem
+                  key={key}
+                  value={station.name}
+                  onSelect={() => handleStationSelect(key)}
+                  className="text-white hover:bg-white/10"
+                >
+                  {toProperCase(station.name)}
+                </CommandItem>
+              ))}
+            </CommandGroup>
+          </Command>
+        </PopoverContent>
+      </Popover>
       <Button onClick={handleSaveLocation} variant="default" className="bg-blue-500 hover:bg-blue-600">
         Save Custom Location
       </Button>
