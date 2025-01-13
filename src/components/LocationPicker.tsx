@@ -26,7 +26,7 @@ interface LocationPickerProps {
 const LocationPicker: React.FC<LocationPickerProps> = ({ id, name, onLocationUpdate }) => {
   const [open, setOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
-  const [selectedLocation, setSelectedLocation] = useState(() => {
+  const [selectedLocation, setSelectedLocation] = useState<string>(() => {
     try {
       const saved = localStorage.getItem("savedLocation");
       return saved ? JSON.parse(saved).name : "";
@@ -54,22 +54,28 @@ const LocationPicker: React.FC<LocationPickerProps> = ({ id, name, onLocationUpd
     }
 
     try {
-      const entries = Object.entries(NOAA_STATIONS);
+      // Ensure we're working with a valid object
+      const entries = Object.entries(NOAA_STATIONS).filter(([_, station]) => {
+        return station && 
+               typeof station === 'object' && 
+               'name' in station &&
+               typeof station.name === 'string';
+      });
+
       if (!entries.length) {
-        console.warn('No entries found in NOAA_STATIONS');
+        console.warn('No valid entries found in NOAA_STATIONS');
         return [];
       }
 
       const searchTermLower = searchTerm.toLowerCase();
       return entries
         .filter(([_, station]) => {
-          if (!station || typeof station.name !== 'string') return false;
           const stationName = station.name.toLowerCase();
           return stationName.includes(searchTermLower);
         })
         .sort((a, b) => {
-          const nameA = a[1]?.name || '';
-          const nameB = b[1]?.name || '';
+          const nameA = a[1].name;
+          const nameB = b[1].name;
           return nameA.localeCompare(nameB);
         })
         .slice(0, 100);
@@ -166,7 +172,7 @@ const LocationPicker: React.FC<LocationPickerProps> = ({ id, name, onLocationUpd
             />
             <CommandEmpty className="text-white/50 py-2">No location found.</CommandEmpty>
             <CommandGroup>
-              {filteredStations.map(([key, station]) => (
+              {(filteredStations || []).map(([key, station]) => (
                 <CommandItem
                   key={key}
                   value={station.name}
