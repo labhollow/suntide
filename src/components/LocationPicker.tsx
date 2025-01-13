@@ -40,37 +40,44 @@ const LocationPicker: React.FC<LocationPickerProps> = ({ id, name, onLocationUpd
 
   // Filter and sort stations based on search term
   const filteredStations = useMemo(() => {
+    console.log('NOAA_STATIONS:', NOAA_STATIONS);
+    
     if (!NOAA_STATIONS || typeof NOAA_STATIONS !== 'object') {
       console.log('NOAA_STATIONS is undefined or not an object');
       return [];
     }
 
     try {
-      // Ensure we have valid entries to work with
-      const entries = Object.entries(NOAA_STATIONS)
-        .filter(entry => entry && Array.isArray(entry) && entry.length === 2);
+      // Convert object to array of entries and ensure they are valid
+      const entries = Object.entries(NOAA_STATIONS).filter(entry => {
+        if (!Array.isArray(entry) || entry.length !== 2) return false;
+        const [_, station] = entry;
+        return station && typeof station === 'object' && 'name' in station;
+      });
 
-      if (!entries || entries.length === 0) {
+      console.log('Filtered entries:', entries);
+
+      if (entries.length === 0) {
         console.log('No valid entries found in NOAA_STATIONS');
         return [];
       }
 
-      // Filter and sort the entries
-      return entries
+      // Filter by search term and sort alphabetically
+      const filtered = entries
         .filter(([_, station]) => {
-          if (!station || typeof station !== 'object') return false;
-          const stationName = station.name;
-          return stationName && 
-                 typeof stationName === 'string' && 
-                 stationName.toLowerCase().includes(searchTerm.toLowerCase());
+          const stationName = station.name?.toLowerCase() || '';
+          const searchTermLower = searchTerm.toLowerCase();
+          return stationName.includes(searchTermLower);
         })
         .sort((a, b) => {
-          const nameA = a[1]?.name;
-          const nameB = b[1]?.name;
-          if (!nameA || !nameB) return 0;
+          const nameA = a[1]?.name || '';
+          const nameB = b[1]?.name || '';
           return nameA.localeCompare(nameB);
         })
-        .slice(0, 100); // Limit results to improve performance
+        .slice(0, 100); // Limit results for performance
+
+      console.log('Final filtered stations:', filtered);
+      return filtered;
     } catch (error) {
       console.error('Error filtering stations:', error);
       return [];
@@ -80,6 +87,7 @@ const LocationPicker: React.FC<LocationPickerProps> = ({ id, name, onLocationUpd
   const handleStationSelect = (stationKey: string) => {
     try {
       const station = NOAA_STATIONS?.[stationKey];
+      
       if (!station || !station.name || typeof station.lat !== 'number' || typeof station.lng !== 'number') {
         console.error('Invalid station data:', station);
         toast({
@@ -95,6 +103,8 @@ const LocationPicker: React.FC<LocationPickerProps> = ({ id, name, onLocationUpd
         lat: station.lat,
         lng: station.lng,
       };
+      
+      console.log('Selected location data:', locationData);
       
       localStorage.setItem("savedLocation", JSON.stringify(locationData));
       onLocationUpdate?.(locationData);
@@ -140,6 +150,9 @@ const LocationPicker: React.FC<LocationPickerProps> = ({ id, name, onLocationUpd
     }
   };
 
+  // Ensure we have valid data for the Command component
+  const commandItems = Array.isArray(filteredStations) ? filteredStations : [];
+
   return (
     <Card className="p-4 flex gap-4 items-center bg-white/5 backdrop-blur-sm border-white/10">
       <MapPin className="text-blue-400" />
@@ -164,7 +177,7 @@ const LocationPicker: React.FC<LocationPickerProps> = ({ id, name, onLocationUpd
             />
             <CommandEmpty className="text-white/50 py-2">No location found.</CommandEmpty>
             <CommandGroup className="max-h-[300px] overflow-auto">
-              {(filteredStations || []).map(([key, station]) => (
+              {commandItems.map(([key, station]) => (
                 <CommandItem
                   key={key}
                   value={station.name}
