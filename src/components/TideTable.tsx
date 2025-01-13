@@ -113,9 +113,19 @@ const TideTable = ({ data, period }: TideTableProps) => {
               <TableCell className={tide.isNearSunriseOrSunset ? "text-white font-semibold flex items-center gap-2" : "text-gray-300"}>
                 {format(tide.date, "MMM dd, yyyy")}
                 {tide.isNearSunriseOrSunset && (
-                  isWithinThreeHours(format(tide.date, "hh:mm a"), tide.sunrise || "") 
-                    ? <ArrowUp className="w-4 h-4" />
-                    : <ArrowDown className="w-4 h-4" />
+                  <div className="flex flex-col items-center">
+                    {isWithinThreeHours(format(tide.date, "hh:mm a"), tide.sunrise || "") ? (
+                      <>
+                        <span className="text-xs mb-1">rise</span>
+                        <ArrowUp className="w-4 h-4" />
+                      </>
+                    ) : (
+                      <>
+                        <ArrowDown className="w-4 h-4" />
+                        <span className="text-xs mt-1">set</span>
+                      </>
+                    )}
+                  </div>
                 )}
               </TableCell>
               <TableCell className={tide.isNearSunriseOrSunset ? "text-white font-semibold" : "text-gray-300"}>
