@@ -108,24 +108,24 @@ const TideTable = ({ data, period }: TideTableProps) => {
           {formattedData.map((tide, index) => (
             <TableRow 
               key={index}
-              className={tide.isNearSunriseOrSunset ? "bg-[#0EA5E9] font-medium" : ""}
+              className={tide.isNearSunriseOrSunset ? "bg-[#0EA5E9]" : ""}
             >
-              <TableCell className={tide.isNearSunriseOrSunset ? "text-white" : "text-gray-300 font-medium"}>
+              <TableCell className={tide.isNearSunriseOrSunset ? "text-white font-medium" : "text-gray-300"}>
                 {format(tide.date, "MMM dd, yyyy")}
               </TableCell>
-              <TableCell className={tide.isNearSunriseOrSunset ? "text-white" : "text-gray-300 font-medium"}>
+              <TableCell className={tide.isNearSunriseOrSunset ? "text-white font-medium" : "text-gray-300"}>
                 {format(tide.date, "hh:mm a")}
               </TableCell>
-              <TableCell className={tide.isNearSunriseOrSunset ? "text-white capitalize" : "text-gray-300 capitalize font-medium"}>
+              <TableCell className={tide.isNearSunriseOrSunset ? "text-white font-medium capitalize" : "text-gray-300 capitalize"}>
                 {tide.type}
               </TableCell>
-              <TableCell className={tide.isNearSunriseOrSunset ? "text-white" : "text-gray-300 font-medium"}>
+              <TableCell className={tide.isNearSunriseOrSunset ? "text-white font-medium" : "text-gray-300"}>
                 {tide.height.toFixed(2)}
               </TableCell>
-              <TableCell className={tide.isNearSunriseOrSunset ? "text-white" : "text-gray-300 font-medium"}>
+              <TableCell className={tide.isNearSunriseOrSunset ? "text-white font-medium" : "text-gray-300"}>
                 {tide.sunrise || 'N/A'}
               </TableCell>
-              <TableCell className={tide.isNearSunriseOrSunset ? "text-white" : "text-gray-300 font-medium"}>
+              <TableCell className={tide.isNearSunriseOrSunset ? "text-white font-medium" : "text-gray-300"}>
                 {tide.sunset || 'N/A'}
               </TableCell>
             </TableRow>
