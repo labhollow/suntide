@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React from "react";
 import { Bell } from "lucide-react";
 import { Switch } from "@/components/ui/switch";
 import { Card } from "@/components/ui/card";
@@ -17,35 +17,35 @@ const TideAlerts = ({ upcomingAlerts }: TideAlertsProps) => {
   const [alertsEnabled, setAlertsEnabled] = React.useState(false);
   const { toast } = useToast();
 
-  useEffect(() => {
-    const hasShownAlert = sessionStorage.getItem('tideAlertShown') === 'true';
-    
-    if (alertsEnabled && !hasShownAlert && upcomingAlerts.length > 0) {
-      const today = new Date();
-      const closestAlert = upcomingAlerts
-        .map(alert => ({
-          ...alert,
-          fullDate: parseISO(`${alert.date} ${alert.time}`)
-        }))
-        .filter(alert => isAfter(alert.fullDate, today))
-        .sort((a, b) => 
-          isBefore(a.fullDate, b.fullDate) ? -1 : 1
-        )[0];
-
-      if (closestAlert) {
-        sessionStorage.setItem('tideAlertShown', 'true');
-        
-        toast({
-          title: "Upcoming Low Tide Near Sunrise/Sunset",
-          description: `Low tide on ${closestAlert.date} at ${closestAlert.time} coincides with ${closestAlert.type}`,
-        });
-      }
-    }
-  }, [alertsEnabled]);
-
   const toggleAlerts = () => {
-    setAlertsEnabled(!alertsEnabled);
-    if (!alertsEnabled) {
+    const newState = !alertsEnabled;
+    setAlertsEnabled(newState);
+    
+    if (newState) {
+      const hasShownAlert = localStorage.getItem('tideAlertShown_v2') === 'true';
+      
+      if (!hasShownAlert && upcomingAlerts.length > 0) {
+        const today = new Date();
+        const closestAlert = upcomingAlerts
+          .map(alert => ({
+            ...alert,
+            fullDate: parseISO(`${alert.date} ${alert.time}`)
+          }))
+          .filter(alert => isAfter(alert.fullDate, today))
+          .sort((a, b) => 
+            isBefore(a.fullDate, b.fullDate) ? -1 : 1
+          )[0];
+
+        if (closestAlert) {
+          localStorage.setItem('tideAlertShown_v2', 'true');
+          
+          toast({
+            title: "Upcoming Low Tide Near Sunrise/Sunset",
+            description: `Low tide on ${closestAlert.date} at ${closestAlert.time} coincides with ${closestAlert.type}`,
+          });
+        }
+      }
+
       Notification.requestPermission();
     }
   };
