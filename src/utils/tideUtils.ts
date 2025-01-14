@@ -20,6 +20,10 @@ export interface TideData {
   isNearSunriseOrSunset?: boolean;
 }
 
+export const metersToFeet = (meters: number): number => {
+  return meters * 3.28084;
+};
+
 export const enrichTideDataWithSunriseSunset = (
   tideData: TideData[], 
   location: Location,
@@ -72,4 +76,12 @@ export const getUpcomingAlerts = (
         type: isNearSunrise ? "sunrise" : "sunset"
       };
     });
+};
+
+export const getLowTidesNearSunriseSunset = (tideData: TideData[]): TideData[] => {
+  return tideData.filter(tide => tide.type === "L" && tide.isNearSunriseOrSunset);
+};
+
+export const getTideAndSunriseSunsetData = (tideData: TideData[], location: Location) => {
+  return enrichTideDataWithSunriseSunset(tideData, location);
 };

@@ -10,7 +10,7 @@ import {
 import { format, parseISO } from "date-fns";
 import { ArrowUp, ArrowDown } from "lucide-react";
 import { metersToFeet } from "@/utils/tideUtils";
-import { isWithinThreeHours } from "@/utils/dateUtils";
+import { isWithinHours } from "@/utils/dateUtils";
 import { useQuery } from "@tanstack/react-query";
 
 interface TideData {
@@ -54,8 +54,8 @@ const TideTable = ({ data, period }: TideTableProps) => {
             sunrise: tide.sunrise,
             sunset: tide.sunset,
             isNearSunriseOrSunset: tide.type === "L" && (
-              (tide.sunrise && isWithinThreeHours(format(date, "hh:mm a"), tide.sunrise)) ||
-              (tide.sunset && isWithinThreeHours(format(date, "hh:mm a"), tide.sunset))
+              (tide.sunrise && isWithinHours(format(date, "hh:mm a"), tide.sunrise, 2)) ||
+              (tide.sunset && isWithinHours(format(date, "hh:mm a"), tide.sunset, 2))
             )
           };
         } catch (error) {
@@ -99,7 +99,7 @@ const TideTable = ({ data, period }: TideTableProps) => {
                 {format(tide.date, "MMM dd, yyyy")}
                 {tide.isNearSunriseOrSunset && (
                   <div className="flex flex-col items-center">
-                    {isWithinThreeHours(format(tide.date, "hh:mm a"), tide.sunrise || "") ? (
+                    {isWithinHours(format(tide.date, "hh:mm a"), tide.sunrise || "", 2) ? (
                       <>
                         <span className="text-xs text-white font-light">rise</span>
                         <ArrowUp className="w-4 h-4" />
