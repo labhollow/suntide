@@ -15,7 +15,6 @@ interface TideAlertsProps {
 
 const TideAlerts = ({ upcomingAlerts }: TideAlertsProps) => {
   const [alertsEnabled, setAlertsEnabled] = React.useState(() => {
-    // Initialize from localStorage
     return localStorage.getItem('tideAlertsEnabled') === 'true';
   });
   const { toast } = useToast();
@@ -55,7 +54,10 @@ const TideAlerts = ({ upcomingAlerts }: TideAlertsProps) => {
         }
       }
 
-      Notification.requestPermission();
+      // Request notification permissions when enabling alerts
+      if ('Notification' in window) {
+        Notification.requestPermission();
+      }
     }
   };
 
