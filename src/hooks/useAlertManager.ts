@@ -1,5 +1,5 @@
 import { useQueryClient, useQuery, useMutation } from "@tanstack/react-query";
-import { parseISO, isAfter, isBefore } from "date-fns";
+import { parseISO, isAfter, isBefore, startOfDay, endOfDay } from "date-fns";
 import { useToast } from "@/hooks/use-toast";
 
 const ALERTS_ENABLED_KEY = 'tideAlertsEnabled';
@@ -21,23 +21,44 @@ export const useAlertManager = (upcomingAlerts: Array<{
     staleTime: Infinity,
   });
 
-  // Use React Query to manage last alert time
-  const { data: lastAlertTime = 0 } = useQuery({
-    queryKey: ['lastAlertTime'],
-    queryFn: () => Number(localStorage.getItem(LAST_ALERT_TIME_KEY)) || 0,
-    staleTime: Infinity,
-  });
+  const checkAndShowAlert = (isInitial = false) => {
+    console.log('Checking alerts - Enabled:', alertsEnabled);
+    console.log('Upcoming alerts:', upcomingAlerts);
+    
+    if (!alertsEnabled) return;
+
+    const now = new Date();
+    const today = startOfDay(now);
+    const todayEnd = endOfDay(now);
+    
+    // Filter alerts for today only
+    const todayAlerts = upcomingAlerts.filter(alert => {
+      const alertDate = parseISO(`${alert.date} ${alert.time}`);
+      return isAfter(alertDate, today) && isBefore(alertDate, todayEnd);
+    });
+
+    console.log('Today\'s alerts:', todayAlerts);
+
+    if (todayAlerts.length > 0) {
+      todayAlerts.forEach(alert => {
+        toast({
+          title: "Upcoming Low Tide Alert",
+          description: `Low tide on ${alert.date} at ${alert.time} coincides with ${alert.type}`,
+          duration: 5000,
+        });
+      });
+
+      // Update last alert time
+      localStorage.setItem(LAST_ALERT_TIME_KEY, now.getTime().toString());
+      queryClient.setQueryData(['lastAlertTime'], now.getTime());
+    }
+  };
 
   // Mutation to toggle alerts
   const toggleAlertsMutation = useMutation({
     mutationFn: (newState: boolean) => {
+      console.log('Toggling alerts to:', newState);
       localStorage.setItem(ALERTS_ENABLED_KEY, String(newState));
-      if (!newState) {
-        // Clear shown alerts when disabling
-        localStorage.removeItem(SHOWN_ALERTS_KEY);
-        localStorage.removeItem(LAST_ALERT_TIME_KEY);
-        queryClient.setQueryData(['lastAlertTime'], 0);
-      }
       return Promise.resolve(newState);
     },
     onSuccess: (newState) => {
@@ -49,54 +70,8 @@ export const useAlertManager = (upcomingAlerts: Array<{
     },
   });
 
-  const checkAndShowAlert = (isInitial = false) => {
-    if (!alertsEnabled) return;
-
-    const now = new Date().getTime();
-    const lastShown = Number(localStorage.getItem(LAST_ALERT_TIME_KEY)) || 0;
-    const shownAlerts = new Set(JSON.parse(localStorage.getItem(SHOWN_ALERTS_KEY) || '[]'));
-    
-    // Skip the 24-hour check if this is the initial enable
-    if (!isInitial && now - lastShown < 24 * 60 * 60 * 1000) {
-      return;
-    }
-
-    const today = new Date();
-    const todayAlerts = upcomingAlerts
-      .filter(alert => {
-        const alertDate = parseISO(`${alert.date}`);
-        const alertKey = `${alert.date}-${alert.time}`;
-        return isAfter(alertDate, today) && 
-               isBefore(alertDate, new Date(today.getFullYear(), today.getMonth(), today.getDate() + 1)) &&
-               !shownAlerts.has(alertKey);
-      })
-      .sort((a, b) => {
-        const dateA = parseISO(`${a.date} ${a.time}`);
-        const dateB = parseISO(`${b.date} ${b.time}`);
-        return dateA.getTime() - dateB.getTime();
-      });
-
-    if (todayAlerts.length > 0) {
-      const nextAlert = todayAlerts[0];
-      const alertKey = `${nextAlert.date}-${nextAlert.time}`;
-      
-      // Update shown alerts
-      shownAlerts.add(alertKey);
-      localStorage.setItem(SHOWN_ALERTS_KEY, JSON.stringify(Array.from(shownAlerts)));
-      
-      // Update last alert time
-      localStorage.setItem(LAST_ALERT_TIME_KEY, String(now));
-      queryClient.setQueryData(['lastAlertTime'], now);
-      
-      toast({
-        title: "Upcoming Low Tide Near Sunrise/Sunset",
-        description: `Next low tide on ${nextAlert.date} at ${nextAlert.time} coincides with ${nextAlert.type}`,
-        duration: 5000,
-      });
-    }
-  };
-
   const toggleAlerts = () => {
+    console.log('Toggle alerts called');
     toggleAlertsMutation.mutate(!alertsEnabled);
   };
 

@@ -14,6 +14,9 @@ interface TideAlertsProps {
 
 const TideAlerts = ({ upcomingAlerts }: TideAlertsProps) => {
   const { alertsEnabled, toggleAlerts } = useAlertManager(upcomingAlerts);
+  
+  console.log('TideAlerts - Alerts Enabled:', alertsEnabled);
+  console.log('TideAlerts - Upcoming Alerts:', upcomingAlerts);
 
   return (
     <Card className="p-4 flex items-center justify-between">
@@ -21,7 +24,10 @@ const TideAlerts = ({ upcomingAlerts }: TideAlertsProps) => {
         <Bell className="text-tide-blue" />
         <span>Low Tide + Sunrise/Sunset Alerts</span>
       </div>
-      <Switch checked={alertsEnabled} onCheckedChange={toggleAlerts} />
+      <Switch 
+        checked={alertsEnabled} 
+        onCheckedChange={toggleAlerts}
+      />
     </Card>
   );
 };
