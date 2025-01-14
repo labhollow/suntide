@@ -12,6 +12,7 @@ import { ArrowUp, ArrowDown } from "lucide-react";
 import { metersToFeet } from "@/utils/tideUtils";
 import { isWithinThreeHours } from "@/utils/dateUtils";
 import { useToast } from "@/hooks/use-toast";
+import { useQuery } from "@tanstack/react-query";
 
 interface TideData {
   t: string;
@@ -29,6 +30,13 @@ interface TideTableProps {
 const TideTable = ({ data, period }: TideTableProps) => {
   console.log('Data received by TideTable:', data);
   const { toast } = useToast();
+  
+  // Check if alerts are enabled using React Query
+  const { data: alertsEnabled = false } = useQuery({
+    queryKey: ['alertsEnabled'],
+    queryFn: () => localStorage.getItem('tideAlertsEnabled') === 'true',
+    staleTime: Infinity,
+  });
   
   const formattedData = React.useMemo(() => {
     return data
@@ -63,25 +71,28 @@ const TideTable = ({ data, period }: TideTableProps) => {
   const shownToasts = React.useRef(new Set());
 
   React.useEffect(() => {
-    formattedData.forEach(tide => {
-      if (tide.isNearSunriseOrSunset) {
-        const toastKey = `${format(tide.date, "yyyy-MM-dd HH:mm")}`;
-        
-        if (!shownToasts.current.has(toastKey)) {
-          const timeOfDay = isWithinThreeHours(format(tide.date, "hh:mm a"), tide.sunrise || "") 
-            ? "sunrise" 
-            : "sunset";
+    // Only show toasts if alerts are enabled
+    if (alertsEnabled) {
+      formattedData.forEach(tide => {
+        if (tide.isNearSunriseOrSunset) {
+          const toastKey = `${format(tide.date, "yyyy-MM-dd HH:mm")}`;
           
-          toast({
-            title: "Low Tide Alert",
-            description: `Low tide on ${format(tide.date, "MMM dd, yyyy")} at ${format(tide.date, "hh:mm a")} is within 3 hours of ${timeOfDay}`,
-          });
-          
-          shownToasts.current.add(toastKey);
+          if (!shownToasts.current.has(toastKey)) {
+            const timeOfDay = isWithinThreeHours(format(tide.date, "hh:mm a"), tide.sunrise || "") 
+              ? "sunrise" 
+              : "sunset";
+            
+            toast({
+              title: "Low Tide Alert",
+              description: `Low tide on ${format(tide.date, "MMM dd, yyyy")} at ${format(tide.date, "hh:mm a")} is within 3 hours of ${timeOfDay}`,
+            });
+            
+            shownToasts.current.add(toastKey);
+          }
         }
-      }
-    });
-  }, [formattedData, toast]);
+      });
+    }
+  }, [formattedData, toast, alertsEnabled]);
 
   if (!data || data.length === 0) {
     return (
