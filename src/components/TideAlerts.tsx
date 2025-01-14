@@ -21,9 +21,18 @@ interface TideAlertsProps {
 }
 
 const TideAlerts = ({ upcomingAlerts }: TideAlertsProps) => {
-  const [alertsEnabled, setAlertsEnabled] = useState(false);
+  const [alertsEnabled, setAlertsEnabled] = useState(() => {
+    // Initialize from localStorage, default to false if not set
+    const saved = localStorage.getItem("alertsEnabled");
+    return saved ? JSON.parse(saved) : false;
+  });
   const [duration, setDuration] = useState("2"); // Default 2 hours
   const { toast, dismiss } = useToast();
+
+  // Save alerts state to localStorage whenever it changes
+  useEffect(() => {
+    localStorage.setItem("alertsEnabled", JSON.stringify(alertsEnabled));
+  }, [alertsEnabled]);
 
   useEffect(() => {
     if (alertsEnabled && upcomingAlerts.length > 0) {
@@ -34,13 +43,18 @@ const TideAlerts = ({ upcomingAlerts }: TideAlertsProps) => {
       const closestAlert = upcomingAlerts[0];
       
       // Show only the closest alert
-      toast({
+      const { id } = toast({
         title: "Upcoming Low Tide Alert",
         description: `Low tide on ${closestAlert.date} at ${closestAlert.time} coincides with ${closestAlert.type}`,
         duration: 5000,
       });
+
+      // Automatically dismiss the toast after duration
+      setTimeout(() => {
+        dismiss();
+      }, 5000);
     }
-  }, [alertsEnabled]); // Only trigger when alerts are enabled/disabled
+  }, [alertsEnabled, upcomingAlerts]); // Add upcomingAlerts to dependencies
 
   return (
     <Card className="p-4 space-y-4">
