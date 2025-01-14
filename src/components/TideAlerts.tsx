@@ -3,7 +3,7 @@ import { Bell } from "lucide-react";
 import { Switch } from "@/components/ui/switch";
 import { Card } from "@/components/ui/card";
 import { useToast } from "@/hooks/use-toast";
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect } from "react";
 import {
   Select,
   SelectContent,
@@ -22,45 +22,32 @@ interface TideAlertsProps {
 
 const TideAlerts = ({ upcomingAlerts }: TideAlertsProps) => {
   const [alertsEnabled, setAlertsEnabled] = useState(() => {
-    // Initialize from localStorage, default to false if not set
     const saved = localStorage.getItem("alertsEnabled");
     return saved ? JSON.parse(saved) : false;
   });
-  const [duration, setDuration] = useState("2"); // Default 2 hours
+  
+  const [duration, setDuration] = useState("2");
   const { toast, dismiss } = useToast();
-  const initialLoadRef = useRef(true);
 
   // Save alerts state to localStorage whenever it changes
   useEffect(() => {
     localStorage.setItem("alertsEnabled", JSON.stringify(alertsEnabled));
   }, [alertsEnabled]);
 
-  // Show alert on initial load (if enabled) and when alerts are toggled
+  // Show alerts on mount if enabled and when toggled
   useEffect(() => {
-    // Only proceed if there are upcoming alerts
-    if (upcomingAlerts.length === 0) return;
-
-    // Show alert if alerts are enabled AND either:
-    // 1. It's the initial page load (initialLoadRef.current is true)
-    // 2. The alerts were just toggled on (initialLoadRef.current is false)
-    if (alertsEnabled) {
-      // Clear any existing toasts
-      dismiss();
-      
-      // Get the closest upcoming alert
+    // Only show alerts if they're enabled and we have upcoming alerts
+    if (alertsEnabled && upcomingAlerts.length > 0) {
       const closestAlert = upcomingAlerts[0];
       
-      // Show the closest alert
+      // Clear any existing toasts before showing new one
+      dismiss();
+      
       toast({
         title: "Upcoming Low Tide Alert",
         description: `Low tide on ${closestAlert.date} at ${closestAlert.time} coincides with ${closestAlert.type}`,
         duration: 5000,
       });
-    }
-
-    // After initial load, set the ref to false
-    if (initialLoadRef.current) {
-      initialLoadRef.current = false;
     }
   }, [alertsEnabled]); // Only depend on alertsEnabled to prevent loops
 
