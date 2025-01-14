@@ -18,14 +18,11 @@ const TideAlerts = ({ upcomingAlerts }: TideAlertsProps) => {
     return localStorage.getItem('tideAlertsEnabled') === 'true';
   });
   const { toast } = useToast();
+  const hasShownInitialAlert = React.useRef(false);
 
-  const toggleAlerts = () => {
-    const newState = !alertsEnabled;
-    setAlertsEnabled(newState);
-    localStorage.setItem('tideAlertsEnabled', String(newState));
-    
-    // Only show alerts when explicitly enabling
-    if (newState) {
+  React.useEffect(() => {
+    // Only show alerts when alerts are enabled and we haven't shown the initial alert
+    if (alertsEnabled && !hasShownInitialAlert.current) {
       const lastAlertTime = localStorage.getItem('lastAlertTime');
       const now = new Date().getTime();
       
@@ -51,13 +48,21 @@ const TideAlerts = ({ upcomingAlerts }: TideAlertsProps) => {
             title: "Upcoming Low Tide Near Sunrise/Sunset",
             description: `Next low tide on ${nextAlert.date} at ${nextAlert.time} coincides with ${nextAlert.type}`,
           });
+          
+          hasShownInitialAlert.current = true;
         }
       }
+    }
+  }, [alertsEnabled, toast, upcomingAlerts]);
 
-      // Request notification permissions when enabling alerts
-      if ('Notification' in window) {
-        Notification.requestPermission();
-      }
+  const toggleAlerts = () => {
+    const newState = !alertsEnabled;
+    setAlertsEnabled(newState);
+    localStorage.setItem('tideAlertsEnabled', String(newState));
+    
+    // Request notification permissions when enabling alerts
+    if (newState && 'Notification' in window) {
+      Notification.requestPermission();
     }
   };
 
