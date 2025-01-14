@@ -14,19 +14,26 @@ interface TideAlertsProps {
 }
 
 const TideAlerts = ({ upcomingAlerts }: TideAlertsProps) => {
-  const [alertsEnabled, setAlertsEnabled] = React.useState(false);
+  const [alertsEnabled, setAlertsEnabled] = React.useState(() => {
+    // Initialize from localStorage
+    return localStorage.getItem('tideAlertsEnabled') === 'true';
+  });
   const { toast } = useToast();
 
   const toggleAlerts = () => {
     const newState = !alertsEnabled;
     setAlertsEnabled(newState);
+    localStorage.setItem('tideAlertsEnabled', String(newState));
     
+    // Only show alerts when explicitly enabling
     if (newState) {
-      const hasShownAlert = localStorage.getItem('tideAlertShown_v2') === 'true';
+      const lastAlertTime = localStorage.getItem('lastAlertTime');
+      const now = new Date().getTime();
       
-      if (!hasShownAlert && upcomingAlerts.length > 0) {
+      // Only show alert if we haven't shown one in the last hour
+      if (!lastAlertTime || (now - Number(lastAlertTime)) > 3600000) {
         const today = new Date();
-        const closestAlert = upcomingAlerts
+        const futureAlerts = upcomingAlerts
           .map(alert => ({
             ...alert,
             fullDate: parseISO(`${alert.date} ${alert.time}`)
@@ -34,14 +41,16 @@ const TideAlerts = ({ upcomingAlerts }: TideAlertsProps) => {
           .filter(alert => isAfter(alert.fullDate, today))
           .sort((a, b) => 
             isBefore(a.fullDate, b.fullDate) ? -1 : 1
-          )[0];
+          );
 
-        if (closestAlert) {
-          localStorage.setItem('tideAlertShown_v2', 'true');
+        // Only show the next upcoming alert
+        const nextAlert = futureAlerts[0];
+        if (nextAlert) {
+          localStorage.setItem('lastAlertTime', String(now));
           
           toast({
             title: "Upcoming Low Tide Near Sunrise/Sunset",
-            description: `Low tide on ${closestAlert.date} at ${closestAlert.time} coincides with ${closestAlert.type}`,
+            description: `Next low tide on ${nextAlert.date} at ${nextAlert.time} coincides with ${nextAlert.type}`,
           });
         }
       }
