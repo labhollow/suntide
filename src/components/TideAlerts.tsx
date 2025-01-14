@@ -18,34 +18,29 @@ const TideAlerts = ({ upcomingAlerts }: TideAlertsProps) => {
   const { toast } = useToast();
 
   useEffect(() => {
-    // Only run this effect when alerts are first enabled
-    if (alertsEnabled) {
-      const alertShown = sessionStorage.getItem('tideAlertShown');
-      
-      if (!alertShown && upcomingAlerts.length > 0) {
-        const today = new Date();
-        const closestAlert = upcomingAlerts
-          .map(alert => ({
-            ...alert,
-            fullDate: parseISO(`${alert.date} ${alert.time}`)
-          }))
-          .filter(alert => isAfter(alert.fullDate, today))
-          .sort((a, b) => 
-            isBefore(a.fullDate, b.fullDate) ? -1 : 1
-          )[0];
+    // Only show alert when alerts are first enabled and haven't been shown this session
+    if (alertsEnabled && !sessionStorage.getItem('tideAlertShown') && upcomingAlerts.length > 0) {
+      const today = new Date();
+      const closestAlert = upcomingAlerts
+        .map(alert => ({
+          ...alert,
+          fullDate: parseISO(`${alert.date} ${alert.time}`)
+        }))
+        .filter(alert => isAfter(alert.fullDate, today))
+        .sort((a, b) => 
+          isBefore(a.fullDate, b.fullDate) ? -1 : 1
+        )[0];
 
-        if (closestAlert) {
-          // Set the flag before showing the toast to prevent race conditions
-          sessionStorage.setItem('tideAlertShown', 'true');
-          
-          toast({
-            title: "Upcoming Low Tide Near Sunrise/Sunset",
-            description: `Low tide on ${closestAlert.date} at ${closestAlert.time} coincides with ${closestAlert.type}`,
-          });
-        }
+      if (closestAlert) {
+        sessionStorage.setItem('tideAlertShown', 'true');
+        
+        toast({
+          title: "Upcoming Low Tide Near Sunrise/Sunset",
+          description: `Low tide on ${closestAlert.date} at ${closestAlert.time} coincides with ${closestAlert.type}`,
+        });
       }
     }
-  }, [alertsEnabled]); // Only depend on alertsEnabled
+  }, [alertsEnabled, upcomingAlerts]); // Include upcomingAlerts in dependencies to prevent stale data
 
   const toggleAlerts = () => {
     setAlertsEnabled(!alertsEnabled);
