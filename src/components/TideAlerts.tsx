@@ -13,43 +13,51 @@ interface TideAlertsProps {
   }>;
 }
 
+const ALERT_SHOWN_KEY = 'tideAlertShown';
+const ALERTS_ENABLED_KEY = 'tideAlertsEnabled';
+const LAST_ALERT_TIME_KEY = 'lastAlertTime';
+
 const TideAlerts = ({ upcomingAlerts }: TideAlertsProps) => {
   const [alertsEnabled, setAlertsEnabled] = React.useState(() => {
-    return localStorage.getItem('tideAlertsEnabled') === 'true';
+    return localStorage.getItem(ALERTS_ENABLED_KEY) === 'true';
   });
   const { toast } = useToast();
-  const hasShownInitialAlert = React.useRef(false);
+  const mounted = React.useRef(false);
 
   React.useEffect(() => {
-    // Only show alerts when alerts are enabled and we haven't shown the initial alert
-    if (alertsEnabled && !hasShownInitialAlert.current) {
-      const lastAlertTime = localStorage.getItem('lastAlertTime');
-      const now = new Date().getTime();
-      
-      // Only show alert if we haven't shown one in the last hour
-      if (!lastAlertTime || (now - Number(lastAlertTime)) > 3600000) {
-        const today = new Date();
-        const futureAlerts = upcomingAlerts
-          .map(alert => ({
-            ...alert,
-            fullDate: parseISO(`${alert.date} ${alert.time}`)
-          }))
-          .filter(alert => isAfter(alert.fullDate, today))
-          .sort((a, b) => 
-            isBefore(a.fullDate, b.fullDate) ? -1 : 1
-          );
+    // Only run this effect once when the component mounts
+    if (!mounted.current) {
+      mounted.current = true;
 
-        // Only show the next upcoming alert
-        const nextAlert = futureAlerts[0];
-        if (nextAlert) {
-          localStorage.setItem('lastAlertTime', String(now));
-          
-          toast({
-            title: "Upcoming Low Tide Near Sunrise/Sunset",
-            description: `Next low tide on ${nextAlert.date} at ${nextAlert.time} coincides with ${nextAlert.type}`,
-          });
-          
-          hasShownInitialAlert.current = true;
+      if (alertsEnabled) {
+        const lastAlertTime = localStorage.getItem(LAST_ALERT_TIME_KEY);
+        const alertShown = sessionStorage.getItem(ALERT_SHOWN_KEY);
+        const now = new Date().getTime();
+
+        // Only show alert if we haven't shown one in the last hour and not in this session
+        if (!alertShown && (!lastAlertTime || (now - Number(lastAlertTime)) > 3600000)) {
+          const today = new Date();
+          const futureAlerts = upcomingAlerts
+            .map(alert => ({
+              ...alert,
+              fullDate: parseISO(`${alert.date} ${alert.time}`)
+            }))
+            .filter(alert => isAfter(alert.fullDate, today))
+            .sort((a, b) => 
+              isBefore(a.fullDate, b.fullDate) ? -1 : 1
+            );
+
+          // Only show the next upcoming alert
+          const nextAlert = futureAlerts[0];
+          if (nextAlert) {
+            localStorage.setItem(LAST_ALERT_TIME_KEY, String(now));
+            sessionStorage.setItem(ALERT_SHOWN_KEY, 'true');
+            
+            toast({
+              title: "Upcoming Low Tide Near Sunrise/Sunset",
+              description: `Next low tide on ${nextAlert.date} at ${nextAlert.time} coincides with ${nextAlert.type}`,
+            });
+          }
         }
       }
     }
@@ -58,11 +66,15 @@ const TideAlerts = ({ upcomingAlerts }: TideAlertsProps) => {
   const toggleAlerts = () => {
     const newState = !alertsEnabled;
     setAlertsEnabled(newState);
-    localStorage.setItem('tideAlertsEnabled', String(newState));
+    localStorage.setItem(ALERTS_ENABLED_KEY, String(newState));
     
-    // Request notification permissions when enabling alerts
-    if (newState && 'Notification' in window) {
-      Notification.requestPermission();
+    if (newState) {
+      // Clear session storage when enabling alerts
+      sessionStorage.removeItem(ALERT_SHOWN_KEY);
+      // Request notification permissions
+      if ('Notification' in window) {
+        Notification.requestPermission();
+      }
     }
   };
 
