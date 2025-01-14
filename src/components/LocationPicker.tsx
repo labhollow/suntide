@@ -126,16 +126,6 @@ const LocationPicker: React.FC<LocationPickerProps> = ({ id, name, onLocationUpd
       <Button onClick={handleSaveLocation} variant="default" className="bg-blue-500 hover:bg-blue-600">
         Save Location
       </Button>
-      <Select defaultValue="2">
-        <SelectTrigger className="w-[180px] bg-white/10 border-white/10 text-white">
-          <SelectValue placeholder="Select duration" />
-        </SelectTrigger>
-        <SelectContent className="bg-slate-800 border-white/10">
-          <SelectItem value="1" className="text-white hover:bg-white/10">1 hour before/after</SelectItem>
-          <SelectItem value="2" className="text-white hover:bg-white/10">2 hours before/after</SelectItem>
-          <SelectItem value="3" className="text-white hover:bg-white/10">3 hours before/after</SelectItem>
-        </SelectContent>
-      </Select>
     </Card>
   );
 };
