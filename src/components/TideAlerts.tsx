@@ -3,6 +3,7 @@ import { Bell } from "lucide-react";
 import { Switch } from "@/components/ui/switch";
 import { Card } from "@/components/ui/card";
 import { useToast } from "@/hooks/use-toast";
+import { parseISO, isAfter, isBefore } from "date-fns";
 
 interface TideAlertsProps {
   upcomingAlerts: Array<{
@@ -18,12 +19,31 @@ const TideAlerts = ({ upcomingAlerts }: TideAlertsProps) => {
 
   useEffect(() => {
     if (alertsEnabled && upcomingAlerts.length > 0) {
-      upcomingAlerts.forEach(alert => {
-        toast({
-          title: "Upcoming Low Tide Near Sunrise/Sunset",
-          description: `Low tide on ${alert.date} at ${alert.time} coincides with ${alert.type}`,
-        });
-      });
+      // Check if we've already shown an alert this session
+      const alertShown = sessionStorage.getItem('tideAlertShown');
+      if (!alertShown) {
+        // Find the closest upcoming alert to today
+        const today = new Date();
+        const closestAlert = upcomingAlerts
+          .map(alert => ({
+            ...alert,
+            fullDate: parseISO(`${alert.date} ${alert.time}`)
+          }))
+          .filter(alert => isAfter(alert.fullDate, today))
+          .sort((a, b) => 
+            isBefore(a.fullDate, b.fullDate) ? -1 : 1
+          )[0];
+
+        if (closestAlert) {
+          toast({
+            title: "Upcoming Low Tide Near Sunrise/Sunset",
+            description: `Low tide on ${closestAlert.date} at ${closestAlert.time} coincides with ${closestAlert.type}`,
+          });
+          
+          // Mark that we've shown an alert this session
+          sessionStorage.setItem('tideAlertShown', 'true');
+        }
+      }
     }
   }, [alertsEnabled, upcomingAlerts, toast]);
 
