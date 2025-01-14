@@ -11,7 +11,7 @@ import { format, parseISO } from "date-fns";
 import { ArrowUp, ArrowDown } from "lucide-react";
 import { metersToFeet } from "@/utils/tideUtils";
 import { isWithinHours } from "@/utils/dateUtils";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 
 interface TideData {
   t: string;
@@ -28,6 +28,7 @@ interface TideTableProps {
 
 const TideTable = ({ data, period }: TideTableProps) => {
   console.log('Data received by TideTable:', data);
+  const queryClient = useQueryClient();
   
   // Check if alerts are enabled
   const { data: alertsEnabled = false } = useQuery({
@@ -47,6 +48,14 @@ const TideTable = ({ data, period }: TideTableProps) => {
       console.log('Alert duration:', duration);
       return duration;
     },
+    meta: {
+      onSuccess: (newDuration) => {
+        // Force a refetch of formattedTideData when duration changes
+        queryClient.invalidateQueries({ 
+          queryKey: ['formattedTideData']
+        });
+      }
+    }
   });
   
   // Format and process tide data
@@ -66,16 +75,18 @@ const TideTable = ({ data, period }: TideTableProps) => {
             }
 
             const formattedTime = format(date, "hh:mm a");
+            const nearSunrise = tide.sunrise && isWithinHours(formattedTime, tide.sunrise, duration);
+            const nearSunset = tide.sunset && isWithinHours(formattedTime, tide.sunset, duration);
+            
             return {
               date,
               height: parseFloat(tide.v),
               type: tide.type === "H" ? "high" : "low",
               sunrise: tide.sunrise,
               sunset: tide.sunset,
-              isNearSunriseOrSunset: tide.type === "L" && (
-                (tide.sunrise && isWithinHours(formattedTime, tide.sunrise, duration)) ||
-                (tide.sunset && isWithinHours(formattedTime, tide.sunset, duration))
-              )
+              isNearSunriseOrSunset: tide.type === "L" && (nearSunrise || nearSunset),
+              isNearSunrise: nearSunrise,
+              isNearSunset: nearSunset
             };
           } catch (error) {
             console.error('Error processing tide data:', error);
@@ -114,13 +125,14 @@ const TideTable = ({ data, period }: TideTableProps) => {
               key={index}
               className={`
                 ${tide.isNearSunriseOrSunset ? "bg-slate-800" : ""}
+                transition-colors duration-200
               `}
             >
               <TableCell className={tide.isNearSunriseOrSunset ? "text-white font-semibold flex items-center gap-2" : "text-gray-300"}>
                 {format(tide.date, "MMM dd, yyyy")}
                 {tide.isNearSunriseOrSunset && (
                   <div className="flex flex-col items-center">
-                    {isWithinHours(format(tide.date, "hh:mm a"), tide.sunrise || "", parseInt(alertDuration)) ? (
+                    {tide.isNearSunrise ? (
                       <>
                         <span className="text-xs text-white font-light">rise</span>
                         <ArrowUp className="w-4 h-4" />
