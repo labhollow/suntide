@@ -62,7 +62,7 @@ const TideAlerts = ({ upcomingAlerts }: TideAlertsProps) => {
     if (initialLoadRef.current) {
       initialLoadRef.current = false;
     }
-  }, [alertsEnabled, upcomingAlerts, toast, dismiss]); // Include necessary dependencies
+  }, [alertsEnabled]); // Only depend on alertsEnabled to prevent loops
 
   return (
     <Card className="p-4 space-y-4">
