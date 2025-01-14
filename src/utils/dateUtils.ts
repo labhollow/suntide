@@ -1,8 +1,7 @@
 import { parse, format } from "date-fns";
 
-export const isWithinThreeHours = (time1: string, time2: string): boolean => {
+export const isWithinHours = (time1: string, time2: string, hours: number): boolean => {
   const parseTime = (timeStr: string) => {
-    // Convert time string to minutes since midnight
     const [time, period] = timeStr.split(' ');
     const [hours, minutes] = time.split(':').map(Number);
     let totalMinutes = hours * 60 + minutes;
@@ -25,7 +24,7 @@ export const isWithinThreeHours = (time1: string, time2: string): boolean => {
   const diff2 = 1440 - diff1; // 1440 = minutes in a day
   const minDiff = Math.min(diff1, diff2);
   
-  return minDiff <= 180; // 3 hours = 180 minutes
+  return minDiff <= (hours * 60); // Convert hours to minutes
 };
 
 export const formatTime = (date: Date): string => {
