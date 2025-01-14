@@ -69,11 +69,10 @@ const TideAlerts = ({ upcomingAlerts }: TideAlertsProps) => {
     setDuration(value);
     localStorage.setItem("alertDuration", value);
     
-    // Force refetch of all related queries
+    // Force immediate refetch of all related queries
     queryClient.refetchQueries({
-      queryKey: ['tideData'],
-      exact: false,
-      type: 'active'
+      queryKey: ['formattedTideData'],
+      type: 'all'
     });
     
     if (alertsEnabled && upcomingAlerts?.length > 0) {

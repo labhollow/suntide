@@ -34,7 +34,7 @@ const TideTable = ({ data, period }: TideTableProps) => {
     queryKey: ['alertDuration'],
     queryFn: () => localStorage.getItem('alertDuration') || "2",
     staleTime: 0,
-    cacheTime: 0
+    gcTime: 0
   });
 
   // Format and process tide data
@@ -76,7 +76,7 @@ const TideTable = ({ data, period }: TideTableProps) => {
     },
     enabled: !!data && !!alertDuration,
     staleTime: 0,
-    cacheTime: 0
+    gcTime: 0
   });
 
   if (!data || data.length === 0) {
