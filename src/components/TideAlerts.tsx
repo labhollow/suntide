@@ -35,15 +35,15 @@ const TideAlerts = ({ upcomingAlerts }: TideAlertsProps) => {
     localStorage.setItem("alertsEnabled", JSON.stringify(alertsEnabled));
   }, [alertsEnabled]);
 
-  // Show alert on initial load and when alerts are toggled
+  // Show alert on initial load (if enabled) and when alerts are toggled
   useEffect(() => {
-    // Only show alerts if there are upcoming alerts
+    // Only proceed if there are upcoming alerts
     if (upcomingAlerts.length === 0) return;
 
-    // Show alert if it's enabled and either:
-    // 1. It's the initial load and alerts are enabled
-    // 2. The alerts were just toggled on
-    if (alertsEnabled && (initialLoadRef.current || !initialLoadRef.current)) {
+    // Show alert if alerts are enabled AND either:
+    // 1. It's the initial page load (initialLoadRef.current is true)
+    // 2. The alerts were just toggled on (initialLoadRef.current is false)
+    if (alertsEnabled) {
       // Clear any existing toasts
       dismiss();
       
@@ -62,7 +62,7 @@ const TideAlerts = ({ upcomingAlerts }: TideAlertsProps) => {
     if (initialLoadRef.current) {
       initialLoadRef.current = false;
     }
-  }, [alertsEnabled]); // Only depend on alertsEnabled to prevent loops
+  }, [alertsEnabled, upcomingAlerts, toast, dismiss]); // Include necessary dependencies
 
   return (
     <Card className="p-4 space-y-4">
