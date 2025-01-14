@@ -34,6 +34,7 @@ const TideAlerts = ({ upcomingAlerts }: TideAlertsProps) => {
     localStorage.setItem("alertsEnabled", JSON.stringify(alertsEnabled));
   }, [alertsEnabled]);
 
+  // Show alert on initial load and when alerts are toggled
   useEffect(() => {
     if (alertsEnabled && upcomingAlerts.length > 0) {
       // Clear any existing toasts
@@ -43,18 +44,13 @@ const TideAlerts = ({ upcomingAlerts }: TideAlertsProps) => {
       const closestAlert = upcomingAlerts[0];
       
       // Show only the closest alert
-      const { id } = toast({
+      toast({
         title: "Upcoming Low Tide Alert",
         description: `Low tide on ${closestAlert.date} at ${closestAlert.time} coincides with ${closestAlert.type}`,
         duration: 5000,
       });
-
-      // Automatically dismiss the toast after duration
-      setTimeout(() => {
-        dismiss();
-      }, 5000);
     }
-  }, [alertsEnabled]); // Only trigger when alerts are enabled/disabled
+  }, [alertsEnabled, dismiss, toast, upcomingAlerts]); // Include all dependencies
 
   return (
     <Card className="p-4 space-y-4">
