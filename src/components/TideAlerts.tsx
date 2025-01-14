@@ -42,7 +42,6 @@ const TideAlerts = ({ upcomingAlerts }: TideAlertsProps) => {
         title: "Upcoming Low Tide Alert",
         description: `Low tide on ${closestAlert.date} at ${closestAlert.time} coincides with ${closestAlert.type}`,
         duration: 5000,
-        className: "group-hover:opacity-100",
       });
     }
   };
@@ -69,10 +68,7 @@ const TideAlerts = ({ upcomingAlerts }: TideAlertsProps) => {
     setDuration(value);
     localStorage.setItem("alertDuration", value);
     
-    // First invalidate the queries to ensure fresh data
     await queryClient.invalidateQueries({ queryKey: ['alertDuration'] });
-    
-    // Then force an immediate refetch of the formatted data
     await queryClient.refetchQueries({
       queryKey: ['formattedTideData'],
       type: 'all',
