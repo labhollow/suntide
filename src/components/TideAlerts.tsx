@@ -33,16 +33,16 @@ const TideAlerts = ({ upcomingAlerts }: TideAlertsProps) => {
   });
 
   const queryClient = useQueryClient();
-  const { toast, dismiss } = useToast();
+  const { toast } = useToast();
 
   const showClosestAlert = () => {
     if (upcomingAlerts && upcomingAlerts.length > 0) {
       const closestAlert = upcomingAlerts[0];
-      dismiss();
       toast({
         title: "Upcoming Low Tide Alert",
         description: `Low tide on ${closestAlert.date} at ${closestAlert.time} coincides with ${closestAlert.type}`,
         duration: 5000,
+        className: "group-hover:opacity-100",
       });
     }
   };
