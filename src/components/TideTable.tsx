@@ -71,47 +71,44 @@ const TideTable = ({ data, period }: TideTableProps) => {
   // Store processed data keys to prevent duplicate alerts
   const shownToasts = React.useRef(new Set());
   
-  // Store the last processed data string to detect actual data changes
-  const lastProcessedData = React.useRef("");
-  
   // Store the last alert time
-  const lastAlertTime = React.useRef(0);
+  const lastAlertTime = React.useRef(Date.now());
 
   React.useEffect(() => {
-    if (!alertsEnabled) return;
+    if (!alertsEnabled) {
+      return;
+    }
 
-    // Create a string representation of the current data
-    const currentDataString = JSON.stringify(data.map(d => d.t));
-    
-    // Only process if the data has actually changed and it's been at least 5 seconds since the last alert
     const now = Date.now();
-    if (currentDataString === lastProcessedData.current || 
-        now - lastAlertTime.current < 5000) return;
-    
-    lastProcessedData.current = currentDataString;
+    // Only check for new alerts every 5 seconds
+    if (now - lastAlertTime.current < 5000) {
+      return;
+    }
 
     formattedData.forEach(tide => {
-      if (tide.isNearSunriseOrSunset) {
-        const toastKey = `${format(tide.date, "yyyy-MM-dd HH:mm")}`;
+      if (!tide.isNearSunriseOrSunset) {
+        return;
+      }
+
+      const toastKey = `${format(tide.date, "yyyy-MM-dd HH:mm")}`;
+      
+      if (!shownToasts.current.has(toastKey)) {
+        const timeOfDay = isWithinThreeHours(format(tide.date, "hh:mm a"), tide.sunrise || "") 
+          ? "sunrise" 
+          : "sunset";
         
-        if (!shownToasts.current.has(toastKey)) {
-          const timeOfDay = isWithinThreeHours(format(tide.date, "hh:mm a"), tide.sunrise || "") 
-            ? "sunrise" 
-            : "sunset";
-          
-          lastAlertTime.current = now;
-          
-          toast({
-            title: "Low Tide Alert",
-            description: `Low tide on ${format(tide.date, "MMM dd, yyyy")} at ${format(tide.date, "hh:mm a")} is within 3 hours of ${timeOfDay}`,
-            duration: 5000, // Toast will disappear after 5 seconds
-          });
-          
-          shownToasts.current.add(toastKey);
-        }
+        lastAlertTime.current = now;
+        
+        toast({
+          title: "Low Tide Alert",
+          description: `Low tide on ${format(tide.date, "MMM dd, yyyy")} at ${format(tide.date, "hh:mm a")} is within 3 hours of ${timeOfDay}`,
+          duration: 5000,
+        });
+        
+        shownToasts.current.add(toastKey);
       }
     });
-  }, [alertsEnabled, data, formattedData, toast]);
+  }, [alertsEnabled, toast, formattedData]);
 
   if (!data || data.length === 0) {
     return (
