@@ -48,11 +48,13 @@ const TideTable = ({ data, period }: TideTableProps) => {
       console.log('Alert duration:', duration);
       return duration;
     },
-    staleTime: 0, // Remove staleTime to ensure updates
-    onSuccess: (newDuration) => {
-      // Invalidate queries that depend on the duration
-      queryClient.invalidateQueries({ queryKey: ['formattedTideData'] });
-    },
+    staleTime: 0,
+    meta: {
+      onSuccess: () => {
+        // Invalidate queries that depend on the duration
+        queryClient.invalidateQueries({ queryKey: ['formattedTideData'] });
+      }
+    }
   });
   
   // Use a separate query for formatted data that depends on alertDuration
