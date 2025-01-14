@@ -98,7 +98,10 @@ const Index = () => {
 
   return (
     <>
-      <div className="fixed inset-0 bg-slate-900" /> {/* Dark background that extends beyond viewport */}
+      {/* This div covers the entire viewport with the darkest shade */}
+      <div className="fixed inset-0 bg-slate-900" />
+      
+      {/* Main container with gradient and content */}
       <div className="min-h-screen w-screen overflow-x-hidden bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 relative">
         <div className="w-full min-h-screen">
           <div className="max-w-4xl mx-auto p-4 sm:p-6 space-y-4 sm:space-y-6 relative">
