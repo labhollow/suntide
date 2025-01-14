@@ -44,20 +44,20 @@ export const useAlertManager = (upcomingAlerts: Array<{
       queryClient.setQueryData(['alertsEnabled'], newState);
       if (newState) {
         // Immediately check for alerts when enabled
-        checkAndShowAlert();
+        checkAndShowAlert(true);
       }
     },
   });
 
-  const checkAndShowAlert = () => {
+  const checkAndShowAlert = (isInitial = false) => {
     if (!alertsEnabled) return;
 
     const now = new Date().getTime();
     const lastShown = Number(localStorage.getItem(LAST_ALERT_TIME_KEY)) || 0;
     const shownAlerts = new Set(JSON.parse(localStorage.getItem(SHOWN_ALERTS_KEY) || '[]'));
     
-    // Only proceed if it's been 24 hours since the last alert
-    if (now - lastShown < 24 * 60 * 60 * 1000) {
+    // Skip the 24-hour check if this is the initial enable
+    if (!isInitial && now - lastShown < 24 * 60 * 60 * 1000) {
       return;
     }
 
