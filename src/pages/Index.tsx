@@ -97,67 +97,70 @@ const Index = () => {
   }, [monthlyTideData, location]);
 
   return (
-    <div className="min-h-screen w-screen overflow-x-hidden bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900">
-      <div className="w-full min-h-screen bg-slate-900/50">
-        <div className="max-w-4xl mx-auto p-4 sm:p-6 space-y-4 sm:space-y-6 relative">
-          <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAwIiBoZWlnaHQ9IjIwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZGVmcz48cGF0dGVybiBpZD0ic3RhcnMiIHg9IjAiIHk9IjAiIHdpZHRoPSI1MCIgaGVpZ2h0PSI1MCIgcGF0dGVyblVuaXRzPSJ1c2VyU3BhY2VPblVzZSI+PGNpcmNsZSBjeD0iMSIgY3k9IjEiIHI9IjEiIGZpbGw9InJnYmEoMjU1LCAyNTUsIDI1NSwgMC4yKSIvPjwvcGF0dGVybj48L2RlZnM+PHJlY3Qgd2lkdGg9IjEwMCUiIGhlaWdodD0iMTAwJSIgZmlsbD0idXJsKCNzdGFycykiLz48L3N2Zz4=')] opacity-30 pointer-events-none" />
-          
-          <TideHeader 
-            location={location} 
-            onLocationUpdate={handleLocationChange}
-            upcomingAlerts={getUpcomingAlerts(monthlyTideData)}
-          />
-          
-          <Tabs defaultValue="daily" className="w-full">
-            <TabsList className="grid w-full grid-cols-2 sm:grid-cols-4 bg-white/5 backdrop-blur-sm border border-white/10 rounded-lg">
-              <TabsTrigger 
-                value="daily" 
-                className="data-[state=active]:bg-blue-200/10 data-[state=active]:text-blue-200"
-              >
-                <Sun className="w-4 h-4 mr-2" />
-                Today
-              </TabsTrigger>
-              <TabsTrigger 
-                value="weekly" 
-                className="data-[state=active]:bg-blue-200/10 data-[state=active]:text-blue-200"
-              >
-                <Moon className="w-4 h-4 mr-2" />
-                This Week
-              </TabsTrigger>
-              <TabsTrigger 
-                value="monthly" 
-                className="data-[state=active]:bg-blue-200/10 data-[state=active]:text-blue-200"
-              >
-                <Waves className="w-4 h-4 mr-2" />
-                This Month
-              </TabsTrigger>
-              <TabsTrigger 
-                value="sunrise-sunset" 
-                className="data-[state=active]:bg-blue-200/10 data-[state=active]:text-blue-200"
-              >
-                Calendar
-              </TabsTrigger>
-            </TabsList>
+    <>
+      <div className="fixed inset-0 bg-slate-900" /> {/* Dark background that extends beyond viewport */}
+      <div className="min-h-screen w-screen overflow-x-hidden bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 relative">
+        <div className="w-full min-h-screen">
+          <div className="max-w-4xl mx-auto p-4 sm:p-6 space-y-4 sm:space-y-6 relative">
+            <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAwIiBoZWlnaHQ9IjIwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZGVmcz48cGF0dGVybiBpZD0ic3RhcnMiIHg9IjAiIHk9IjAiIHdpZHRoPSI1MCIgaGVpZ2h0PSI1MCIgcGF0dGVyblVuaXRzPSJ1c2VyU3BhY2VPblVzZSI+PGNpcmNsZSBjeD0iMSIgY3k9IjEiIHI9IjEiIGZpbGw9InJnYmEoMjU1LCAyNTUsIDI1NSwgMC4yKSIvPjwvcGF0dGVybj48L2RlZnM+PHJlY3Qgd2lkdGg9IjEwMCUiIGhlaWdodD0iMTAwJSIgZmlsbD0idXJsKCNzdGFycykiLz48L3N2Zz4=')] opacity-30 pointer-events-none" />
             
-            <TabsContent value="daily">
-              <TideView data={todayTideData} period="daily" />
-            </TabsContent>
+            <TideHeader 
+              location={location} 
+              onLocationUpdate={handleLocationChange}
+              upcomingAlerts={getUpcomingAlerts(monthlyTideData)}
+            />
             
-            <TabsContent value="weekly">
-              <TideView data={weeklyTideData} period="weekly" />
-            </TabsContent>
-            
-            <TabsContent value="monthly">
-              <TideView data={monthlyTideData} period="monthly" />
-            </TabsContent>
-            
-            <TabsContent value="sunrise-sunset">
-              <TideCalendar tideData={monthlyTideData} />
-            </TabsContent>
-          </Tabs>
+            <Tabs defaultValue="daily" className="w-full">
+              <TabsList className="grid w-full grid-cols-2 sm:grid-cols-4 bg-white/5 backdrop-blur-sm border border-white/10 rounded-lg">
+                <TabsTrigger 
+                  value="daily" 
+                  className="data-[state=active]:bg-blue-200/10 data-[state=active]:text-blue-200"
+                >
+                  <Sun className="w-4 h-4 mr-2" />
+                  Today
+                </TabsTrigger>
+                <TabsTrigger 
+                  value="weekly" 
+                  className="data-[state=active]:bg-blue-200/10 data-[state=active]:text-blue-200"
+                >
+                  <Moon className="w-4 h-4 mr-2" />
+                  This Week
+                </TabsTrigger>
+                <TabsTrigger 
+                  value="monthly" 
+                  className="data-[state=active]:bg-blue-200/10 data-[state=active]:text-blue-200"
+                >
+                  <Waves className="w-4 h-4 mr-2" />
+                  This Month
+                </TabsTrigger>
+                <TabsTrigger 
+                  value="sunrise-sunset" 
+                  className="data-[state=active]:bg-blue-200/10 data-[state=active]:text-blue-200"
+                >
+                  Calendar
+                </TabsTrigger>
+              </TabsList>
+              
+              <TabsContent value="daily">
+                <TideView data={todayTideData} period="daily" />
+              </TabsContent>
+              
+              <TabsContent value="weekly">
+                <TideView data={weeklyTideData} period="weekly" />
+              </TabsContent>
+              
+              <TabsContent value="monthly">
+                <TideView data={monthlyTideData} period="monthly" />
+              </TabsContent>
+              
+              <TabsContent value="sunrise-sunset">
+                <TideCalendar tideData={monthlyTideData} />
+              </TabsContent>
+            </Tabs>
+          </div>
         </div>
       </div>
-    </div>
+    </>
   );
 };
 
