@@ -36,9 +36,6 @@ export const useAlertManager = (upcomingAlerts: Array<{
     onSuccess: (newState) => {
       queryClient.setQueryData(['alertsEnabled'], newState);
       if (newState) {
-        // Reset last alert time when enabling alerts
-        localStorage.removeItem(LAST_ALERT_TIME_KEY);
-        queryClient.setQueryData(['lastAlertTime'], 0);
         checkAndShowAlert();
       }
     },
@@ -46,9 +43,10 @@ export const useAlertManager = (upcomingAlerts: Array<{
 
   const checkAndShowAlert = () => {
     const now = new Date().getTime();
+    const lastShown = Number(localStorage.getItem(LAST_ALERT_TIME_KEY)) || 0;
     
-    // Only show alert if enabled and hasn't been shown in the last hour
-    if (alertsEnabled && (now - lastAlertTime > 3600000)) {
+    // Only show alert if enabled and hasn't been shown in the last 24 hours
+    if (alertsEnabled && (now - lastShown > 24 * 60 * 60 * 1000)) {
       const today = new Date();
       const futureAlerts = upcomingAlerts
         .map(alert => ({
@@ -66,6 +64,7 @@ export const useAlertManager = (upcomingAlerts: Array<{
         toast({
           title: "Upcoming Low Tide Near Sunrise/Sunset",
           description: `Next low tide on ${nextAlert.date} at ${nextAlert.time} coincides with ${nextAlert.type}`,
+          duration: 5000,
         });
       }
     }

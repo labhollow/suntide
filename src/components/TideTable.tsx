@@ -37,6 +37,13 @@ const TideTable = ({ data, period }: TideTableProps) => {
     queryFn: () => localStorage.getItem('tideAlertsEnabled') === 'true',
     staleTime: Infinity,
   });
+
+  // Get last alert time from localStorage
+  const { data: lastAlertTime = 0 } = useQuery({
+    queryKey: ['lastAlertTime'],
+    queryFn: () => Number(localStorage.getItem('lastAlertTime')) || 0,
+    staleTime: Infinity,
+  });
   
   const formattedData = React.useMemo(() => {
     return data
@@ -70,9 +77,6 @@ const TideTable = ({ data, period }: TideTableProps) => {
 
   // Store processed data keys to prevent duplicate alerts
   const shownToasts = React.useRef(new Set());
-  
-  // Store the last alert time
-  const lastAlertTime = React.useRef(Date.now());
 
   React.useEffect(() => {
     if (!alertsEnabled) {
@@ -80,8 +84,8 @@ const TideTable = ({ data, period }: TideTableProps) => {
     }
 
     const now = Date.now();
-    // Only check for new alerts every 5 seconds
-    if (now - lastAlertTime.current < 5000) {
+    // Only show alerts once per 24 hours
+    if (now - lastAlertTime < 24 * 60 * 60 * 1000) {
       return;
     }
 
@@ -97,8 +101,6 @@ const TideTable = ({ data, period }: TideTableProps) => {
           ? "sunrise" 
           : "sunset";
         
-        lastAlertTime.current = now;
-        
         toast({
           title: "Low Tide Alert",
           description: `Low tide on ${format(tide.date, "MMM dd, yyyy")} at ${format(tide.date, "hh:mm a")} is within 3 hours of ${timeOfDay}`,
@@ -108,7 +110,7 @@ const TideTable = ({ data, period }: TideTableProps) => {
         shownToasts.current.add(toastKey);
       }
     });
-  }, [alertsEnabled, toast, formattedData]);
+  }, [alertsEnabled, lastAlertTime]);
 
   if (!data || data.length === 0) {
     return (
