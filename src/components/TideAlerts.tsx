@@ -54,7 +54,7 @@ const TideAlerts = ({ upcomingAlerts }: TideAlertsProps) => {
         dismiss();
       }, 5000);
     }
-  }, [alertsEnabled, upcomingAlerts]); // Add upcomingAlerts to dependencies
+  }, [alertsEnabled]); // Only trigger when alerts are enabled/disabled
 
   return (
     <Card className="p-4 space-y-4">
