@@ -18,11 +18,11 @@ const TideAlerts = ({ upcomingAlerts }: TideAlertsProps) => {
   const { toast } = useToast();
 
   useEffect(() => {
-    if (alertsEnabled && upcomingAlerts.length > 0) {
-      // Check if we've already shown an alert this session
+    // Only run this effect when alerts are first enabled
+    if (alertsEnabled) {
       const alertShown = sessionStorage.getItem('tideAlertShown');
-      if (!alertShown) {
-        // Find the closest upcoming alert to today
+      
+      if (!alertShown && upcomingAlerts.length > 0) {
         const today = new Date();
         const closestAlert = upcomingAlerts
           .map(alert => ({
@@ -35,17 +35,17 @@ const TideAlerts = ({ upcomingAlerts }: TideAlertsProps) => {
           )[0];
 
         if (closestAlert) {
+          // Set the flag before showing the toast to prevent race conditions
+          sessionStorage.setItem('tideAlertShown', 'true');
+          
           toast({
             title: "Upcoming Low Tide Near Sunrise/Sunset",
             description: `Low tide on ${closestAlert.date} at ${closestAlert.time} coincides with ${closestAlert.type}`,
           });
-          
-          // Mark that we've shown an alert this session
-          sessionStorage.setItem('tideAlertShown', 'true');
         }
       }
     }
-  }, [alertsEnabled, upcomingAlerts, toast]);
+  }, [alertsEnabled]); // Only depend on alertsEnabled
 
   const toggleAlerts = () => {
     setAlertsEnabled(!alertsEnabled);
