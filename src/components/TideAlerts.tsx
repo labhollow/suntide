@@ -1,4 +1,4 @@
-import React, { useEffect, useCallback } from "react";
+import React, { useEffect } from "react";
 import { Bell } from "lucide-react";
 import { Switch } from "@/components/ui/switch";
 import { Card } from "@/components/ui/card";
@@ -17,8 +17,10 @@ const TideAlerts = ({ upcomingAlerts }: TideAlertsProps) => {
   const [alertsEnabled, setAlertsEnabled] = React.useState(false);
   const { toast } = useToast();
 
-  const showInitialAlert = useCallback(() => {
-    if (!sessionStorage.getItem('tideAlertShown') && upcomingAlerts.length > 0) {
+  useEffect(() => {
+    const hasShownAlert = sessionStorage.getItem('tideAlertShown') === 'true';
+    
+    if (alertsEnabled && !hasShownAlert && upcomingAlerts.length > 0) {
       const today = new Date();
       const closestAlert = upcomingAlerts
         .map(alert => ({
@@ -39,13 +41,7 @@ const TideAlerts = ({ upcomingAlerts }: TideAlertsProps) => {
         });
       }
     }
-  }, [upcomingAlerts, toast]);
-
-  useEffect(() => {
-    if (alertsEnabled) {
-      showInitialAlert();
-    }
-  }, [alertsEnabled, showInitialAlert]);
+  }, [alertsEnabled]);
 
   const toggleAlerts = () => {
     setAlertsEnabled(!alertsEnabled);
