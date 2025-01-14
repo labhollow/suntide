@@ -11,7 +11,7 @@ import { format, parseISO } from "date-fns";
 import { ArrowUp, ArrowDown } from "lucide-react";
 import { metersToFeet } from "@/utils/tideUtils";
 import { isWithinHours } from "@/utils/dateUtils";
-import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { useQuery } from "@tanstack/react-query";
 
 interface TideData {
   t: string;
@@ -28,9 +28,8 @@ interface TideTableProps {
 
 const TideTable = ({ data, period }: TideTableProps) => {
   console.log('Data received by TideTable:', data);
-  const queryClient = useQueryClient();
   
-  // Check if alerts are enabled and get duration using React Query
+  // Check if alerts are enabled
   const { data: alertsEnabled = false } = useQuery({
     queryKey: ['alertsEnabled'],
     queryFn: () => {
@@ -38,9 +37,9 @@ const TideTable = ({ data, period }: TideTableProps) => {
       console.log('Alerts enabled:', enabled);
       return enabled;
     },
-    staleTime: 0, // Remove staleTime to ensure updates
   });
 
+  // Get alert duration
   const { data: alertDuration = "2" } = useQuery({
     queryKey: ['alertDuration'],
     queryFn: () => {
@@ -48,16 +47,9 @@ const TideTable = ({ data, period }: TideTableProps) => {
       console.log('Alert duration:', duration);
       return duration;
     },
-    staleTime: 0,
-    meta: {
-      onSuccess: () => {
-        // Invalidate queries that depend on the duration
-        queryClient.invalidateQueries({ queryKey: ['formattedTideData'] });
-      }
-    }
   });
   
-  // Use a separate query for formatted data that depends on alertDuration
+  // Format and process tide data
   const { data: formattedData = [] } = useQuery({
     queryKey: ['formattedTideData', alertDuration, data],
     queryFn: () => {
@@ -73,6 +65,7 @@ const TideTable = ({ data, period }: TideTableProps) => {
               return null;
             }
 
+            const formattedTime = format(date, "hh:mm a");
             return {
               date,
               height: parseFloat(tide.v),
@@ -80,8 +73,8 @@ const TideTable = ({ data, period }: TideTableProps) => {
               sunrise: tide.sunrise,
               sunset: tide.sunset,
               isNearSunriseOrSunset: tide.type === "L" && (
-                (tide.sunrise && isWithinHours(format(date, "hh:mm a"), tide.sunrise, duration)) ||
-                (tide.sunset && isWithinHours(format(date, "hh:mm a"), tide.sunset, duration))
+                (tide.sunrise && isWithinHours(formattedTime, tide.sunrise, duration)) ||
+                (tide.sunset && isWithinHours(formattedTime, tide.sunset, duration))
               )
             };
           } catch (error) {
