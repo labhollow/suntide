@@ -29,14 +29,21 @@ interface TideTableProps {
 const TideTable = ({ data, period }: TideTableProps) => {
   console.log('Data received by TideTable:', data);
   
-  // Check if alerts are enabled using React Query
+  // Check if alerts are enabled and get duration using React Query
   const { data: alertsEnabled = false } = useQuery({
     queryKey: ['alertsEnabled'],
-    queryFn: () => localStorage.getItem('tideAlertsEnabled') === 'true',
+    queryFn: () => localStorage.getItem('alertsEnabled') === 'true',
+    staleTime: Infinity,
+  });
+
+  const { data: alertDuration = "2" } = useQuery({
+    queryKey: ['alertDuration'],
+    queryFn: () => localStorage.getItem('alertDuration') || "2",
     staleTime: Infinity,
   });
   
   const formattedData = React.useMemo(() => {
+    const duration = parseInt(alertDuration);
     return data
       .filter(tide => tide && tide.t)
       .map(tide => {
@@ -54,8 +61,8 @@ const TideTable = ({ data, period }: TideTableProps) => {
             sunrise: tide.sunrise,
             sunset: tide.sunset,
             isNearSunriseOrSunset: tide.type === "L" && (
-              (tide.sunrise && isWithinHours(format(date, "hh:mm a"), tide.sunrise, 2)) ||
-              (tide.sunset && isWithinHours(format(date, "hh:mm a"), tide.sunset, 2))
+              (tide.sunrise && isWithinHours(format(date, "hh:mm a"), tide.sunrise, duration)) ||
+              (tide.sunset && isWithinHours(format(date, "hh:mm a"), tide.sunset, duration))
             )
           };
         } catch (error) {
@@ -64,7 +71,7 @@ const TideTable = ({ data, period }: TideTableProps) => {
         }
       })
       .filter(Boolean);
-  }, [data]);
+  }, [data, alertDuration]);
 
   if (!data || data.length === 0) {
     return (
@@ -99,7 +106,7 @@ const TideTable = ({ data, period }: TideTableProps) => {
                 {format(tide.date, "MMM dd, yyyy")}
                 {tide.isNearSunriseOrSunset && (
                   <div className="flex flex-col items-center">
-                    {isWithinHours(format(tide.date, "hh:mm a"), tide.sunrise || "", 2) ? (
+                    {isWithinHours(format(tide.date, "hh:mm a"), tide.sunrise || "", parseInt(alertDuration)) ? (
                       <>
                         <span className="text-xs text-white font-light">rise</span>
                         <ArrowUp className="w-4 h-4" />
