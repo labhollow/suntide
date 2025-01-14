@@ -81,7 +81,7 @@ const TideTable = ({ data, period }: TideTableProps) => {
 
   if (!data || data.length === 0) {
     return (
-      <div className="w-full p-4 text-center text-gray-500 animate-fade-in">
+      <div className="w-full p-4 text-center text-gray-500">
         No tide data available
       </div>
     );
@@ -103,7 +103,7 @@ const TideTable = ({ data, period }: TideTableProps) => {
         <TableBody>
           {formattedData.map((tide, index) => (
             <TableRow 
-              key={index}
+              key={`${tide.date.toISOString()}-${tide.type}-${index}`}
               className={`
                 ${tide.isNearSunriseOrSunset ? "bg-slate-800" : ""}
                 transition-all duration-300 ease-in-out
