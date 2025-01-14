@@ -3,7 +3,7 @@ import { Bell } from "lucide-react";
 import { Switch } from "@/components/ui/switch";
 import { Card } from "@/components/ui/card";
 import { useToast } from "@/hooks/use-toast";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import {
   Select,
   SelectContent,
@@ -28,6 +28,7 @@ const TideAlerts = ({ upcomingAlerts }: TideAlertsProps) => {
   });
   const [duration, setDuration] = useState("2"); // Default 2 hours
   const { toast, dismiss } = useToast();
+  const initialLoadRef = useRef(true);
 
   // Save alerts state to localStorage whenever it changes
   useEffect(() => {
@@ -36,21 +37,32 @@ const TideAlerts = ({ upcomingAlerts }: TideAlertsProps) => {
 
   // Show alert on initial load and when alerts are toggled
   useEffect(() => {
-    if (alertsEnabled && upcomingAlerts.length > 0) {
+    // Only show alerts if there are upcoming alerts
+    if (upcomingAlerts.length === 0) return;
+
+    // Show alert if it's enabled and either:
+    // 1. It's the initial load and alerts are enabled
+    // 2. The alerts were just toggled on
+    if (alertsEnabled && (initialLoadRef.current || !initialLoadRef.current)) {
       // Clear any existing toasts
       dismiss();
       
-      // Get the closest upcoming alert (first in the array, as they should be sorted)
+      // Get the closest upcoming alert
       const closestAlert = upcomingAlerts[0];
       
-      // Show only the closest alert
+      // Show the closest alert
       toast({
         title: "Upcoming Low Tide Alert",
         description: `Low tide on ${closestAlert.date} at ${closestAlert.time} coincides with ${closestAlert.type}`,
         duration: 5000,
       });
     }
-  }, [alertsEnabled, dismiss, toast, upcomingAlerts]); // Include all dependencies
+
+    // After initial load, set the ref to false
+    if (initialLoadRef.current) {
+      initialLoadRef.current = false;
+    }
+  }, [alertsEnabled]); // Only depend on alertsEnabled to prevent loops
 
   return (
     <Card className="p-4 space-y-4">
