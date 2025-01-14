@@ -30,13 +30,14 @@ const TideAlerts = ({ upcomingAlerts }: TideAlertsProps) => {
       // Clear any existing toasts
       dismiss();
       
-      // Show new alerts
-      upcomingAlerts.forEach(alert => {
-        toast({
-          title: "Upcoming Low Tide Alert",
-          description: `Low tide on ${alert.date} at ${alert.time} coincides with ${alert.type}`,
-          duration: 5000,
-        });
+      // Get the closest upcoming alert (first in the array, as they should be sorted)
+      const closestAlert = upcomingAlerts[0];
+      
+      // Show only the closest alert
+      toast({
+        title: "Upcoming Low Tide Alert",
+        description: `Low tide on ${closestAlert.date} at ${closestAlert.time} coincides with ${closestAlert.type}`,
+        duration: 5000,
       });
     }
   }, [alertsEnabled]); // Only trigger when alerts are enabled/disabled
