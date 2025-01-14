@@ -49,7 +49,7 @@ const LocationPicker: React.FC<LocationPickerProps> = ({ id, name, onLocationUpd
     
     localStorage.setItem("savedLocation", JSON.stringify(locationData));
     onLocationUpdate?.(locationData);
-    setSelectedLocation(locationData.name);
+    setSelectedLocation(stationKey);
   };
 
   const handleSaveLocation = () => {
@@ -87,7 +87,13 @@ const LocationPicker: React.FC<LocationPickerProps> = ({ id, name, onLocationUpd
       const saved = localStorage.getItem("savedLocation");
       if (saved) {
         const parsed = JSON.parse(saved);
-        setSelectedLocation(parsed.name || "");
+        // Find the station key that matches the saved location name
+        const stationKey = Object.entries(NOAA_STATIONS || {}).find(
+          ([_, station]) => station.name.toLowerCase() === parsed.name.toLowerCase()
+        )?.[0];
+        if (stationKey) {
+          setSelectedLocation(stationKey);
+        }
       }
     } catch (error) {
       console.error('Error reading from localStorage:', error);
@@ -101,7 +107,7 @@ const LocationPicker: React.FC<LocationPickerProps> = ({ id, name, onLocationUpd
   return (
     <Card className="p-4 flex gap-4 items-center bg-white/5 backdrop-blur-sm border-white/10">
       <MapPin className="text-blue-400" />
-      <Select onValueChange={handleStationSelect} value={selectedLocation || undefined}>
+      <Select onValueChange={handleStationSelect} value={selectedLocation}>
         <SelectTrigger className="w-[300px] bg-white/10 border-white/10 text-white">
           <SelectValue placeholder="Select location..." />
         </SelectTrigger>
