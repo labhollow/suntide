@@ -34,22 +34,33 @@ const TideAlerts = ({ upcomingAlerts }: TideAlertsProps) => {
     localStorage.setItem("alertsEnabled", JSON.stringify(alertsEnabled));
   }, [alertsEnabled]);
 
-  // Show alerts on mount if enabled and when toggled
-  useEffect(() => {
-    // Only show alerts if they're enabled and we have upcoming alerts
-    if (alertsEnabled && upcomingAlerts.length > 0) {
+  // Function to show the closest alert
+  const showClosestAlert = () => {
+    if (upcomingAlerts.length > 0) {
       const closestAlert = upcomingAlerts[0];
-      
-      // Clear any existing toasts before showing new one
       dismiss();
-      
       toast({
         title: "Upcoming Low Tide Alert",
         description: `Low tide on ${closestAlert.date} at ${closestAlert.time} coincides with ${closestAlert.type}`,
         duration: 5000,
       });
     }
-  }, [alertsEnabled]); // Only depend on alertsEnabled to prevent loops
+  };
+
+  // Show alerts on initial mount if enabled
+  useEffect(() => {
+    if (alertsEnabled) {
+      showClosestAlert();
+    }
+  }, []); // Empty dependency array for initial mount only
+
+  // Handle alert toggle
+  const handleAlertToggle = (checked: boolean) => {
+    setAlertsEnabled(checked);
+    if (checked) {
+      showClosestAlert();
+    }
+  };
 
   return (
     <Card className="p-4 space-y-4">
@@ -74,7 +85,7 @@ const TideAlerts = ({ upcomingAlerts }: TideAlertsProps) => {
           </Select>
           <Switch 
             checked={alertsEnabled} 
-            onCheckedChange={setAlertsEnabled}
+            onCheckedChange={handleAlertToggle}
           />
         </div>
       </div>
