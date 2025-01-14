@@ -20,7 +20,6 @@ interface LocationPickerProps {
 
 const LocationPicker: React.FC<LocationPickerProps> = ({ id, name, onLocationUpdate }) => {
   const [selectedLocation, setSelectedLocation] = useState<string>("");
-  const [alertDuration, setAlertDuration] = useState(2);
   const { toast } = useToast();
 
   const toProperCase = (str: string) => {
@@ -88,6 +87,7 @@ const LocationPicker: React.FC<LocationPickerProps> = ({ id, name, onLocationUpd
       const saved = localStorage.getItem("savedLocation");
       if (saved) {
         const parsed = JSON.parse(saved);
+        // Find the station key that matches the saved location name
         const stationKey = Object.entries(NOAA_STATIONS || {}).find(
           ([_, station]) => station.name.toLowerCase() === parsed.name.toLowerCase()
         )?.[0];
@@ -123,26 +123,9 @@ const LocationPicker: React.FC<LocationPickerProps> = ({ id, name, onLocationUpd
           ))}
         </SelectContent>
       </Select>
-      <div className="flex items-center gap-4">
-        <Select
-          value={alertDuration.toString()}
-          onValueChange={(value) => setAlertDuration(Number(value))}
-        >
-          <SelectTrigger className="w-[120px] bg-white/10 border-white/10 text-white">
-            <SelectValue placeholder="Duration" />
-          </SelectTrigger>
-          <SelectContent className="bg-slate-800 border-white/10">
-            <SelectItem value="2" className="text-white hover:bg-white/10">2 hours</SelectItem>
-            <SelectItem value="4" className="text-white hover:bg-white/10">4 hours</SelectItem>
-            <SelectItem value="6" className="text-white hover:bg-white/10">6 hours</SelectItem>
-            <SelectItem value="12" className="text-white hover:bg-white/10">12 hours</SelectItem>
-            <SelectItem value="24" className="text-white hover:bg-white/10">24 hours</SelectItem>
-          </SelectContent>
-        </Select>
-        <Button onClick={handleSaveLocation} variant="default" className="bg-blue-500 hover:bg-blue-600">
-          Save Custom Location
-        </Button>
-      </div>
+      <Button onClick={handleSaveLocation} variant="default" className="bg-blue-500 hover:bg-blue-600">
+        Save Location
+      </Button>
     </Card>
   );
 };
