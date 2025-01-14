@@ -3,7 +3,7 @@ import { Bell } from "lucide-react";
 import { Switch } from "@/components/ui/switch";
 import { Card } from "@/components/ui/card";
 import { useToast } from "@/hooks/use-toast";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import {
   Select,
   SelectContent,
@@ -28,6 +28,7 @@ const TideAlerts = ({ upcomingAlerts }: TideAlertsProps) => {
   
   const [duration, setDuration] = useState("2");
   const { toast, dismiss } = useToast();
+  const hasShownInitialAlert = useRef(false);
 
   // Function to show the closest alert
   const showClosestAlert = () => {
@@ -42,14 +43,25 @@ const TideAlerts = ({ upcomingAlerts }: TideAlertsProps) => {
     }
   };
 
-  // Save alerts state to localStorage whenever it changes
+  // Save alerts state to localStorage
   useEffect(() => {
     localStorage.setItem("alertsEnabled", JSON.stringify(alertsEnabled));
-    // Show alert whenever alertsEnabled changes to true
-    if (alertsEnabled) {
+  }, [alertsEnabled]);
+
+  // Handle initial alert display and toggle
+  useEffect(() => {
+    if (alertsEnabled && upcomingAlerts && !hasShownInitialAlert.current) {
       showClosestAlert();
+      hasShownInitialAlert.current = true;
     }
   }, [alertsEnabled, upcomingAlerts]);
+
+  const handleAlertToggle = (checked: boolean) => {
+    setAlertsEnabled(checked);
+    if (checked) {
+      showClosestAlert();
+    }
+  };
 
   return (
     <Card className="p-4 space-y-4">
@@ -74,7 +86,7 @@ const TideAlerts = ({ upcomingAlerts }: TideAlertsProps) => {
           </Select>
           <Switch 
             checked={alertsEnabled} 
-            onCheckedChange={setAlertsEnabled}
+            onCheckedChange={handleAlertToggle}
           />
         </div>
       </div>
