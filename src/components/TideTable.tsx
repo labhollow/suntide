@@ -88,7 +88,7 @@ const TideTable = ({ data, period }: TideTableProps) => {
   }
 
   return (
-    <div className="w-full overflow-auto animate-fade-in">
+    <div className="w-full overflow-auto">
       <Table>
         <TableHeader>
           <TableRow>
@@ -107,7 +107,6 @@ const TideTable = ({ data, period }: TideTableProps) => {
               className={`
                 ${tide.isNearSunriseOrSunset ? "bg-slate-800" : ""}
                 transition-all duration-300 ease-in-out
-                animate-fade-in [animation-delay:${index * 50}ms]
                 hover:bg-slate-700/50
               `}
             >
