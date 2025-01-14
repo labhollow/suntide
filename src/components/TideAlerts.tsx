@@ -35,7 +35,6 @@ const TideAlerts = ({ upcomingAlerts }: TideAlertsProps) => {
   const queryClient = useQueryClient();
   const { toast, dismiss } = useToast();
 
-  // Function to show the closest alert
   const showClosestAlert = () => {
     if (upcomingAlerts && upcomingAlerts.length > 0) {
       const closestAlert = upcomingAlerts[0];
@@ -48,18 +47,16 @@ const TideAlerts = ({ upcomingAlerts }: TideAlertsProps) => {
     }
   };
 
-  // Save settings to localStorage
   useEffect(() => {
     localStorage.setItem("alertsEnabled", JSON.stringify(alertsEnabled));
     localStorage.setItem("alertDuration", duration);
   }, [alertsEnabled, duration]);
 
-  // Show alerts on mount if enabled
   useEffect(() => {
     if (alertsEnabled && upcomingAlerts?.length > 0) {
       showClosestAlert();
     }
-  }, []); // Empty dependency array for mount only
+  }, []); 
 
   const handleAlertToggle = (checked: boolean) => {
     setAlertsEnabled(checked);
@@ -70,10 +67,15 @@ const TideAlerts = ({ upcomingAlerts }: TideAlertsProps) => {
 
   const handleDurationChange = (value: string) => {
     setDuration(value);
-    // Invalidate queries to trigger recalculation
-    queryClient.invalidateQueries({ 
-      queryKey: ['tideData', 'alertDuration', 'formattedTideData']
+    localStorage.setItem("alertDuration", value);
+    
+    // Force refetch of all related queries
+    queryClient.refetchQueries({
+      queryKey: ['tideData'],
+      exact: false,
+      type: 'active'
     });
+    
     if (alertsEnabled && upcomingAlerts?.length > 0) {
       showClosestAlert();
     }

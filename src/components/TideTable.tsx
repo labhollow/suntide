@@ -29,24 +29,12 @@ interface TideTableProps {
 const TideTable = ({ data, period }: TideTableProps) => {
   console.log('Data received by TideTable:', data);
   
-  // Check if alerts are enabled
-  const { data: alertsEnabled = false } = useQuery({
-    queryKey: ['alertsEnabled'],
-    queryFn: () => {
-      const enabled = localStorage.getItem('alertsEnabled') === 'true';
-      console.log('Alerts enabled:', enabled);
-      return enabled;
-    },
-  });
-
   // Get alert duration
   const { data: alertDuration = "2" } = useQuery({
     queryKey: ['alertDuration'],
-    queryFn: () => {
-      const duration = localStorage.getItem('alertDuration') || "2";
-      console.log('Alert duration:', duration);
-      return duration;
-    }
+    queryFn: () => localStorage.getItem('alertDuration') || "2",
+    staleTime: 0,
+    cacheTime: 0
   });
 
   // Format and process tide data
@@ -87,6 +75,8 @@ const TideTable = ({ data, period }: TideTableProps) => {
         .filter(Boolean);
     },
     enabled: !!data && !!alertDuration,
+    staleTime: 0,
+    cacheTime: 0
   });
 
   if (!data || data.length === 0) {
