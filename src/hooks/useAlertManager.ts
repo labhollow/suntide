@@ -35,6 +35,8 @@ export const useAlertManager = (upcomingAlerts: Array<{
       if (!newState) {
         // Clear shown alerts when disabling
         localStorage.removeItem(SHOWN_ALERTS_KEY);
+        localStorage.removeItem(LAST_ALERT_TIME_KEY);
+        queryClient.setQueryData(['lastAlertTime'], 0);
       }
       return Promise.resolve(newState);
     },
@@ -51,7 +53,6 @@ export const useAlertManager = (upcomingAlerts: Array<{
 
     const now = new Date().getTime();
     const lastShown = Number(localStorage.getItem(LAST_ALERT_TIME_KEY)) || 0;
-    const shownAlerts = new Set(JSON.parse(localStorage.getItem(SHOWN_ALERTS_KEY) || '[]'));
     
     // Only proceed if it's been 24 hours since the last alert
     if (now - lastShown < 24 * 60 * 60 * 1000) {
@@ -59,26 +60,23 @@ export const useAlertManager = (upcomingAlerts: Array<{
     }
 
     const today = new Date();
-    const futureAlerts = upcomingAlerts
+    // Get unique alerts for the current day only
+    const todayAlerts = upcomingAlerts
       .filter(alert => {
-        const alertKey = `${alert.date}-${alert.time}-${alert.type}`;
-        return !shownAlerts.has(alertKey);
+        const alertDate = parseISO(`${alert.date}`);
+        return isAfter(alertDate, today) && 
+               isBefore(alertDate, new Date(today.getFullYear(), today.getMonth(), today.getDate() + 1));
       })
-      .map(alert => ({
-        ...alert,
-        fullDate: parseISO(`${alert.date} ${alert.time}`)
-      }))
-      .filter(alert => isAfter(alert.fullDate, today))
-      .sort((a, b) => isBefore(a.fullDate, b.fullDate) ? -1 : 1);
+      .sort((a, b) => {
+        const dateA = parseISO(`${a.date} ${a.time}`);
+        const dateB = parseISO(`${b.date} ${b.time}`);
+        return dateA.getTime() - dateB.getTime();
+      });
 
-    const nextAlert = futureAlerts[0];
-    if (nextAlert) {
-      const alertKey = `${nextAlert.date}-${nextAlert.time}-${nextAlert.type}`;
-      shownAlerts.add(alertKey);
+    if (todayAlerts.length > 0) {
+      const nextAlert = todayAlerts[0];
       
       localStorage.setItem(LAST_ALERT_TIME_KEY, String(now));
-      localStorage.setItem(SHOWN_ALERTS_KEY, JSON.stringify(Array.from(shownAlerts)));
-      
       queryClient.setQueryData(['lastAlertTime'], now);
       
       toast({
