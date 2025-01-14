@@ -43,6 +43,7 @@ export const useAlertManager = (upcomingAlerts: Array<{
     onSuccess: (newState) => {
       queryClient.setQueryData(['alertsEnabled'], newState);
       if (newState) {
+        // Immediately check for alerts when enabled
         checkAndShowAlert();
       }
     },
@@ -53,6 +54,7 @@ export const useAlertManager = (upcomingAlerts: Array<{
 
     const now = new Date().getTime();
     const lastShown = Number(localStorage.getItem(LAST_ALERT_TIME_KEY)) || 0;
+    const shownAlerts = new Set(JSON.parse(localStorage.getItem(SHOWN_ALERTS_KEY) || '[]'));
     
     // Only proceed if it's been 24 hours since the last alert
     if (now - lastShown < 24 * 60 * 60 * 1000) {
@@ -60,12 +62,13 @@ export const useAlertManager = (upcomingAlerts: Array<{
     }
 
     const today = new Date();
-    // Get unique alerts for the current day only
     const todayAlerts = upcomingAlerts
       .filter(alert => {
         const alertDate = parseISO(`${alert.date}`);
+        const alertKey = `${alert.date}-${alert.time}`;
         return isAfter(alertDate, today) && 
-               isBefore(alertDate, new Date(today.getFullYear(), today.getMonth(), today.getDate() + 1));
+               isBefore(alertDate, new Date(today.getFullYear(), today.getMonth(), today.getDate() + 1)) &&
+               !shownAlerts.has(alertKey);
       })
       .sort((a, b) => {
         const dateA = parseISO(`${a.date} ${a.time}`);
@@ -75,7 +78,13 @@ export const useAlertManager = (upcomingAlerts: Array<{
 
     if (todayAlerts.length > 0) {
       const nextAlert = todayAlerts[0];
+      const alertKey = `${nextAlert.date}-${nextAlert.time}`;
       
+      // Update shown alerts
+      shownAlerts.add(alertKey);
+      localStorage.setItem(SHOWN_ALERTS_KEY, JSON.stringify(Array.from(shownAlerts)));
+      
+      // Update last alert time
       localStorage.setItem(LAST_ALERT_TIME_KEY, String(now));
       queryClient.setQueryData(['lastAlertTime'], now);
       
