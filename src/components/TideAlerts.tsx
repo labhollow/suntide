@@ -3,7 +3,7 @@ import { Bell } from "lucide-react";
 import { Switch } from "@/components/ui/switch";
 import { Card } from "@/components/ui/card";
 import { useToast } from "@/hooks/use-toast";
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect } from "react";
 import {
   Select,
   SelectContent,
@@ -26,9 +26,12 @@ const TideAlerts = ({ upcomingAlerts }: TideAlertsProps) => {
     return saved ? JSON.parse(saved) : false;
   });
   
-  const [duration, setDuration] = useState("2");
+  const [duration, setDuration] = useState(() => {
+    const saved = localStorage.getItem("alertDuration");
+    return saved || "2";
+  });
+
   const { toast, dismiss } = useToast();
-  const hasShownInitialAlert = useRef(false);
 
   // Function to show the closest alert
   const showClosestAlert = () => {
@@ -43,22 +46,29 @@ const TideAlerts = ({ upcomingAlerts }: TideAlertsProps) => {
     }
   };
 
-  // Save alerts state to localStorage
+  // Save settings to localStorage
   useEffect(() => {
     localStorage.setItem("alertsEnabled", JSON.stringify(alertsEnabled));
-  }, [alertsEnabled]);
+    localStorage.setItem("alertDuration", duration);
+  }, [alertsEnabled, duration]);
 
-  // Handle initial alert display and toggle
+  // Show alerts on mount if enabled
   useEffect(() => {
-    if (alertsEnabled && upcomingAlerts && !hasShownInitialAlert.current) {
+    if (alertsEnabled && upcomingAlerts?.length > 0) {
       showClosestAlert();
-      hasShownInitialAlert.current = true;
     }
-  }, [alertsEnabled, upcomingAlerts]);
+  }, []); // Empty dependency array for mount only
 
   const handleAlertToggle = (checked: boolean) => {
     setAlertsEnabled(checked);
-    if (checked) {
+    if (checked && upcomingAlerts?.length > 0) {
+      showClosestAlert();
+    }
+  };
+
+  const handleDurationChange = (value: string) => {
+    setDuration(value);
+    if (alertsEnabled && upcomingAlerts?.length > 0) {
       showClosestAlert();
     }
   };
@@ -73,7 +83,7 @@ const TideAlerts = ({ upcomingAlerts }: TideAlertsProps) => {
         <div className="flex items-center gap-4">
           <Select
             value={duration}
-            onValueChange={setDuration}
+            onValueChange={handleDurationChange}
           >
             <SelectTrigger className="w-[180px]">
               <SelectValue placeholder="Alert window" />
