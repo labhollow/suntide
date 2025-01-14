@@ -2,7 +2,7 @@ import React from 'react';
 import { Calendar, momentLocalizer } from 'react-big-calendar';
 import moment from 'moment';
 import 'react-big-calendar/lib/css/react-big-calendar.css';
-import { isWithinThreeHours } from '@/utils/dateUtils';
+import { isWithinHours } from '@/utils/dateUtils';
 import { format, parseISO } from 'date-fns';
 
 const localizer = momentLocalizer(moment);
@@ -21,15 +21,15 @@ const TideCalendar = ({ tideData }) => {
 
             const tideTime = format(tideDate, 'hh:mm a');
             const isNearSunriseOrSunset = tide.type === 'L' && (
-                (tide.sunrise && isWithinThreeHours(tideTime, tide.sunrise)) ||
-                (tide.sunset && isWithinThreeHours(tideTime, tide.sunset))
+                (tide.sunrise && isWithinHours(tideTime, tide.sunrise, 2)) ||
+                (tide.sunset && isWithinHours(tideTime, tide.sunset, 2))
             );
 
             if (!isNearSunriseOrSunset) {
                 return null;
             }
 
-            const isNearSunrise = tide.sunrise && isWithinThreeHours(tideTime, tide.sunrise);
+            const isNearSunrise = tide.sunrise && isWithinHours(tideTime, tide.sunrise, 2);
             const timeOfDay = isNearSunrise ? 'Sunrise' : 'Sunset';
             const relevantTime = isNearSunrise ? tide.sunrise : tide.sunset;
 
@@ -61,8 +61,8 @@ const TideCalendar = ({ tideData }) => {
                 color: 'white',
                 border: '0px',
                 display: 'block',
-                fontSize: '0.5rem', // Decreased font size by half
-                whiteSpace: 'pre-line' // This allows \n to create new lines
+                fontSize: '0.5rem',
+                whiteSpace: 'pre-line'
             }
         };
     };
