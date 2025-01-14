@@ -81,14 +81,14 @@ const TideTable = ({ data, period }: TideTableProps) => {
 
   if (!data || data.length === 0) {
     return (
-      <div className="w-full p-4 text-center text-gray-500">
+      <div className="w-full p-4 text-center text-gray-500 animate-fade-in">
         No tide data available
       </div>
     );
   }
 
   return (
-    <div className="w-full overflow-auto">
+    <div className="w-full overflow-auto animate-fade-in">
       <Table>
         <TableHeader>
           <TableRow>
@@ -106,10 +106,12 @@ const TideTable = ({ data, period }: TideTableProps) => {
               key={index}
               className={`
                 ${tide.isNearSunriseOrSunset ? "bg-slate-800" : ""}
-                transition-colors duration-200
+                transition-all duration-300 ease-in-out
+                animate-fade-in [animation-delay:${index * 50}ms]
+                hover:bg-slate-700/50
               `}
             >
-              <TableCell className={tide.isNearSunriseOrSunset ? "text-white font-semibold flex items-center gap-2" : "text-gray-300"}>
+              <TableCell className={`${tide.isNearSunriseOrSunset ? "text-white font-semibold flex items-center gap-2" : "text-gray-300"} transition-colors duration-300`}>
                 {format(tide.date, "MMM dd, yyyy")}
                 {tide.isNearSunriseOrSunset && (
                   <div className="flex flex-col items-center">
@@ -127,19 +129,19 @@ const TideTable = ({ data, period }: TideTableProps) => {
                   </div>
                 )}
               </TableCell>
-              <TableCell className={tide.isNearSunriseOrSunset ? "text-white font-semibold" : "text-gray-300"}>
+              <TableCell className={`${tide.isNearSunriseOrSunset ? "text-white font-semibold" : "text-gray-300"} transition-colors duration-300`}>
                 {format(tide.date, "hh:mm a")}
               </TableCell>
-              <TableCell className={tide.isNearSunriseOrSunset ? "text-white font-semibold capitalize" : "text-gray-300 capitalize"}>
+              <TableCell className={`${tide.isNearSunriseOrSunset ? "text-white font-semibold capitalize" : "text-gray-300 capitalize"} transition-colors duration-300`}>
                 {tide.type}
               </TableCell>
-              <TableCell className={tide.isNearSunriseOrSunset ? "text-white font-semibold" : "text-gray-300"}>
+              <TableCell className={`${tide.isNearSunriseOrSunset ? "text-white font-semibold" : "text-gray-300"} transition-colors duration-300`}>
                 {tide.height.toFixed(2)}
               </TableCell>
-              <TableCell className={tide.isNearSunriseOrSunset ? "text-white font-semibold" : "text-gray-300"}>
+              <TableCell className={`${tide.isNearSunriseOrSunset ? "text-white font-semibold" : "text-gray-300"} transition-colors duration-300`}>
                 {tide.sunrise || 'N/A'}
               </TableCell>
-              <TableCell className={tide.isNearSunriseOrSunset ? "text-white font-semibold" : "text-gray-300"}>
+              <TableCell className={`${tide.isNearSunriseOrSunset ? "text-white font-semibold" : "text-gray-300"} transition-colors duration-300`}>
                 {tide.sunset || 'N/A'}
               </TableCell>
             </TableRow>
