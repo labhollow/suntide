@@ -11,7 +11,7 @@ import { format, parseISO } from "date-fns";
 import { ArrowUp, ArrowDown } from "lucide-react";
 import { metersToFeet } from "@/utils/tideUtils";
 import { isWithinHours } from "@/utils/dateUtils";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 
 interface TideData {
   t: string;
@@ -28,50 +28,69 @@ interface TideTableProps {
 
 const TideTable = ({ data, period }: TideTableProps) => {
   console.log('Data received by TideTable:', data);
+  const queryClient = useQueryClient();
   
   // Check if alerts are enabled and get duration using React Query
   const { data: alertsEnabled = false } = useQuery({
     queryKey: ['alertsEnabled'],
-    queryFn: () => localStorage.getItem('alertsEnabled') === 'true',
-    staleTime: Infinity,
+    queryFn: () => {
+      const enabled = localStorage.getItem('alertsEnabled') === 'true';
+      console.log('Alerts enabled:', enabled);
+      return enabled;
+    },
+    staleTime: 0, // Remove staleTime to ensure updates
   });
 
   const { data: alertDuration = "2" } = useQuery({
     queryKey: ['alertDuration'],
-    queryFn: () => localStorage.getItem('alertDuration') || "2",
-    staleTime: Infinity,
+    queryFn: () => {
+      const duration = localStorage.getItem('alertDuration') || "2";
+      console.log('Alert duration:', duration);
+      return duration;
+    },
+    staleTime: 0, // Remove staleTime to ensure updates
+    onSuccess: (newDuration) => {
+      // Invalidate queries that depend on the duration
+      queryClient.invalidateQueries({ queryKey: ['formattedTideData'] });
+    },
   });
   
-  const formattedData = React.useMemo(() => {
-    const duration = parseInt(alertDuration);
-    return data
-      .filter(tide => tide && tide.t)
-      .map(tide => {
-        try {
-          const date = parseISO(tide.t);
-          if (isNaN(date.getTime())) {
-            console.error('Invalid date:', tide.t);
+  // Use a separate query for formatted data that depends on alertDuration
+  const { data: formattedData = [] } = useQuery({
+    queryKey: ['formattedTideData', alertDuration, data],
+    queryFn: () => {
+      const duration = parseInt(alertDuration);
+      console.log('Formatting data with duration:', duration);
+      return data
+        .filter(tide => tide && tide.t)
+        .map(tide => {
+          try {
+            const date = parseISO(tide.t);
+            if (isNaN(date.getTime())) {
+              console.error('Invalid date:', tide.t);
+              return null;
+            }
+
+            return {
+              date,
+              height: parseFloat(tide.v),
+              type: tide.type === "H" ? "high" : "low",
+              sunrise: tide.sunrise,
+              sunset: tide.sunset,
+              isNearSunriseOrSunset: tide.type === "L" && (
+                (tide.sunrise && isWithinHours(format(date, "hh:mm a"), tide.sunrise, duration)) ||
+                (tide.sunset && isWithinHours(format(date, "hh:mm a"), tide.sunset, duration))
+              )
+            };
+          } catch (error) {
+            console.error('Error processing tide data:', error);
             return null;
           }
-
-          return {
-            date,
-            height: parseFloat(tide.v),
-            type: tide.type === "H" ? "high" : "low",
-            sunrise: tide.sunrise,
-            sunset: tide.sunset,
-            isNearSunriseOrSunset: tide.type === "L" && (
-              (tide.sunrise && isWithinHours(format(date, "hh:mm a"), tide.sunrise, duration)) ||
-              (tide.sunset && isWithinHours(format(date, "hh:mm a"), tide.sunset, duration))
-            )
-          };
-        } catch (error) {
-          console.error('Error processing tide data:', error);
-          return null;
-        }
-      })
-      .filter(Boolean);
-  }, [data, alertDuration]);
+        })
+        .filter(Boolean);
+    },
+    enabled: !!data && !!alertDuration,
+  });
 
   if (!data || data.length === 0) {
     return (
