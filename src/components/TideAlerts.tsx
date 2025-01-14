@@ -23,12 +23,12 @@ interface TideAlertsProps {
 const TideAlerts = ({ upcomingAlerts }: TideAlertsProps) => {
   const [alertsEnabled, setAlertsEnabled] = useState(false);
   const [duration, setDuration] = useState("2"); // Default 2 hours
-  const { toast } = useToast();
+  const { toast, dismiss } = useToast();
 
   useEffect(() => {
     if (alertsEnabled && upcomingAlerts.length > 0) {
       // Clear any existing toasts
-      toast.dismiss();
+      dismiss();
       
       // Show new alerts
       upcomingAlerts.forEach(alert => {
