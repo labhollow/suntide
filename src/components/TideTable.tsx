@@ -11,7 +11,7 @@ import { format, parseISO } from "date-fns";
 import { ArrowUp, ArrowDown } from "lucide-react";
 import { metersToFeet } from "@/utils/tideUtils";
 import { isWithinHours } from "@/utils/dateUtils";
-import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { useQuery } from "@tanstack/react-query";
 
 interface TideData {
   t: string;
@@ -28,7 +28,6 @@ interface TideTableProps {
 
 const TideTable = ({ data, period }: TideTableProps) => {
   console.log('Data received by TideTable:', data);
-  const queryClient = useQueryClient();
   
   // Check if alerts are enabled
   const { data: alertsEnabled = false } = useQuery({
@@ -47,14 +46,6 @@ const TideTable = ({ data, period }: TideTableProps) => {
       const duration = localStorage.getItem('alertDuration') || "2";
       console.log('Alert duration:', duration);
       return duration;
-    },
-    meta: {
-      onSuccess: (newDuration) => {
-        // Force a refetch of the parent tide data query
-        queryClient.invalidateQueries({ 
-          queryKey: ['tideData']
-        });
-      }
     }
   });
 

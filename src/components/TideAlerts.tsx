@@ -4,6 +4,7 @@ import { Switch } from "@/components/ui/switch";
 import { Card } from "@/components/ui/card";
 import { useToast } from "@/hooks/use-toast";
 import { useState, useEffect } from "react";
+import { useQueryClient } from "@tanstack/react-query";
 import {
   Select,
   SelectContent,
@@ -31,6 +32,7 @@ const TideAlerts = ({ upcomingAlerts }: TideAlertsProps) => {
     return saved || "2";
   });
 
+  const queryClient = useQueryClient();
   const { toast, dismiss } = useToast();
 
   // Function to show the closest alert
@@ -68,6 +70,10 @@ const TideAlerts = ({ upcomingAlerts }: TideAlertsProps) => {
 
   const handleDurationChange = (value: string) => {
     setDuration(value);
+    // Invalidate queries to trigger recalculation
+    queryClient.invalidateQueries({ 
+      queryKey: ['tideData']
+    });
     if (alertsEnabled && upcomingAlerts?.length > 0) {
       showClosestAlert();
     }
