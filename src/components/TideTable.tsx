@@ -73,15 +73,20 @@ const TideTable = ({ data, period }: TideTableProps) => {
   
   // Store the last processed data string to detect actual data changes
   const lastProcessedData = React.useRef("");
+  
+  // Store the last alert time
+  const lastAlertTime = React.useRef(0);
 
   React.useEffect(() => {
     if (!alertsEnabled) return;
 
     // Create a string representation of the current data
-    const currentDataString = JSON.stringify(formattedData.map(d => d.date));
+    const currentDataString = JSON.stringify(data.map(d => d.t));
     
-    // Only process if the data has actually changed
-    if (currentDataString === lastProcessedData.current) return;
+    // Only process if the data has actually changed and it's been at least 5 seconds since the last alert
+    const now = Date.now();
+    if (currentDataString === lastProcessedData.current || 
+        now - lastAlertTime.current < 5000) return;
     
     lastProcessedData.current = currentDataString;
 
@@ -94,16 +99,19 @@ const TideTable = ({ data, period }: TideTableProps) => {
             ? "sunrise" 
             : "sunset";
           
+          lastAlertTime.current = now;
+          
           toast({
             title: "Low Tide Alert",
             description: `Low tide on ${format(tide.date, "MMM dd, yyyy")} at ${format(tide.date, "hh:mm a")} is within 3 hours of ${timeOfDay}`,
+            duration: 5000, // Toast will disappear after 5 seconds
           });
           
           shownToasts.current.add(toastKey);
         }
       }
     });
-  }, [alertsEnabled, formattedData, toast]);
+  }, [alertsEnabled, data, formattedData, toast]);
 
   if (!data || data.length === 0) {
     return (
