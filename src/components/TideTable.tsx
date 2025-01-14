@@ -68,31 +68,42 @@ const TideTable = ({ data, period }: TideTableProps) => {
       .filter(Boolean);
   }, [data]);
 
+  // Store processed data keys to prevent duplicate alerts
   const shownToasts = React.useRef(new Set());
+  
+  // Store the last processed data string to detect actual data changes
+  const lastProcessedData = React.useRef("");
 
   React.useEffect(() => {
-    // Only show toasts if alerts are enabled
-    if (alertsEnabled) {
-      formattedData.forEach(tide => {
-        if (tide.isNearSunriseOrSunset) {
-          const toastKey = `${format(tide.date, "yyyy-MM-dd HH:mm")}`;
+    if (!alertsEnabled) return;
+
+    // Create a string representation of the current data
+    const currentDataString = JSON.stringify(formattedData.map(d => d.date));
+    
+    // Only process if the data has actually changed
+    if (currentDataString === lastProcessedData.current) return;
+    
+    lastProcessedData.current = currentDataString;
+
+    formattedData.forEach(tide => {
+      if (tide.isNearSunriseOrSunset) {
+        const toastKey = `${format(tide.date, "yyyy-MM-dd HH:mm")}`;
+        
+        if (!shownToasts.current.has(toastKey)) {
+          const timeOfDay = isWithinThreeHours(format(tide.date, "hh:mm a"), tide.sunrise || "") 
+            ? "sunrise" 
+            : "sunset";
           
-          if (!shownToasts.current.has(toastKey)) {
-            const timeOfDay = isWithinThreeHours(format(tide.date, "hh:mm a"), tide.sunrise || "") 
-              ? "sunrise" 
-              : "sunset";
-            
-            toast({
-              title: "Low Tide Alert",
-              description: `Low tide on ${format(tide.date, "MMM dd, yyyy")} at ${format(tide.date, "hh:mm a")} is within 3 hours of ${timeOfDay}`,
-            });
-            
-            shownToasts.current.add(toastKey);
-          }
+          toast({
+            title: "Low Tide Alert",
+            description: `Low tide on ${format(tide.date, "MMM dd, yyyy")} at ${format(tide.date, "hh:mm a")} is within 3 hours of ${timeOfDay}`,
+          });
+          
+          shownToasts.current.add(toastKey);
         }
-      });
-    }
-  }, [formattedData, toast, alertsEnabled]);
+      }
+    });
+  }, [alertsEnabled, formattedData, toast]);
 
   if (!data || data.length === 0) {
     return (
