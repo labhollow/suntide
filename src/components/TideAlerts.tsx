@@ -72,7 +72,7 @@ const TideAlerts = ({ upcomingAlerts }: TideAlertsProps) => {
     setDuration(value);
     // Invalidate queries to trigger recalculation
     queryClient.invalidateQueries({ 
-      queryKey: ['tideData']
+      queryKey: ['tideData', 'alertDuration', 'formattedTideData']
     });
     if (alertsEnabled && upcomingAlerts?.length > 0) {
       showClosestAlert();
