@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useCallback } from "react";
 import { Bell } from "lucide-react";
 import { Switch } from "@/components/ui/switch";
 import { Card } from "@/components/ui/card";
@@ -17,9 +17,8 @@ const TideAlerts = ({ upcomingAlerts }: TideAlertsProps) => {
   const [alertsEnabled, setAlertsEnabled] = React.useState(false);
   const { toast } = useToast();
 
-  useEffect(() => {
-    // Only show alert when alerts are first enabled and haven't been shown this session
-    if (alertsEnabled && !sessionStorage.getItem('tideAlertShown') && upcomingAlerts.length > 0) {
+  const showInitialAlert = useCallback(() => {
+    if (!sessionStorage.getItem('tideAlertShown') && upcomingAlerts.length > 0) {
       const today = new Date();
       const closestAlert = upcomingAlerts
         .map(alert => ({
@@ -40,7 +39,13 @@ const TideAlerts = ({ upcomingAlerts }: TideAlertsProps) => {
         });
       }
     }
-  }, [alertsEnabled, upcomingAlerts]); // Include upcomingAlerts in dependencies to prevent stale data
+  }, [upcomingAlerts, toast]);
+
+  useEffect(() => {
+    if (alertsEnabled) {
+      showInitialAlert();
+    }
+  }, [alertsEnabled, showInitialAlert]);
 
   const toggleAlerts = () => {
     setAlertsEnabled(!alertsEnabled);
