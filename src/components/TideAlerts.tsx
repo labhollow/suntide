@@ -2,9 +2,15 @@ import React from "react";
 import { Bell } from "lucide-react";
 import { Switch } from "@/components/ui/switch";
 import { Card } from "@/components/ui/card";
-import { Slider } from "@/components/ui/slider";
 import { useToast } from "@/hooks/use-toast";
 import { useState, useEffect } from "react";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 interface TideAlertsProps {
   upcomingAlerts: Array<{
@@ -16,11 +22,15 @@ interface TideAlertsProps {
 
 const TideAlerts = ({ upcomingAlerts }: TideAlertsProps) => {
   const [alertsEnabled, setAlertsEnabled] = useState(false);
-  const [duration, setDuration] = useState([2]); // Default 2 hours
+  const [duration, setDuration] = useState("2"); // Default 2 hours
   const { toast } = useToast();
 
   useEffect(() => {
     if (alertsEnabled && upcomingAlerts.length > 0) {
+      // Clear any existing toasts
+      toast.dismiss();
+      
+      // Show new alerts
       upcomingAlerts.forEach(alert => {
         toast({
           title: "Upcoming Low Tide Alert",
@@ -29,7 +39,7 @@ const TideAlerts = ({ upcomingAlerts }: TideAlertsProps) => {
         });
       });
     }
-  }, [alertsEnabled, upcomingAlerts, toast]);
+  }, [alertsEnabled]); // Only trigger when alerts are enabled/disabled
 
   return (
     <Card className="p-4 space-y-4">
@@ -38,26 +48,26 @@ const TideAlerts = ({ upcomingAlerts }: TideAlertsProps) => {
           <Bell className="text-tide-blue" />
           <span>Low Tide + Sunrise/Sunset Alerts</span>
         </div>
-        <Switch 
-          checked={alertsEnabled} 
-          onCheckedChange={setAlertsEnabled}
-        />
-      </div>
-      {alertsEnabled && (
-        <div className="space-y-2">
-          <label className="text-sm text-gray-600">
-            Alert window: {duration[0]} hours before/after sunrise/sunset
-          </label>
-          <Slider
+        <div className="flex items-center gap-4">
+          <Select
             value={duration}
             onValueChange={setDuration}
-            min={1}
-            max={3}
-            step={1}
-            className="w-full"
+          >
+            <SelectTrigger className="w-[180px]">
+              <SelectValue placeholder="Alert window" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="1">1 hour before/after</SelectItem>
+              <SelectItem value="2">2 hours before/after</SelectItem>
+              <SelectItem value="3">3 hours before/after</SelectItem>
+            </SelectContent>
+          </Select>
+          <Switch 
+            checked={alertsEnabled} 
+            onCheckedChange={setAlertsEnabled}
           />
         </div>
-      )}
+      </div>
     </Card>
   );
 };

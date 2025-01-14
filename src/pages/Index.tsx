@@ -22,6 +22,7 @@ const Index = () => {
   const today = startOfToday();
   const [monthlyTideData, setMonthlyTideData] = useState([]);
   const [stationId, setStationId] = useState('9414290');
+  const [alertDuration, setAlertDuration] = useState(2);
 
   useEffect(() => {
     const savedLocation = localStorage.getItem("savedLocation");
