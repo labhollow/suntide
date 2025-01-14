@@ -50,17 +50,14 @@ const TideTable = ({ data, period }: TideTableProps) => {
     },
     meta: {
       onSuccess: (newDuration) => {
-        // Invalidate both the formatted data and the original tide data queries
+        // Force a refetch of the parent tide data query
         queryClient.invalidateQueries({ 
-          queryKey: ['formattedTideData']
-        });
-        queryClient.invalidateQueries({
           queryKey: ['tideData']
         });
       }
     }
   });
-  
+
   // Format and process tide data
   const { data: formattedData = [] } = useQuery({
     queryKey: ['formattedTideData', data, alertDuration],
