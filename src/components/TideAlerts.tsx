@@ -65,14 +65,18 @@ const TideAlerts = ({ upcomingAlerts }: TideAlertsProps) => {
     }
   };
 
-  const handleDurationChange = (value: string) => {
+  const handleDurationChange = async (value: string) => {
     setDuration(value);
     localStorage.setItem("alertDuration", value);
     
-    // Force immediate refetch of all related queries
-    queryClient.refetchQueries({
+    // First invalidate the queries to ensure fresh data
+    await queryClient.invalidateQueries({ queryKey: ['alertDuration'] });
+    
+    // Then force an immediate refetch of the formatted data
+    await queryClient.refetchQueries({
       queryKey: ['formattedTideData'],
-      type: 'all'
+      type: 'all',
+      exact: false
     });
     
     if (alertsEnabled && upcomingAlerts?.length > 0) {
