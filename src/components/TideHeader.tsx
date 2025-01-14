@@ -16,7 +16,7 @@ interface TideHeaderProps {
 
 const TideHeader = ({ location, onLocationUpdate, upcomingAlerts }: TideHeaderProps) => {
   return (
-    <div className="space-y-4">
+    <div className="space-y-4 overflow-x-hidden">
       <div className="flex items-center justify-center gap-4 mb-8">
         <Waves className="w-10 h-10 text-blue-400 animate-wave" />
         <h1 className="text-4xl font-bold bg-gradient-to-r from-blue-400 to-purple-400 bg-clip-text text-transparent">
@@ -24,7 +24,7 @@ const TideHeader = ({ location, onLocationUpdate, upcomingAlerts }: TideHeaderPr
         </h1>
       </div>
       
-      <div className="space-y-4">
+      <div className="space-y-4 max-w-full">
         <TideAlerts upcomingAlerts={upcomingAlerts} />
         <LocationPicker 
           id="location-picker" 
@@ -34,7 +34,7 @@ const TideHeader = ({ location, onLocationUpdate, upcomingAlerts }: TideHeaderPr
       </div>
       
       {location && (
-        <div className="text-sm text-blue-200/80 text-center mt-2">
+        <div className="text-sm text-blue-200/80 text-center mt-2 px-4">
           Showing tide data for {location.name} ({location.lat.toFixed(2)}, {location.lng.toFixed(2)})
         </div>
       )}
