@@ -4,6 +4,7 @@ import { useToast } from "@/hooks/use-toast";
 
 const ALERTS_ENABLED_KEY = 'tideAlertsEnabled';
 const LAST_ALERT_TIME_KEY = 'lastAlertTime';
+const SHOWN_ALERTS_KEY = 'shownAlerts';
 
 export const useAlertManager = (upcomingAlerts: Array<{
   date: string;
@@ -31,6 +32,10 @@ export const useAlertManager = (upcomingAlerts: Array<{
   const toggleAlertsMutation = useMutation({
     mutationFn: (newState: boolean) => {
       localStorage.setItem(ALERTS_ENABLED_KEY, String(newState));
+      if (!newState) {
+        // Clear shown alerts when disabling
+        localStorage.removeItem(SHOWN_ALERTS_KEY);
+      }
       return Promise.resolve(newState);
     },
     onSuccess: (newState) => {
@@ -42,31 +47,45 @@ export const useAlertManager = (upcomingAlerts: Array<{
   });
 
   const checkAndShowAlert = () => {
+    if (!alertsEnabled) return;
+
     const now = new Date().getTime();
     const lastShown = Number(localStorage.getItem(LAST_ALERT_TIME_KEY)) || 0;
+    const shownAlerts = new Set(JSON.parse(localStorage.getItem(SHOWN_ALERTS_KEY) || '[]'));
     
-    // Only show alert if enabled and hasn't been shown in the last 24 hours
-    if (alertsEnabled && (now - lastShown > 24 * 60 * 60 * 1000)) {
-      const today = new Date();
-      const futureAlerts = upcomingAlerts
-        .map(alert => ({
-          ...alert,
-          fullDate: parseISO(`${alert.date} ${alert.time}`)
-        }))
-        .filter(alert => isAfter(alert.fullDate, today))
-        .sort((a, b) => isBefore(a.fullDate, b.fullDate) ? -1 : 1);
+    // Only proceed if it's been 24 hours since the last alert
+    if (now - lastShown < 24 * 60 * 60 * 1000) {
+      return;
+    }
 
-      const nextAlert = futureAlerts[0];
-      if (nextAlert) {
-        localStorage.setItem(LAST_ALERT_TIME_KEY, String(now));
-        queryClient.setQueryData(['lastAlertTime'], now);
-        
-        toast({
-          title: "Upcoming Low Tide Near Sunrise/Sunset",
-          description: `Next low tide on ${nextAlert.date} at ${nextAlert.time} coincides with ${nextAlert.type}`,
-          duration: 5000,
-        });
-      }
+    const today = new Date();
+    const futureAlerts = upcomingAlerts
+      .filter(alert => {
+        const alertKey = `${alert.date}-${alert.time}-${alert.type}`;
+        return !shownAlerts.has(alertKey);
+      })
+      .map(alert => ({
+        ...alert,
+        fullDate: parseISO(`${alert.date} ${alert.time}`)
+      }))
+      .filter(alert => isAfter(alert.fullDate, today))
+      .sort((a, b) => isBefore(a.fullDate, b.fullDate) ? -1 : 1);
+
+    const nextAlert = futureAlerts[0];
+    if (nextAlert) {
+      const alertKey = `${nextAlert.date}-${nextAlert.time}-${nextAlert.type}`;
+      shownAlerts.add(alertKey);
+      
+      localStorage.setItem(LAST_ALERT_TIME_KEY, String(now));
+      localStorage.setItem(SHOWN_ALERTS_KEY, JSON.stringify(Array.from(shownAlerts)));
+      
+      queryClient.setQueryData(['lastAlertTime'], now);
+      
+      toast({
+        title: "Upcoming Low Tide Near Sunrise/Sunset",
+        description: `Next low tide on ${nextAlert.date} at ${nextAlert.time} coincides with ${nextAlert.type}`,
+        duration: 5000,
+      });
     }
   };
 

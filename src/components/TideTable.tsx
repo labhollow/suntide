@@ -79,24 +79,22 @@ const TideTable = ({ data, period }: TideTableProps) => {
   const shownToasts = React.useRef(new Set());
 
   React.useEffect(() => {
-    if (!alertsEnabled) {
-      return;
-    }
+    if (!alertsEnabled) return;
 
     const now = Date.now();
+    const shownAlerts = new Set(JSON.parse(localStorage.getItem('shownAlerts') || '[]'));
+    
     // Only show alerts once per 24 hours
     if (now - lastAlertTime < 24 * 60 * 60 * 1000) {
       return;
     }
 
     formattedData.forEach(tide => {
-      if (!tide.isNearSunriseOrSunset) {
-        return;
-      }
+      if (!tide.isNearSunriseOrSunset) return;
 
       const toastKey = `${format(tide.date, "yyyy-MM-dd HH:mm")}`;
       
-      if (!shownToasts.current.has(toastKey)) {
+      if (!shownToasts.current.has(toastKey) && !shownAlerts.has(toastKey)) {
         const timeOfDay = isWithinThreeHours(format(tide.date, "hh:mm a"), tide.sunrise || "") 
           ? "sunrise" 
           : "sunset";
