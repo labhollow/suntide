@@ -29,7 +29,7 @@ export default {
           sunset: "#f97316",
         },
         purple: {
-          '850': '#2c1667', // Custom value between purple-800 (#3730a3) and purple-900 (#1e1b4b)
+          '850': '#2c1667',
         },
         border: "hsl(var(--border))",
         input: "hsl(var(--input))",
