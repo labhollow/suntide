@@ -113,7 +113,7 @@ const Index = () => {
     if (!nextTide) return '';
     const tideTime = format(parseISO(nextTide.t), 'hh:mm a');
     const nearSunrise = isWithinHours(tideTime, nextTide.sunrise, alertDuration);
-    return `Low Tide - Near ${nearSunrise ? 'Sunrise' : 'Sunset'}`;
+    return ` Near ${nearSunrise ? 'Sunrise' : 'Sunset'}`;
   };
 
   const handleLocationChange = (newLocation: Location) => {
