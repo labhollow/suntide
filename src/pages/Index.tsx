@@ -2,7 +2,7 @@ import React, { useEffect, useState, useMemo } from 'react';
 import axios from 'axios';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card } from "@/components/ui/card";
-import { startOfToday, format, parseISO, startOfDay, endOfDay, addDays, isWithinInterval } from "date-fns";
+import { startOfToday, format, parseISO, startOfDay, endOfDay, addDays, isWithinInterval, isFuture } from "date-fns";
 import { getLowTidesNearSunriseSunset, getUpcomingAlerts, enrichTideDataWithSunriseSunset, getTideAndSunriseSunsetData } from "@/utils/tideUtils";
 import type { Location } from "@/utils/tideUtils";
 import { NOAA_STATIONS } from "@/utils/noaaApi";
@@ -86,9 +86,17 @@ const Index = () => {
   }, [monthlyTideData, today]);
 
   const nextTide = useMemo(() => {
-    if (!todayTideData.length) return null;
-    return todayTideData[0];
-  }, [todayTideData]);
+    if (!monthlyTideData.length) return null;
+    
+    // Find the next upcoming tide by comparing with current time
+    const now = new Date();
+    const upcomingTides = monthlyTideData.filter(tide => {
+      const tideTime = parseISO(tide.t);
+      return isFuture(tideTime);
+    });
+    
+    return upcomingTides.length > 0 ? upcomingTides[0] : null;
+  }, [monthlyTideData]);
 
   const handleLocationChange = (newLocation: Location) => {
     const locationKey = newLocation.name.toLowerCase().replace(/\s+/g, '-');
