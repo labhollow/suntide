@@ -2,7 +2,7 @@ import React, { useEffect, useState, useMemo } from 'react';
 import axios from 'axios';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card } from "@/components/ui/card";
-import { startOfToday, format, parseISO, startOfDay, endOfDay, addDays } from "date-fns";
+import { startOfToday, format, parseISO, startOfDay, endOfDay, addDays, isWithinInterval } from "date-fns";
 import { getLowTidesNearSunriseSunset, getUpcomingAlerts, enrichTideDataWithSunriseSunset, getTideAndSunriseSunsetData } from "@/utils/tideUtils";
 import type { Location } from "@/utils/tideUtils";
 import { NOAA_STATIONS } from "@/utils/noaaApi";
@@ -73,6 +73,15 @@ const Index = () => {
     return monthlyTideData.filter((item: any) => {
       const itemDate = parseISO(item.t);
       return itemDate >= todayStart && itemDate <= todayEnd;
+    });
+  }, [monthlyTideData, today]);
+
+  const weeklyTideData = useMemo(() => {
+    const weekEnd = addDays(today, 7);
+    
+    return monthlyTideData.filter((item: any) => {
+      const itemDate = parseISO(item.t);
+      return isWithinInterval(itemDate, { start: today, end: weekEnd });
     });
   }, [monthlyTideData, today]);
 
