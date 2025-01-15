@@ -4,13 +4,14 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card } from "@/components/ui/card";
 import { startOfToday, format, parseISO, startOfDay, endOfDay, addDays, isWithinInterval, isFuture } from "date-fns";
 import { getLowTidesNearSunriseSunset, getUpcomingAlerts, enrichTideDataWithSunriseSunset, getTideAndSunriseSunsetData } from "@/utils/tideUtils";
+import { isWithinHours } from "@/utils/dateUtils";
 import type { Location } from "@/utils/tideUtils";
 import { NOAA_STATIONS } from "@/utils/noaaApi";
 import TideAlerts from "@/components/TideAlerts";
 import TideHeader from "@/components/TideHeader";
 import TideView from "@/components/TideView";
 import TideCalendar from '@/components/TideCalendar';
-import { Moon, Sun, Waves, Sunrise, Sunset } from 'lucide-react';
+import { Moon, Sun, Waves, Sunrise, Sunset, AlertTriangle } from 'lucide-react';
 
 const DEFAULT_LOCATION = {
   name: "San Francisco",
@@ -88,7 +89,6 @@ const Index = () => {
   const nextTide = useMemo(() => {
     if (!monthlyTideData.length) return null;
     
-    // Find the next upcoming tide by comparing with current time
     const now = new Date();
     const upcomingTides = monthlyTideData.filter(tide => {
       const tideTime = parseISO(tide.t);
@@ -97,6 +97,17 @@ const Index = () => {
     
     return upcomingTides.length > 0 ? upcomingTides[0] : null;
   }, [monthlyTideData]);
+
+  const isNextTideAlert = useMemo(() => {
+    if (!nextTide) return false;
+    
+    if (nextTide.type !== 'L') return false;
+    
+    const tideTime = format(parseISO(nextTide.t), 'hh:mm a');
+    
+    return isWithinHours(tideTime, nextTide.sunrise, alertDuration) || 
+           isWithinHours(tideTime, nextTide.sunset, alertDuration);
+  }, [nextTide, alertDuration]);
 
   const handleLocationChange = (newLocation: Location) => {
     const locationKey = newLocation.name.toLowerCase().replace(/\s+/g, '-');
@@ -122,10 +133,19 @@ const Index = () => {
             />
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
-              <Card className="p-6 bg-white/5 backdrop-blur-sm border-white/10">
+              <Card className={`p-6 backdrop-blur-sm border-white/10 transition-colors ${
+                isNextTideAlert 
+                  ? 'bg-orange-500/20 border-orange-500/50' 
+                  : 'bg-white/5'
+              }`}>
                 <div className="flex items-center justify-between mb-4">
                   <h3 className="text-lg font-semibold text-blue-200">Next Tide</h3>
-                  <Waves className="w-6 h-6 text-blue-400" />
+                  <div className="flex items-center gap-2">
+                    {isNextTideAlert && (
+                      <AlertTriangle className="w-5 h-5 text-orange-400 animate-pulse" />
+                    )}
+                    <Waves className="w-6 h-6 text-blue-400" />
+                  </div>
                 </div>
                 {nextTide && (
                   <div className="space-y-2">
@@ -135,8 +155,11 @@ const Index = () => {
                     <div className="text-blue-200">
                       {format(parseISO(nextTide.t), 'h:mm a')}
                     </div>
-                    <div className="text-blue-200/80">
+                    <div className={`${
+                      isNextTideAlert ? 'text-orange-400' : 'text-blue-200/80'
+                    }`}>
                       {nextTide.type === 'H' ? 'High Tide' : 'Low Tide'}
+                      {isNextTideAlert && ' - Near Sun Event'}
                     </div>
                   </div>
                 )}
