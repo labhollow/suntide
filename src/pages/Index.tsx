@@ -109,6 +109,13 @@ const Index = () => {
            isWithinHours(tideTime, nextTide.sunset, alertDuration);
   }, [nextTide, alertDuration]);
 
+  const getAlertText = () => {
+    if (!nextTide) return '';
+    const tideTime = format(parseISO(nextTide.t), 'hh:mm a');
+    const nearSunrise = isWithinHours(tideTime, nextTide.sunrise, alertDuration);
+    return `Low Tide - Near ${nearSunrise ? 'Sunrise' : 'Sunset'}`;
+  };
+
   const handleLocationChange = (newLocation: Location) => {
     const locationKey = newLocation.name.toLowerCase().replace(/\s+/g, '-');
     const station = NOAA_STATIONS[locationKey];
@@ -159,7 +166,7 @@ const Index = () => {
                       isNextTideAlert ? 'text-orange-400' : 'text-blue-200/80'
                     }`}>
                       {nextTide.type === 'H' ? 'High Tide' : 'Low Tide'}
-                      {isNextTideAlert && ' - Near Sun Event'}
+                      {isNextTideAlert && ` - ${getAlertText()}`}
                     </div>
                   </div>
                 )}
