@@ -17,14 +17,18 @@ const DEFAULT_LOCATION = {
   name: "San Francisco",
   lat: 37.7749,
   lng: -122.4194
-};
+} as const;
+
+const TODAY = startOfToday();
 
 const Index = () => {
   const [location, setLocation] = useState<Location>(DEFAULT_LOCATION);
-  const today = startOfToday();
   const [monthlyTideData, setMonthlyTideData] = useState([]);
   const [stationId, setStationId] = useState('9414290');
   const [alertDuration, setAlertDuration] = useState(2);
+
+  // Memoize the location to prevent unnecessary re-renders
+  const memoizedLocation = useMemo(() => location, [location.name, location.lat, location.lng]);
 
   useEffect(() => {
     const savedLocation = localStorage.getItem("savedLocation");
@@ -38,8 +42,8 @@ const Index = () => {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const beginDate = format(today, 'yyyyMMdd');
-        const endDate = format(addDays(today, 30), 'yyyyMMdd');
+        const beginDate = format(TODAY, 'yyyyMMdd');
+        const endDate = format(addDays(TODAY, 30), 'yyyyMMdd');
 
         const response = await axios.get('https://api.tidesandcurrents.noaa.gov/api/prod/datagetter', {
           params: {
@@ -56,7 +60,7 @@ const Index = () => {
         });
 
         if (response.data && response.data.predictions) {
-          const enrichedData = enrichTideDataWithSunriseSunset(response.data.predictions, location);
+          const enrichedData = enrichTideDataWithSunriseSunset(response.data.predictions, memoizedLocation);
           setMonthlyTideData(enrichedData);
         }
       } catch (error) {
@@ -65,26 +69,26 @@ const Index = () => {
     };
 
     fetchData();
-  }, [stationId, location, today]);
+  }, [stationId, memoizedLocation]); // Remove today from dependencies since it's now constant
 
   const todayTideData = useMemo(() => {
-    const todayStart = startOfDay(today);
-    const todayEnd = endOfDay(today);
+    const todayStart = startOfDay(TODAY);
+    const todayEnd = endOfDay(TODAY);
     
     return monthlyTideData.filter((item: any) => {
       const itemDate = parseISO(item.t);
       return itemDate >= todayStart && itemDate <= todayEnd;
     });
-  }, [monthlyTideData, today]);
+  }, [monthlyTideData, TODAY]);
 
   const weeklyTideData = useMemo(() => {
-    const weekEnd = addDays(today, 7);
+    const weekEnd = addDays(TODAY, 7);
     
     return monthlyTideData.filter((item: any) => {
       const itemDate = parseISO(item.t);
-      return isWithinInterval(itemDate, { start: today, end: weekEnd });
+      return isWithinInterval(itemDate, { start: TODAY, end: weekEnd });
     });
-  }, [monthlyTideData, today]);
+  }, [monthlyTideData, TODAY]);
 
   const nextTide = useMemo(() => {
     if (!monthlyTideData.length) return null;
@@ -134,7 +138,7 @@ const Index = () => {
 
           <div className="max-w-4xl mx-auto p-4 sm:p-6 space-y-6 relative">
             <TideHeader 
-              location={location} 
+              location={memoizedLocation} 
               onLocationUpdate={handleLocationChange}
               upcomingAlerts={getUpcomingAlerts(monthlyTideData)}
             />
