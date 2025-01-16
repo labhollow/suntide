@@ -174,7 +174,7 @@ const LocationPicker: React.FC<LocationPickerProps> = ({ id, name, onLocationUpd
         </SelectContent>
       </Select>
       <Button onClick={handleSaveLocation} variant="default" className="bg-blue-500 hover:bg-blue-600">
-        Save Location
+        Find Closest Station
       </Button>
     </Card>
   );
