@@ -14,9 +14,11 @@ import TideCalendar from '@/components/TideCalendar';
 import { Moon, Sun, Waves, Sunrise, Sunset, AlertTriangle } from 'lucide-react';
 
 const DEFAULT_LOCATION = {
-  name: "San Francisco",
-  lat: 37.7749,
-  lng: -122.4194
+  "id": "9414290",
+  "name": "SAN FRANCISCO (Golden Gate)",
+  "lat": 37.80630555555555,
+  "lng": -122.4658888888889,
+  "state": "California"
 } as const;
 
 const TODAY = startOfToday();
@@ -26,6 +28,7 @@ const Index = () => {
   const [monthlyTideData, setMonthlyTideData] = useState([]);
   const [stationId, setStationId] = useState('9414290');
   const [alertDuration, setAlertDuration] = useState(2);
+  const [isLoading, setIsLoading] = useState(false);
 
   // Memoize the location to prevent unnecessary re-renders
   const memoizedLocation = useMemo(() => location, [location.name, location.lat, location.lng]);
@@ -40,45 +43,53 @@ const Index = () => {
       const locationStationId = Object.entries(NOAA_STATIONS).find(
         ([key, station]) => station.name === parsedLocation.name
       )?.[1].id;
+
       if (locationStationId) {
         setStationId(locationStationId);
       }
     } else {
+      // Only set the default location if no saved location is found
       localStorage.setItem("savedLocation", JSON.stringify(DEFAULT_LOCATION));
       setLocation(DEFAULT_LOCATION);
     }
   }, []);
 
   useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const beginDate = format(TODAY, 'yyyyMMdd');
-        const endDate = format(addDays(TODAY, 30), 'yyyyMMdd');
+    // Only fetch data if stationId is valid and not the default one
+    if (stationId && stationId !== '9414290') {
+      const fetchData = async () => {
+        setIsLoading(true);
+        try {
+          const beginDate = format(TODAY, 'yyyyMMdd');
+          const endDate = format(addDays(TODAY, 30), 'yyyyMMdd');
 
-        const response = await axios.get('https://api.tidesandcurrents.noaa.gov/api/prod/datagetter', {
-          params: {
-            station: stationId,
-            product: 'predictions',
-            datum: 'MLLW',
-            format: 'json',
-            units: 'english',
-            time_zone: 'lst_ldt',
-            begin_date: beginDate,
-            end_date: endDate,
-            interval: 'hilo'
+          const response = await axios.get('https://api.tidesandcurrents.noaa.gov/api/prod/datagetter', {
+            params: {
+              station: stationId,
+              product: 'predictions',
+              datum: 'MLLW',
+              format: 'json',
+              units: 'english',
+              time_zone: 'lst_ldt',
+              begin_date: beginDate,
+              end_date: endDate,
+              interval: 'hilo'
+            }
+          });
+
+          if (response.data && response.data.predictions) {
+            const enrichedData = enrichTideDataWithSunriseSunset(response.data.predictions, memoizedLocation);
+            setMonthlyTideData(enrichedData);
           }
-        });
-
-        if (response.data && response.data.predictions) {
-          const enrichedData = enrichTideDataWithSunriseSunset(response.data.predictions, memoizedLocation);
-          setMonthlyTideData(enrichedData);
+        } catch (error) {
+          console.error('Error fetching data:', error);
+        } finally {
+          setIsLoading(false);
         }
-      } catch (error) {
-        console.error('Error fetching data:', error);
-      }
-    };
+      };
 
-    fetchData();
+      fetchData();
+    }
   }, [stationId, memoizedLocation]); // Fetch data when stationId changes
 
   const todayTideData = useMemo(() => {
@@ -248,19 +259,19 @@ const Index = () => {
               </TabsList>
               
               <TabsContent value="daily">
-                <TideView data={todayTideData} period="daily" />
+                {isLoading ? <p>Loading tide data...</p> : <TideView data={todayTideData} period="daily" />}
               </TabsContent>
               
               <TabsContent value="weekly">
-                <TideView data={weeklyTideData} period="weekly" />
+                {isLoading ? <p>Loading tide data...</p> : <TideView data={weeklyTideData} period="weekly" />}
               </TabsContent>
               
               <TabsContent value="monthly">
-                <TideView data={monthlyTideData} period="monthly" />
+                {isLoading ? <p>Loading tide data...</p> : <TideView data={monthlyTideData} period="monthly" />}
               </TabsContent>
               
               <TabsContent value="sunrise-sunset">
-                <TideCalendar tideData={monthlyTideData} />
+                {isLoading ? <p>Loading tide data...</p> : <TideCalendar tideData={monthlyTideData} />}
               </TabsContent>
             </Tabs>
           </div>
