@@ -30,6 +30,33 @@ const LocationPicker: React.FC<LocationPickerProps> = ({ id, name, onLocationUpd
       .join(' ');
   };
 
+  const calculateDistance = (lat1: number, lon1: number, lat2: number, lon2: number): number => {
+    const R = 3959; // Earth's radius in miles
+    const dLat = (lat2 - lat1) * Math.PI / 180;
+    const dLon = (lon2 - lon1) * Math.PI / 180;
+    const a = 
+      Math.sin(dLat/2) * Math.sin(dLat/2) +
+      Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) * 
+      Math.sin(dLon/2) * Math.sin(dLon/2);
+    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+    return R * c;
+  };
+
+  const findNearestStation = (userLat: number, userLng: number): string | null => {
+    let nearestStation = null;
+    let shortestDistance = Infinity;
+
+    Object.entries(NOAA_STATIONS).forEach(([key, station]) => {
+      const distance = calculateDistance(userLat, userLng, station.lat, station.lng);
+      if (distance < shortestDistance && distance <= 100) {
+        shortestDistance = distance;
+        nearestStation = key;
+      }
+    });
+
+    return nearestStation;
+  };
+
   const handleStationSelect = (stationKey: string) => {
     const station = NOAA_STATIONS?.[stationKey];
     if (!station) {
@@ -56,21 +83,44 @@ const LocationPicker: React.FC<LocationPickerProps> = ({ id, name, onLocationUpd
     if ("geolocation" in navigator) {
       navigator.geolocation.getCurrentPosition(
         (position) => {
-          const locationData = {
-            name: selectedLocation || "Custom Location",
-            lat: position.coords.latitude,
-            lng: position.coords.longitude,
-          };
-          localStorage.setItem("savedLocation", JSON.stringify(locationData));
-          onLocationUpdate?.(locationData);
+          const nearestStationKey = findNearestStation(
+            position.coords.latitude,
+            position.coords.longitude
+          );
+
+          if (nearestStationKey) {
+            handleStationSelect(nearestStationKey);
+            toast({
+              title: "Location Updated",
+              description: `Found nearest station: ${NOAA_STATIONS[nearestStationKey].name}`,
+            });
+          } else {
+            // Default to San Francisco if no station found within 100 miles
+            const sfKey = Object.entries(NOAA_STATIONS).find(
+              ([_, station]) => station.name.toLowerCase() === "san francisco (golden gate)"
+            )?.[0];
+            if (sfKey) {
+              handleStationSelect(sfKey);
+              toast({
+                title: "Notice",
+                description: "No stations found within 100 miles. Defaulting to San Francisco.",
+              });
+            }
+          }
         },
         (error) => {
           console.error("Error getting location:", error);
-          toast({
-            title: "Error",
-            description: "Could not get your location. Please try again.",
-            variant: "destructive",
-          });
+          // Default to San Francisco on error
+          const sfKey = Object.entries(NOAA_STATIONS).find(
+            ([_, station]) => station.name.toLowerCase() === "san francisco (golden gate)"
+          )?.[0];
+          if (sfKey) {
+            handleStationSelect(sfKey);
+            toast({
+              title: "Location Access Denied",
+              description: "Defaulting to San Francisco. You can manually select a location.",
+            });
+          }
         }
       );
     } else {
