@@ -105,7 +105,7 @@ const TideTable = ({ data, period }: TideTableProps) => {
             <TableRow 
               key={`${tide.date.toISOString()}-${tide.type}-${index}`}
               className={`
-                ${tide.isNearSunriseOrSunset ? "bg-slate-800" : ""}
+                ${tide.isNearSunriseOrSunset ? "bg-orange-500/20 border-orange-500/50 hover:bg-orange-500/50" : ""}
                 transition-all duration-300 ease-in-out
                 hover:bg-slate-700/50
               `}

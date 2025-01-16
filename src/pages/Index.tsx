@@ -33,9 +33,19 @@ const Index = () => {
   useEffect(() => {
     const savedLocation = localStorage.getItem("savedLocation");
     if (savedLocation) {
-      setLocation(JSON.parse(savedLocation));
+      const parsedLocation = JSON.parse(savedLocation);
+      setLocation(parsedLocation);
+
+      // Update the stationId based on the retrieved location
+      const locationStationId = Object.entries(NOAA_STATIONS).find(
+        ([key, station]) => station.name === parsedLocation.name
+      )?.[1].id;
+      if (locationStationId) {
+        setStationId(locationStationId);
+      }
     } else {
       localStorage.setItem("savedLocation", JSON.stringify(DEFAULT_LOCATION));
+      setLocation(DEFAULT_LOCATION);
     }
   }, []);
 
@@ -69,7 +79,7 @@ const Index = () => {
     };
 
     fetchData();
-  }, [stationId, memoizedLocation]); // Remove today from dependencies since it's now constant
+  }, [stationId, memoizedLocation]); // Fetch data when stationId changes
 
   const todayTideData = useMemo(() => {
     const todayStart = startOfDay(TODAY);
