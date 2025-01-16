@@ -2,7 +2,12 @@ import React from 'react';
 import LocationPicker from './LocationPicker';
 import TideAlerts from './TideAlerts';
 import type { Location } from '@/utils/tideUtils';
-import { Waves } from 'lucide-react';
+import { Waves, ChevronDown } from 'lucide-react';
+import {
+  Collapsible,
+  CollapsibleContent,
+  CollapsibleTrigger,
+} from "@/components/ui/collapsible";
 
 interface TideHeaderProps {
   location: Location | null;
@@ -25,7 +30,17 @@ const TideHeader = ({ location, onLocationUpdate, upcomingAlerts }: TideHeaderPr
       </div>
       
       <div className="space-y-4 max-w-full">
-        <TideAlerts upcomingAlerts={upcomingAlerts} />
+        <Collapsible>
+          <CollapsibleTrigger className="flex items-center justify-between w-full p-4 bg-white/5 backdrop-blur-sm border border-white/10 rounded-lg text-blue-200 hover:bg-white/10 transition-colors">
+            <div className="flex items-center gap-2">
+              <span>Alert Settings</span>
+            </div>
+            <ChevronDown className="h-4 w-4" />
+          </CollapsibleTrigger>
+          <CollapsibleContent className="mt-2">
+            <TideAlerts upcomingAlerts={upcomingAlerts} />
+          </CollapsibleContent>
+        </Collapsible>
         <LocationPicker 
           id="location-picker" 
           name="location" 
