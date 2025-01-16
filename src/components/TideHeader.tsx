@@ -31,14 +31,16 @@ const TideHeader = ({ location, onLocationUpdate, upcomingAlerts }: TideHeaderPr
       
       <div className="space-y-4 max-w-full">
         <Collapsible>
-          <CollapsibleTrigger className="flex items-center justify-between w-full p-4 bg-white/5 backdrop-blur-sm border border-white/10 rounded-lg text-blue-200 hover:bg-white/10 transition-colors group">
+          <CollapsibleTrigger className="flex items-center justify-between w-full p-4 bg-white/5 backdrop-blur-sm border border-white/10 rounded-lg text-blue-200 hover:bg-white/10 transition-all duration-200 group">
             <div className="flex items-center gap-2">
               <span>Alert Settings</span>
             </div>
             <ChevronDown className="h-4 w-4 transition-transform duration-200 group-data-[state=open]:rotate-180" />
           </CollapsibleTrigger>
-          <CollapsibleContent className="mt-2 data-[state=open]:animate-accordion-down data-[state=closed]:animate-accordion-up">
-            <TideAlerts upcomingAlerts={upcomingAlerts} />
+          <CollapsibleContent className="overflow-hidden transition-all duration-200 data-[state=closed]:animate-accordion-up data-[state=open]:animate-accordion-down">
+            <div className="pt-2">
+              <TideAlerts upcomingAlerts={upcomingAlerts} />
+            </div>
           </CollapsibleContent>
         </Collapsible>
         <LocationPicker 
