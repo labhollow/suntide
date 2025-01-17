@@ -95,30 +95,30 @@ const LocationPicker: React.FC<LocationPickerProps> = ({ id, name, onLocationUpd
               description: `Found nearest station: ${NOAA_STATIONS[nearestStationKey].name}`,
             });
           } else {
-            // Default to San Francisco if no station found within 100 miles
+            // Default to Balboa Pier, Newport Beach if no station found within 100 miles
             const sfKey = Object.entries(NOAA_STATIONS).find(
-              ([_, station]) => station.name.toLowerCase() === "san francisco (golden gate)"
+              ([_, station]) => station.name.toLowerCase() === "balboa pier, newport beach"
             )?.[0];
             if (sfKey) {
               handleStationSelect(sfKey);
               toast({
                 title: "Notice",
-                description: "No stations found within 100 miles. Defaulting to San Francisco.",
+                description: "No stations found within 100 miles. Defaulting to Balboa Pier, Newport Beach.",
               });
             }
           }
         },
         (error) => {
           console.error("Error getting location:", error);
-          // Default to San Francisco on error
+          // Default to Balboa Pier, Newport Beach on error
           const sfKey = Object.entries(NOAA_STATIONS).find(
-            ([_, station]) => station.name.toLowerCase() === "san francisco (golden gate)"
+            ([_, station]) => station.name.toLowerCase() === "balboa pier, newport beach"
           )?.[0];
           if (sfKey) {
             handleStationSelect(sfKey);
             toast({
               title: "Location Access Denied",
-              description: "Defaulting to San Francisco. You can manually select a location.",
+              description: "Defaulting to Balboa Pier, Newport Beach. You can manually select a location.",
             });
           }
         }
