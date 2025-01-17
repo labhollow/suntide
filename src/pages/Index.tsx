@@ -11,7 +11,7 @@ import TideAlerts from "@/components/TideAlerts";
 import TideHeader from "@/components/TideHeader";
 import TideView from "@/components/TideView";
 import TideCalendar from '@/components/TideCalendar';
-import { Moon, Sun, Waves, Sunrise, Sunset, AlertTriangle } from 'lucide-react';
+import { Moon, Sun, Waves, Sunrise, Sunset, AlertTriangle, Loader2 } from 'lucide-react';
 
 const DEFAULT_LOCATION = {
   "id": "9414290",
@@ -28,18 +28,18 @@ const Index = () => {
   const [monthlyTideData, setMonthlyTideData] = useState([]);
   const [stationId, setStationId] = useState('9414290');
   const [alertDuration, setAlertDuration] = useState(2);
-  const [isLoading, setIsLoading] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
 
   // Memoize the location to prevent unnecessary re-renders
   const memoizedLocation = useMemo(() => location, [location.name, location.lat, location.lng]);
 
+  // Effect to handle initial location setup
   useEffect(() => {
     const savedLocation = localStorage.getItem("savedLocation");
     if (savedLocation) {
       const parsedLocation = JSON.parse(savedLocation);
       setLocation(parsedLocation);
 
-      // Update the stationId based on the retrieved location
       const locationStationId = Object.entries(NOAA_STATIONS).find(
         ([key, station]) => station.name === parsedLocation.name
       )?.[1].id;
@@ -48,49 +48,49 @@ const Index = () => {
         setStationId(locationStationId);
       }
     } else {
-      // Only set the default location if no saved location is found
       localStorage.setItem("savedLocation", JSON.stringify(DEFAULT_LOCATION));
       setLocation(DEFAULT_LOCATION);
+      setStationId(DEFAULT_LOCATION.id);
     }
   }, []);
 
+  // Effect to fetch tide data
   useEffect(() => {
-    // Only fetch data if stationId is valid and not the default one
-    if (stationId && stationId !== '9414290') {
-      const fetchData = async () => {
-        setIsLoading(true);
-        try {
-          const beginDate = format(TODAY, 'yyyyMMdd');
-          const endDate = format(addDays(TODAY, 30), 'yyyyMMdd');
+    const fetchData = async () => {
+      setIsLoading(true);
+      try {
+        const beginDate = format(TODAY, 'yyyyMMdd');
+        const endDate = format(addDays(TODAY, 30), 'yyyyMMdd');
 
-          const response = await axios.get('https://api.tidesandcurrents.noaa.gov/api/prod/datagetter', {
-            params: {
-              station: stationId,
-              product: 'predictions',
-              datum: 'MLLW',
-              format: 'json',
-              units: 'english',
-              time_zone: 'lst_ldt',
-              begin_date: beginDate,
-              end_date: endDate,
-              interval: 'hilo'
-            }
-          });
-
-          if (response.data && response.data.predictions) {
-            const enrichedData = enrichTideDataWithSunriseSunset(response.data.predictions, memoizedLocation);
-            setMonthlyTideData(enrichedData);
+        const response = await axios.get('https://api.tidesandcurrents.noaa.gov/api/prod/datagetter', {
+          params: {
+            station: stationId,
+            product: 'predictions',
+            datum: 'MLLW',
+            format: 'json',
+            units: 'english',
+            time_zone: 'lst_ldt',
+            begin_date: beginDate,
+            end_date: endDate,
+            interval: 'hilo'
           }
-        } catch (error) {
-          console.error('Error fetching data:', error);
-        } finally {
-          setIsLoading(false);
-        }
-      };
+        });
 
+        if (response.data && response.data.predictions) {
+          const enrichedData = enrichTideDataWithSunriseSunset(response.data.predictions, memoizedLocation);
+          setMonthlyTideData(enrichedData);
+        }
+      } catch (error) {
+        console.error('Error fetching data:', error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    if (stationId) {
       fetchData();
     }
-  }, [stationId, memoizedLocation]); // Fetch data when stationId changes
+  }, [stationId, memoizedLocation]);
 
   const todayTideData = useMemo(() => {
     const todayStart = startOfDay(TODAY);
@@ -150,6 +150,33 @@ const Index = () => {
     setLocation(newLocation);
     localStorage.setItem("savedLocation", JSON.stringify(newLocation));
   };
+
+  const LoadingState = () => (
+    <div className="flex flex-col items-center justify-center space-y-4 p-8">
+      <Loader2 className="w-8 h-8 animate-spin text-blue-500" />
+      <p className="text-blue-200">Loading tide data...</p>
+    </div>
+  );
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-slate-900">
+        <div className="min-h-screen w-full bg-gradient-to-br from-slate-900 via-purple-850 to-slate-900">
+          <div className="relative w-full min-h-screen">
+            <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAwIiBoZWlnaHQ9IjIwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZGVmcz48cGF0dGVybiBpZD0ic3RhcnMiIHg9IjAiIHk9IjAiIHdpZHRoPSI1MCIgaGVpZ2h0PSI1MCIgcGF0dGVyblVuaXRzPSJ1c2VyU3BhY2VPblVzZSI+PGNpcmNsZSBjeD0iMSIgY3k9IjEiIHI9IjEiIGZpbGw9InJnYmEoMjU1LCAyNTUsIDI1NSwgMC4yKSIvPjwvcGF0dGVybj48L2RlZnM+PHJlY3Qgd2lkdGg9IjEwMCUiIGhlaWdodD0iMTAwJSIgZmlsbD0idXJsKCNzdGFycykiLz48L3N2Zz4=')] opacity-30 pointer-events-none" />
+            <div className="max-w-4xl mx-auto p-4 sm:p-6 space-y-6 relative">
+              <TideHeader 
+                location={memoizedLocation} 
+                onLocationUpdate={setLocation}
+                upcomingAlerts={[]}
+              />
+              <LoadingState />
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-slate-900">
