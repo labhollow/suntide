@@ -5,6 +5,19 @@
   text-align: center;
 }
 
+body {
+  margin: 0;
+  padding: 0;
+  background: linear-gradient(to right, #1a1a2e, #4a1259);
+  min-height: 100vh;
+  /* Handle iOS safe areas */
+  padding-left: env(safe-area-inset-left);
+  padding-right: env(safe-area-inset-right);
+  /* Prevent bounce/overflow scroll on iOS */
+  overscroll-behavior: none;
+  -webkit-overflow-scrolling: touch;
+}
+
 .logo {
   height: 6em;
   padding: 1.5em;
