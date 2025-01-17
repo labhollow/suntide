@@ -95,7 +95,6 @@ const LocationPicker: React.FC<LocationPickerProps> = ({ id, name, onLocationUpd
               description: `Found nearest station: ${NOAA_STATIONS[nearestStationKey].name}`,
             });
           } else {
-            // Default to San Francisco if no station found within 100 miles
             const sfKey = Object.entries(NOAA_STATIONS).find(
               ([_, station]) => station.name.toLowerCase() === "san francisco (golden gate)"
             )?.[0];
@@ -110,7 +109,6 @@ const LocationPicker: React.FC<LocationPickerProps> = ({ id, name, onLocationUpd
         },
         (error) => {
           console.error("Error getting location:", error);
-          // Default to San Francisco on error
           const sfKey = Object.entries(NOAA_STATIONS).find(
             ([_, station]) => station.name.toLowerCase() === "san francisco (golden gate)"
           )?.[0];
@@ -137,7 +135,6 @@ const LocationPicker: React.FC<LocationPickerProps> = ({ id, name, onLocationUpd
       const saved = localStorage.getItem("savedLocation");
       if (saved) {
         const parsed = JSON.parse(saved);
-        // Find the station key that matches the saved location name
         const stationKey = Object.entries(NOAA_STATIONS).find(
           ([_, station]) => station.name.toLowerCase() === parsed.name.toLowerCase()
         )?.[0];
@@ -150,7 +147,8 @@ const LocationPicker: React.FC<LocationPickerProps> = ({ id, name, onLocationUpd
           ([_, station]) => station.name.toLowerCase() === "san francisco (golden gate)"
         )?.[0];
         if (sfKey) {
-          handleStationSelect(sfKey);
+          setSelectedLocation(sfKey);  // Set the selected location first
+          handleStationSelect(sfKey);  // Then trigger the selection handler
         }
       }
     } catch (error) {
