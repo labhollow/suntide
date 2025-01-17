@@ -135,17 +135,21 @@ const LocationPicker: React.FC<LocationPickerProps> = ({ id, name, onLocationUpd
       const saved = localStorage.getItem("savedLocation");
       if (saved) {
         const parsed = JSON.parse(saved);
+        // Find the station key by matching the name
         const stationKey = Object.entries(NOAA_STATIONS).find(
           ([_, station]) => station.name.toLowerCase() === parsed.name.toLowerCase()
         )?.[0];
         if (stationKey) {
+          setSelectedLocation(stationKey);
           handleStationSelect(stationKey);
         }
       } else {
+        // If no saved location, set San Francisco as default
         const sfKey = Object.entries(NOAA_STATIONS).find(
           ([_, station]) => station.name.toLowerCase() === "san francisco (golden gate)"
         )?.[0];
         if (sfKey) {
+          setSelectedLocation(sfKey);
           handleStationSelect(sfKey);
         }
       }
@@ -161,7 +165,7 @@ const LocationPicker: React.FC<LocationPickerProps> = ({ id, name, onLocationUpd
   return (
     <Card className="p-4 flex gap-4 items-center bg-white/5 backdrop-blur-sm border-white/10">
       <MapPin className="text-blue-400" />
-      <Select onValueChange={handleStationSelect} value={selectedLocation}>
+      <Select value={selectedLocation} onValueChange={handleStationSelect}>
         <SelectTrigger className="w-[300px] bg-white/10 border-white/10 text-white">
           <SelectValue placeholder="Select location..." />
         </SelectTrigger>
