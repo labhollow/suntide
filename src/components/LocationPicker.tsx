@@ -138,11 +138,19 @@ const LocationPicker: React.FC<LocationPickerProps> = ({ id, name, onLocationUpd
       if (saved) {
         const parsed = JSON.parse(saved);
         // Find the station key that matches the saved location name
-        const stationKey = Object.entries(NOAA_STATIONS || {}).find(
+        const stationKey = Object.entries(NOAA_STATIONS).find(
           ([_, station]) => station.name.toLowerCase() === parsed.name.toLowerCase()
         )?.[0];
         if (stationKey) {
           setSelectedLocation(stationKey);
+        }
+      } else {
+        // If no saved location, set San Francisco as default
+        const sfKey = Object.entries(NOAA_STATIONS).find(
+          ([_, station]) => station.name.toLowerCase() === "san francisco (golden gate)"
+        )?.[0];
+        if (sfKey) {
+          handleStationSelect(sfKey);
         }
       }
     } catch (error) {
