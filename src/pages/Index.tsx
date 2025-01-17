@@ -26,7 +26,7 @@ const TODAY = startOfToday();
 const Index = () => {
   const [location, setLocation] = useState<Location>(DEFAULT_LOCATION);
   const [monthlyTideData, setMonthlyTideData] = useState([]);
-  const [stationId, setStationId] = useState('9414290');
+  const [stationId, setStationId] = useState('9410583');
   const [alertDuration, setAlertDuration] = useState(2);
   const [isLoading, setIsLoading] = useState(true);
 
