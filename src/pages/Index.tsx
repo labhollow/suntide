@@ -26,7 +26,7 @@ const TODAY = startOfToday();
 const Index = () => {
   const [location, setLocation] = useState<Location>(DEFAULT_LOCATION);
   const [monthlyTideData, setMonthlyTideData] = useState([]);
-  const [stationId, setStationId] = useState('9410583');
+  const [stationId, setStationId] = useState<string | undefined>(undefined);
   const [alertDuration, setAlertDuration] = useState(2);
   const [isLoading, setIsLoading] = useState(true);
 
@@ -39,18 +39,11 @@ const Index = () => {
     if (savedLocation) {
       const parsedLocation = JSON.parse(savedLocation);
       setLocation(parsedLocation);
-
-      const locationStationId = Object.entries(NOAA_STATIONS).find(
-        ([key, station]) => station.name === parsedLocation.name
-      )?.[1].id;
-
-      if (locationStationId) {
-        setStationId(locationStationId);
-      }
+      setStationId(parsedLocation.id);
     } else {
-      localStorage.setItem("savedLocation", JSON.stringify(DEFAULT_LOCATION));
       setLocation(DEFAULT_LOCATION);
       setStationId(DEFAULT_LOCATION.id);
+      localStorage.setItem("savedLocation", JSON.stringify(DEFAULT_LOCATION));
     }
   }, []);
 
