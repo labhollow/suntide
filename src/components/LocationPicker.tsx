@@ -159,7 +159,7 @@ const LocationPicker: React.FC<LocationPickerProps> = ({ id, name, onLocationUpd
       <MapPin className="text-blue-400" />
       <Select onValueChange={handleStationSelect} value={selectedLocation}>
         <SelectTrigger className="w-[300px] bg-white/10 border-white/10 text-white">
-          <SelectValue placeholder="Select location..." />
+          <SelectValue placeholder="Balboa Pier, Newport Beach" />
         </SelectTrigger>
         <SelectContent className="bg-slate-800 border-white/10">
           {stationsList.map(([key, station]) => (

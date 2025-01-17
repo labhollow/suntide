@@ -14,12 +14,12 @@ import TideCalendar from '@/components/TideCalendar';
 import { Moon, Sun, Waves, Sunrise, Sunset, AlertTriangle, Loader2 } from 'lucide-react';
 
 const DEFAULT_LOCATION = {
-  "id": "9414290",
-  "name": "SAN FRANCISCO (Golden Gate)",
-  "lat": 37.80630555555555,
-  "lng": -122.4658888888889,
-  "state": "California"
-} as const;
+        "id": "9410583",
+        "name": "Balboa Pier, Newport Beach",
+        "lat": 33.6,
+        "lng": -117.9,
+        "state": "California"
+    } as const;
 
 const TODAY = startOfToday();
 
