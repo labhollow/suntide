@@ -1,14 +1,19 @@
 #root {
-  max-width: 1280px;
-  margin: 0 auto;
-  padding: 2rem;
+  width: 100%;
+  margin: 0;
+  padding: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);
   text-align: center;
   background:#1a1a2e !important;
+}
+
+html {
+  background: #1a1a2e;
 }
 
 html, body {
   margin: 0;
   padding: 0;
+  background: #1a1a2e;
   background: linear-gradient(to right, #1a1a2e, #4a1259);
   min-height: 100vh;
   /* Handle iOS safe areas */
@@ -22,6 +27,7 @@ html, body {
   position: fixed;
   inset: 0;
 }
+
 /* If you have a main container */
 .main-container {
   min-height: 100vh;
