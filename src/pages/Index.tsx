@@ -3,7 +3,7 @@ import axios from 'axios';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card } from "@/components/ui/card";
 import { startOfToday, format, parseISO, startOfDay, endOfDay, addDays, isWithinInterval, isFuture } from "date-fns";
-import { getLowTidesNearSunriseSunset, getUpcomingAlerts, enrichTideDataWithSunriseSunset, getTideAndSunriseSunsetData } from "@/utils/tideUtils";
+import { getLowTidesNearSunriseSunset, getUpcomingAlerts, enrichTideDataWithSunriseSunset } from "@/utils/tideUtils";
 import { isWithinHours } from "@/utils/dateUtils";
 import type { Location } from "@/utils/tideUtils";
 import { NOAA_STATIONS } from "@/utils/noaaApi";
@@ -14,49 +14,48 @@ import TideCalendar from '@/components/TideCalendar';
 import { Moon, Sun, Waves, Sunrise, Sunset, AlertTriangle, Loader2 } from 'lucide-react';
 
 const DEFAULT_LOCATION = {
-        "id": "9410583",
-        "name": "Balboa Pier, Newport Beach",
-        "lat": 33.6,
-        "lng": -117.9,
-        "state": "California"
-    } as const;
+  "id": "9410583",
+  "name": "Balboa Pier, Newport Beach",
+  "lat": 33.6,
+  "lng": -117.9,
+  "state": "California"
+} as const;
 
 const TODAY = startOfToday();
 
 const Index = () => {
-  const [location, setLocation] = useState<Location>(DEFAULT_LOCATION);
+  const [location, setLocation] = useState<Location | null>(null);
   const [monthlyTideData, setMonthlyTideData] = useState([]);
-  const [stationId, setStationId] = useState('9410583');
-  const [alertDuration, setAlertDuration] = useState(2);
+  const [stationId, setStationId] = useState<string | null>(null);
+  const [alertDuration] = useState(2);
   const [isLoading, setIsLoading] = useState(true);
-
-  // Memoize the location to prevent unnecessary re-renders
-  const memoizedLocation = useMemo(() => location, [location.name, location.lat, location.lng]);
 
   // Effect to handle initial location setup
   useEffect(() => {
     const savedLocation = localStorage.getItem("savedLocation");
-    if (savedLocation) {
-      const parsedLocation = JSON.parse(savedLocation);
-      setLocation(parsedLocation);
-
-      const locationStationId = Object.entries(NOAA_STATIONS).find(
-        ([key, station]) => station.name === parsedLocation.name
-      )?.[1].id;
-
-      if (locationStationId) {
-        setStationId(locationStationId);
-      }
-    } else {
+    const initialLocation = savedLocation ? JSON.parse(savedLocation) : DEFAULT_LOCATION;
+    
+    if (!savedLocation) {
       localStorage.setItem("savedLocation", JSON.stringify(DEFAULT_LOCATION));
-      setLocation(DEFAULT_LOCATION);
-      setStationId(DEFAULT_LOCATION.id);
+    }
+
+    setLocation(initialLocation);
+    
+    // Find the station ID for the location
+    const locationStationId = Object.entries(NOAA_STATIONS).find(
+      ([_, station]) => station.name === initialLocation.name
+    )?.[1].id;
+
+    if (locationStationId) {
+      setStationId(locationStationId);
     }
   }, []);
 
   // Effect to fetch tide data
   useEffect(() => {
     const fetchData = async () => {
+      if (!stationId || !location) return;
+      
       setIsLoading(true);
       try {
         const beginDate = format(TODAY, 'yyyyMMdd');
@@ -77,7 +76,7 @@ const Index = () => {
         });
 
         if (response.data && response.data.predictions) {
-          const enrichedData = enrichTideDataWithSunriseSunset(response.data.predictions, memoizedLocation);
+          const enrichedData = enrichTideDataWithSunriseSunset(response.data.predictions, location);
           setMonthlyTideData(enrichedData);
         }
       } catch (error) {
@@ -87,10 +86,8 @@ const Index = () => {
       }
     };
 
-    if (stationId) {
-      fetchData();
-    }
-  }, [stationId, memoizedLocation]);
+    fetchData();
+  }, [stationId, location]);
 
   const todayTideData = useMemo(() => {
     const todayStart = startOfDay(TODAY);
@@ -151,14 +148,7 @@ const Index = () => {
     localStorage.setItem("savedLocation", JSON.stringify(newLocation));
   };
 
-  const LoadingState = () => (
-    <div className="flex flex-col items-center justify-center space-y-4 p-8">
-      <Loader2 className="w-8 h-8 animate-spin text-blue-500" />
-      <p className="text-blue-200">Loading tide data...</p>
-    </div>
-  );
-
-  if (isLoading) {
+  if (!location || isLoading) {
     return (
       <div className="min-h-screen bg-slate-900">
         <div className="min-h-screen w-full bg-gradient-to-br from-slate-900 via-purple-850 to-slate-900">
@@ -166,11 +156,14 @@ const Index = () => {
             <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAwIiBoZWlnaHQ9IjIwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZGVmcz48cGF0dGVybiBpZD0ic3RhcnMiIHg9IjAiIHk9IjAiIHdpZHRoPSI1MCIgaGVpZ2h0PSI1MCIgcGF0dGVyblVuaXRzPSJ1c2VyU3BhY2VPblVzZSI+PGNpcmNsZSBjeD0iMSIgY3k9IjEiIHI9IjEiIGZpbGw9InJnYmEoMjU1LCAyNTUsIDI1NSwgMC4yKSIvPjwvcGF0dGVybj48L2RlZnM+PHJlY3Qgd2lkdGg9IjEwMCUiIGhlaWdodD0iMTAwJSIgZmlsbD0idXJsKCNzdGFycykiLz48L3N2Zz4=')] opacity-30 pointer-events-none" />
             <div className="max-w-4xl mx-auto p-4 sm:p-6 space-y-6 relative">
               <TideHeader 
-                location={memoizedLocation} 
-                onLocationUpdate={setLocation}
+                location={location} 
+                onLocationUpdate={handleLocationChange}
                 upcomingAlerts={[]}
               />
-              <LoadingState />
+              <div className="flex flex-col items-center justify-center space-y-4 p-8">
+                <Loader2 className="w-8 h-8 animate-spin text-blue-500" />
+                <p className="text-blue-200">Loading tide data...</p>
+              </div>
             </div>
           </div>
         </div>
@@ -186,7 +179,7 @@ const Index = () => {
 
           <div className="max-w-4xl mx-auto p-4 sm:p-6 space-y-6 relative">
             <TideHeader 
-              location={memoizedLocation} 
+              location={location} 
               onLocationUpdate={handleLocationChange}
               upcomingAlerts={getUpcomingAlerts(monthlyTideData)}
             />
