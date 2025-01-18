@@ -5,6 +5,10 @@
   text-align: center;
 }
 
+html {
+  background: #1a1a2e;
+}
+
 html, body {
   margin: 0;
   padding: 0;
