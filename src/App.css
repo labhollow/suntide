@@ -21,6 +21,14 @@ html, body {
   position: fixed;
   inset: 0;
 }
+/* If you have a main container */
+.main-container {
+  min-height: 100vh;
+  min-height: -webkit-fill-available;
+  width: 100%;
+  margin: 0;
+  padding: 0;
+}
 
 .logo {
   height: 6em;
