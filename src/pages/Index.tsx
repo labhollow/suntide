@@ -126,10 +126,11 @@ const Index = () => {
     if (nextTide.type !== 'L') return false;
     
     const tideTime = format(parseISO(nextTide.t), 'hh:mm a');
+    const duration = parseInt(localStorage.getItem('alertDuration') || '2');
     
-    return isWithinHours(tideTime, nextTide.sunrise, alertDuration) || 
-           isWithinHours(tideTime, nextTide.sunset, alertDuration);
-  }, [nextTide, alertDuration]);
+    return isWithinHours(tideTime, nextTide.sunrise, duration) || 
+           isWithinHours(tideTime, nextTide.sunset, duration);
+  }, [nextTide]);
 
   const getAlertText = () => {
     if (!nextTide) return '';
