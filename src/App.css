@@ -1,3 +1,11 @@
+@media only screen and (orientation: landscape) {
+  /* Styles for landscape orientation */
+  #root {
+    display: flex; /* or grid */
+    flex-direction: row; /* or appropriate grid settings */
+  }
+}
+
 /* Reset all margins and paddings first */
 * {
   margin: 0;
