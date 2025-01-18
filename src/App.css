@@ -5,7 +5,7 @@
   text-align: center;
 }
 
-body {
+html, body {
   margin: 0;
   padding: 0;
   background: linear-gradient(to right, #1a1a2e, #4a1259);
@@ -16,6 +16,10 @@ body {
   /* Prevent bounce/overflow scroll on iOS */
   overscroll-behavior: none;
   -webkit-overflow-scrolling: touch;
+  min-height: -webkit-fill-available; /* Important for iOS Chrome */
+  /* Force Chrome to recognize full viewport */
+  position: fixed;
+  inset: 0;
 }
 
 .logo {
