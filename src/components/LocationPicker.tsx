@@ -202,7 +202,7 @@ const LocationPicker: React.FC<LocationPickerProps> = ({ id, name, onLocationUpd
                       key={station.key}
                       value={`nearby-${station.key}`}
                       onSelect={() => handleStationSelect(station.key)}
-                      className="text-slate-300 hover:bg-white/10 hover:text-white"
+                      className="bg-white/10 text-white hover:bg-white/20"
                     >
                       {toProperCase(station.name)}
                       <span className="ml-2 text-sm text-gray-400">
@@ -221,7 +221,7 @@ const LocationPicker: React.FC<LocationPickerProps> = ({ id, name, onLocationUpd
                       key={key}
                       value={`recent-${key}`}
                       onSelect={() => handleStationSelect(key)}
-                      className="text-slate-300 hover:bg-white/10 hover:text-white"
+                      className="bg-white/10 text-white hover:bg-white/20"
                     >
                       <History className="mr-2 h-4 w-4" />
                       {toProperCase(NOAA_STATIONS[key]?.name)}
@@ -238,7 +238,7 @@ const LocationPicker: React.FC<LocationPickerProps> = ({ id, name, onLocationUpd
                       key={key}
                       value={`${state}-${station.name}`}
                       onSelect={() => handleStationSelect(key)}
-                      className="text-slate-300 hover:bg-white/10 hover:text-white"
+                      className="bg-white/10 text-white hover:bg-white/20"
                     >
                       {toProperCase(station.name)}
                     </CommandItem>
