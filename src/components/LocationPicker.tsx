@@ -174,82 +174,92 @@ const LocationPicker: React.FC<LocationPickerProps> = ({ id, name, onLocationUpd
   }, []);
 
   return (
-    <Card className="p-4 flex gap-4 items-center bg-white/5 backdrop-blur-sm border-white/10">
-      <MapPin className="text-blue-400" />
-      <Popover open={open} onOpenChange={setOpen}>
-        <PopoverTrigger asChild>
-          <Button
-            variant="outline"
-            role="combobox"
-            aria-expanded={open}
-            className="w-[300px] justify-between bg-white/10 border-white/10 text-white"
+    <Card className="p-4 flex flex-col sm:flex-row gap-4 items-stretch sm:items-center bg-white/5 backdrop-blur-sm border-white/10">
+      <div className="flex items-center gap-4 flex-1">
+        <MapPin className="text-blue-400 hidden sm:block" />
+        <Popover open={open} onOpenChange={setOpen}>
+          <PopoverTrigger asChild>
+            <Button
+              variant="outline"
+              role="combobox"
+              aria-expanded={open}
+              className="w-full sm:w-[300px] justify-between bg-white/10 border-white/10 text-white"
+            >
+              {selectedLocation
+                ? toProperCase(NOAA_STATIONS[selectedLocation]?.name)
+                : "Select location..."}
+            </Button>
+          </PopoverTrigger>
+          <PopoverContent 
+            className="w-[calc(100vw-2rem)] sm:w-[300px] p-0 bg-slate-800/95 backdrop-blur-sm border-white/10"
+            align="start"
+            sideOffset={4}
           >
-            {selectedLocation
-              ? toProperCase(NOAA_STATIONS[selectedLocation]?.name)
-              : "Select location..."}
-          </Button>
-        </PopoverTrigger>
-        <PopoverContent className="w-[300px] p-0 bg-slate-800 border-white/10">
-          <Command>
-            <CommandInput placeholder="Search locations..." className="text-white" />
-            <CommandList>
-              <CommandEmpty>No location found.</CommandEmpty>
-              
-              {userLocation && (
-                <CommandGroup heading="Nearby Stations">
-                  {nearbyStations.map((station) => (
-                    <CommandItem
-                      key={station.key}
-                      value={`nearby-${station.key}`}
-                      onSelect={() => handleStationSelect(station.key)}
-                      className="bg-white/10 text-white hover:bg-white/20"
-                    >
-                      {toProperCase(station.name)}
-                      <span className="ml-2 text-sm text-gray-400">
-                        ({Math.round(station.distance)}mi)
-                      </span>
-                    </CommandItem>
-                  ))}
-                  <CommandSeparator />
-                </CommandGroup>
-              )}
-              
-              {recentLocations.length > 0 && (
-                <CommandGroup heading="Recent">
-                  {recentLocations.map((key) => (
-                    <CommandItem
-                      key={key}
-                      value={`recent-${key}`}
-                      onSelect={() => handleStationSelect(key)}
-                      className="bg-white/10 text-white hover:bg-white/20"
-                    >
-                      <History className="mr-2 h-4 w-4" />
-                      {toProperCase(NOAA_STATIONS[key]?.name)}
-                    </CommandItem>
-                  ))}
-                  <CommandSeparator />
-                </CommandGroup>
-              )}
-              
-              {Object.entries(groupedStations).map(([state, stations]) => (
-                <CommandGroup key={state} heading={state}>
-                  {Object.entries(stations).map(([key, station]) => (
-                    <CommandItem
-                      key={key}
-                      value={`${state}-${station.name}`}
-                      onSelect={() => handleStationSelect(key)}
-                      className="bg-white/10 text-white hover:bg-white/20"
-                    >
-                      {toProperCase(station.name)}
-                    </CommandItem>
-                  ))}
-                </CommandGroup>
-              ))}
-            </CommandList>
-          </Command>
-        </PopoverContent>
-      </Popover>
-      <Button onClick={handleSaveLocation} variant="default" className="bg-blue-500 hover:bg-blue-600">
+            <Command className="bg-transparent">
+              <CommandInput placeholder="Search locations..." className="text-white" />
+              <CommandList className="max-h-[50vh] sm:max-h-[300px]">
+                <CommandEmpty className="py-6 text-center text-white">No location found.</CommandEmpty>
+                
+                {userLocation && (
+                  <CommandGroup heading="Nearby Stations" className="text-blue-200">
+                    {nearbyStations.map((station) => (
+                      <CommandItem
+                        key={station.key}
+                        value={`nearby-${station.key}`}
+                        onSelect={() => handleStationSelect(station.key)}
+                        className="bg-white/10 text-white hover:bg-white/20"
+                      >
+                        {toProperCase(station.name)}
+                        <span className="ml-2 text-sm text-blue-200">
+                          ({Math.round(station.distance)}mi)
+                        </span>
+                      </CommandItem>
+                    ))}
+                    <CommandSeparator className="bg-white/10" />
+                  </CommandGroup>
+                )}
+                
+                {recentLocations.length > 0 && (
+                  <CommandGroup heading="Recent" className="text-blue-200">
+                    {recentLocations.map((key) => (
+                      <CommandItem
+                        key={key}
+                        value={`recent-${key}`}
+                        onSelect={() => handleStationSelect(key)}
+                        className="bg-white/10 text-white hover:bg-white/20"
+                      >
+                        <History className="mr-2 h-4 w-4" />
+                        {toProperCase(NOAA_STATIONS[key]?.name)}
+                      </CommandItem>
+                    ))}
+                    <CommandSeparator className="bg-white/10" />
+                  </CommandGroup>
+                )}
+                
+                {Object.entries(groupedStations).map(([state, stations]) => (
+                  <CommandGroup key={state} heading={state} className="text-blue-200">
+                    {Object.entries(stations).map(([key, station]) => (
+                      <CommandItem
+                        key={key}
+                        value={`${state}-${station.name}`}
+                        onSelect={() => handleStationSelect(key)}
+                        className="bg-white/10 text-white hover:bg-white/20"
+                      >
+                        {toProperCase(station.name)}
+                      </CommandItem>
+                    ))}
+                  </CommandGroup>
+                ))}
+              </CommandList>
+            </Command>
+          </PopoverContent>
+        </Popover>
+      </div>
+      <Button 
+        onClick={handleSaveLocation} 
+        variant="default" 
+        className="w-full sm:w-auto bg-blue-500 hover:bg-blue-600 whitespace-nowrap"
+      >
         Find Closest Station
       </Button>
     </Card>
