@@ -40,6 +40,10 @@ export default {
           'safe-left': 'env(safe-area-inset-left)',
           'safe-right': 'env(safe-area-inset-right)',
         },
+        margin: {
+          'safe-left': 'env(safe-area-inset-left)',
+          'safe-right': 'env(safe-area-inset-right)',
+        },
         primary: {
           DEFAULT: "hsl(var(--primary))",
           foreground: "hsl(var(--primary-foreground))",
