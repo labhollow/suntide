@@ -37,6 +37,23 @@ body {
   background-color: #1a1a2e;
 }
 
+* {
+  outline: 1px solid red; /* Replace red with another color to see overlaps */
+}
+
+
+@supports (-webkit-touch-callout: none) {
+  /* Safari and Chrome on iOS */
+  html, body {
+    background-color: #1a1a2e;
+  }
+
+  #root {
+    background-color: #1a1a2e;
+  }
+}
+
+
 @media only screen and (orientation: landscape) {
   html, body, #root {
     height: calc(100vh - env(safe-area-inset-top) - env(safe-area-inset-bottom));
