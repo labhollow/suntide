@@ -176,7 +176,7 @@ const LocationPicker: React.FC<LocationPickerProps> = ({ id, name, onLocationUpd
   }, []);
 
   return (
-    <Card className="p-4 flex flex-col sm:flex-row gap-4 items-stretch sm:items-center bg-white/95 backdrop-blur-sm border-neutral-200">
+    <Card className="p-4 flex flex-col sm:flex-row gap-4 items-stretch sm:items-center bg-card-background backdrop-blur-sm border-neutral-200">
       <div className="flex items-center gap-4 flex-1 min-w-0">
         <MapPin className="text-blue-600 hidden sm:block" />
         <Popover open={open} onOpenChange={setOpen}>
