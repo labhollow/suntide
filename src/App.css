@@ -4,6 +4,7 @@
     display: flex; /* or grid */
     flex-direction: row; /* or appropriate grid settings */
     padding: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);
+    background: #1a1a2e !important;
   }
 }
 
@@ -12,6 +13,7 @@
   margin: 0;
   padding: 0;
   box-sizing: border-box;
+  background: #1a1a2e !important;
 }
 
 /* Handle the root element */
@@ -22,7 +24,7 @@
   margin: 0;
   padding: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);
   text-align: center;
-  background: #1a1a2e;
+  background: #1a1a2e !important;
   position: relative;
   top: 0;
   left: 0;
