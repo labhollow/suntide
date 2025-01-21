@@ -37,10 +37,8 @@ export default {
         background: "hsl(var(--background))",
         foreground: "hsl(var(--foreground))",
         padding: {
-          'safe-top': 'env(safe-area-inset-top)',
-          'safe-right': 'env(safe-area-inset-right)',
-          'safe-bottom': 'env(safe-area-inset-bottom)',
           'safe-left': 'env(safe-area-inset-left)',
+          'safe-right': 'env(safe-area-inset-right)',
         },
         primary: {
           DEFAULT: "hsl(var(--primary))",
