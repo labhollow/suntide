@@ -3,6 +3,7 @@ import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { MapPin, Search, History } from "lucide-react";
 import { useToast } from "@/components/ui/use-toast";
+import { useIsMobile } from "@/hooks/use-mobile";
 import {
   Command,
   CommandEmpty,
@@ -31,6 +32,7 @@ const LocationPicker: React.FC<LocationPickerProps> = ({ id, name, onLocationUpd
   const [userLocation, setUserLocation] = useState<{ lat: number; lng: number } | null>(null);
   const [recentLocations, setRecentLocations] = useState<string[]>([]);
   const { toast } = useToast();
+  const isMobile = useIsMobile();
 
   const toProperCase = (str: string) => {
     return str
@@ -175,13 +177,13 @@ const LocationPicker: React.FC<LocationPickerProps> = ({ id, name, onLocationUpd
 
   return (
     <Card className="p-4 flex flex-col sm:flex-row gap-4 items-stretch sm:items-center bg-white/5 backdrop-blur-sm border-white/10">
-      <div className="flex items-center gap-4 flex-1">
+      <div className="flex items-center gap-4 flex-1 min-w-0">
         <MapPin className="text-blue-400 hidden sm:block" />
         <Popover open={open} onOpenChange={setOpen}>
           <PopoverTrigger asChild>
             <Button
               variant="outline"
-              className="w-full sm:w-[300px] justify-between bg-white/10 border-white/10 text-white"
+              className="w-full justify-between bg-white/10 border-white/10 text-white truncate"
             >
               {selectedLocation
                 ? toProperCase(NOAA_STATIONS[selectedLocation]?.name)
@@ -193,13 +195,14 @@ const LocationPicker: React.FC<LocationPickerProps> = ({ id, name, onLocationUpd
             align="start"
             sideOffset={4}
           >
-            <Command className="bg-transparent" shouldFilter={false}>
-              <CommandInput 
-                placeholder="Search locations..." 
-                className="text-white"
-                autoFocus={false}
-              />
-              <CommandList className="max-h-[40vh] overflow-y-auto">
+            <Command className="bg-transparent">
+              {!isMobile && (
+                <CommandInput 
+                  placeholder="Search locations..." 
+                  className="text-white"
+                />
+              )}
+              <CommandList className="max-h-[50vh] overflow-y-auto">
                 <CommandEmpty className="py-6 text-center text-white">No location found.</CommandEmpty>
                 
                 {userLocation && (
@@ -260,7 +263,7 @@ const LocationPicker: React.FC<LocationPickerProps> = ({ id, name, onLocationUpd
       <Button 
         onClick={handleSaveLocation} 
         variant="default" 
-        className="w-full sm:w-auto bg-blue-500 hover:bg-blue-600 whitespace-nowrap"
+        className="w-full sm:w-auto bg-blue-500 hover:bg-blue-600 whitespace-nowrap flex-shrink-0"
       >
         Find Closest Station
       </Button>
