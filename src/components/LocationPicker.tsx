@@ -193,10 +193,11 @@ const LocationPicker: React.FC<LocationPickerProps> = ({ id, name, onLocationUpd
             align="start"
             sideOffset={4}
           >
-            <Command className="bg-transparent">
+            <Command className="bg-transparent" shouldFilter={false}>
               <CommandInput 
                 placeholder="Search locations..." 
                 className="text-white"
+                autoFocus={false}
               />
               <CommandList className="max-h-[40vh] overflow-y-auto">
                 <CommandEmpty className="py-6 text-center text-white">No location found.</CommandEmpty>
