@@ -9,7 +9,7 @@
 /* Reset all margins and paddings first */
 * {
   margin: 0;
-  padding: 0;
+  padding: env(safe-area-inset);
   box-sizing: border-box;
 }
 
