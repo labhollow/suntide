@@ -36,6 +36,12 @@ export default {
         ring: "hsl(var(--ring))",
         background: "hsl(var(--background))",
         foreground: "hsl(var(--foreground))",
+        padding: {
+          'safe-top': 'env(safe-area-inset-top)',
+          'safe-right': 'env(safe-area-inset-right)',
+          'safe-bottom': 'env(safe-area-inset-bottom)',
+          'safe-left': 'env(safe-area-inset-left)',
+        },
         primary: {
           DEFAULT: "hsl(var(--primary))",
           foreground: "hsl(var(--primary-foreground))",
@@ -67,12 +73,12 @@ export default {
       },
       keyframes: {
         "accordion-down": {
-          from: { height: 0 },
+          from: { height: "0" },
           to: { height: "var(--radix-accordion-content-height)" }
         },
         "accordion-up": {
           from: { height: "var(--radix-accordion-content-height)" },
-          to: { height: 0 }
+          to: { height: "0" }
         },
         wave: {
           "0%, 100%": { transform: "translateY(0)" },
