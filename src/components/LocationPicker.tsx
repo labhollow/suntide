@@ -181,8 +181,6 @@ const LocationPicker: React.FC<LocationPickerProps> = ({ id, name, onLocationUpd
           <PopoverTrigger asChild>
             <Button
               variant="outline"
-              role="combobox"
-              aria-expanded={open}
               className="w-full sm:w-[300px] justify-between bg-white/10 border-white/10 text-white"
             >
               {selectedLocation
@@ -196,8 +194,11 @@ const LocationPicker: React.FC<LocationPickerProps> = ({ id, name, onLocationUpd
             sideOffset={4}
           >
             <Command className="bg-transparent">
-              <CommandInput placeholder="Search locations..." className="text-white" />
-              <CommandList className="max-h-[50vh] sm:max-h-[300px]">
+              <CommandInput 
+                placeholder="Search locations..." 
+                className="text-white"
+              />
+              <CommandList className="max-h-[40vh] overflow-y-auto">
                 <CommandEmpty className="py-6 text-center text-white">No location found.</CommandEmpty>
                 
                 {userLocation && (
