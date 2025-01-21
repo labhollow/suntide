@@ -183,7 +183,7 @@ const LocationPicker: React.FC<LocationPickerProps> = ({ id, name, onLocationUpd
           <PopoverTrigger asChild>
             <Button
               variant="outline"
-              className="w-full justify-between bg-slate-900 border-neutral-200 text-white font-normal truncate hover:bg-neutral-50"
+              className="w-full justify-between bg-slate-900 border-neutral-200 text-white font-semi-bold truncate hover:bg-neutral-50"
             >
               {selectedLocation
                 ? toProperCase(NOAA_STATIONS[selectedLocation]?.name)
