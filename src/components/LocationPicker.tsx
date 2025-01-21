@@ -176,14 +176,14 @@ const LocationPicker: React.FC<LocationPickerProps> = ({ id, name, onLocationUpd
   }, []);
 
   return (
-    <Card className="p-4 flex flex-col sm:flex-row gap-4 items-stretch sm:items-center bg-white/5 backdrop-blur-sm border-white/10">
+    <Card className="p-4 flex flex-col sm:flex-row gap-4 items-stretch sm:items-center bg-white/95 backdrop-blur-sm border-neutral-200">
       <div className="flex items-center gap-4 flex-1 min-w-0">
-        <MapPin className="text-blue-400 hidden sm:block" />
+        <MapPin className="text-blue-600 hidden sm:block" />
         <Popover open={open} onOpenChange={setOpen}>
           <PopoverTrigger asChild>
             <Button
               variant="outline"
-              className="w-full justify-between bg-white/10 border-white/10 text-white truncate"
+              className="w-full justify-between bg-white border-neutral-200 text-neutral-700 font-normal truncate hover:bg-neutral-50"
             >
               {selectedLocation
                 ? toProperCase(NOAA_STATIONS[selectedLocation]?.name)
@@ -191,7 +191,7 @@ const LocationPicker: React.FC<LocationPickerProps> = ({ id, name, onLocationUpd
             </Button>
           </PopoverTrigger>
           <PopoverContent 
-            className="w-[calc(100vw-2rem)] sm:w-[300px] p-0 bg-slate-800/95 backdrop-blur-sm border-white/10"
+            className="w-[calc(100vw-2rem)] sm:w-[300px] p-0 bg-white/95 backdrop-blur-sm border-neutral-200 shadow-lg"
             align="start"
             sideOffset={4}
           >
@@ -199,56 +199,56 @@ const LocationPicker: React.FC<LocationPickerProps> = ({ id, name, onLocationUpd
               {!isMobile && (
                 <CommandInput 
                   placeholder="Search locations..." 
-                  className="text-white"
+                  className="text-neutral-700"
                 />
               )}
               <CommandList className="max-h-[50vh] overflow-y-auto">
-                <CommandEmpty className="py-6 text-center text-white">No location found.</CommandEmpty>
+                <CommandEmpty className="py-6 text-center text-neutral-700">No location found.</CommandEmpty>
                 
                 {userLocation && (
-                  <CommandGroup heading="Nearby Stations" className="text-blue-200">
+                  <CommandGroup heading="Nearby Stations" className="text-neutral-500">
                     {nearbyStations.map((station) => (
                       <CommandItem
                         key={station.key}
                         value={`nearby-${station.key}`}
                         onSelect={() => handleStationSelect(station.key)}
-                        className="bg-white/10 text-white hover:bg-white/20"
+                        className="bg-white text-neutral-700 hover:bg-neutral-50"
                       >
                         {toProperCase(station.name)}
-                        <span className="ml-2 text-sm text-blue-200">
+                        <span className="ml-2 text-sm text-blue-600">
                           ({Math.round(station.distance)}mi)
                         </span>
                       </CommandItem>
                     ))}
-                    <CommandSeparator className="bg-white/10" />
+                    <CommandSeparator className="bg-neutral-200" />
                   </CommandGroup>
                 )}
                 
                 {recentLocations.length > 0 && (
-                  <CommandGroup heading="Recent" className="text-blue-200">
+                  <CommandGroup heading="Recent" className="text-neutral-500">
                     {recentLocations.map((key) => (
                       <CommandItem
                         key={key}
                         value={`recent-${key}`}
                         onSelect={() => handleStationSelect(key)}
-                        className="bg-white/10 text-white hover:bg-white/20"
+                        className="bg-white text-neutral-700 hover:bg-neutral-50"
                       >
                         <History className="mr-2 h-4 w-4" />
                         {toProperCase(NOAA_STATIONS[key]?.name)}
                       </CommandItem>
                     ))}
-                    <CommandSeparator className="bg-white/10" />
+                    <CommandSeparator className="bg-neutral-200" />
                   </CommandGroup>
                 )}
                 
                 {Object.entries(groupedStations).map(([state, stations]) => (
-                  <CommandGroup key={state} heading={state} className="text-blue-200">
+                  <CommandGroup key={state} heading={state} className="text-neutral-500">
                     {Object.entries(stations).map(([key, station]) => (
                       <CommandItem
                         key={key}
                         value={`${state}-${station.name}`}
                         onSelect={() => handleStationSelect(key)}
-                        className="bg-white/10 text-white hover:bg-white/20"
+                        className="bg-white text-neutral-700 hover:bg-neutral-50"
                       >
                         {toProperCase(station.name)}
                       </CommandItem>
@@ -263,7 +263,7 @@ const LocationPicker: React.FC<LocationPickerProps> = ({ id, name, onLocationUpd
       <Button 
         onClick={handleSaveLocation} 
         variant="default" 
-        className="w-full sm:w-auto bg-blue-500 hover:bg-blue-600 whitespace-nowrap flex-shrink-0"
+        className="w-full sm:w-auto bg-blue-500 hover:bg-blue-600 text-white whitespace-nowrap flex-shrink-0 font-normal"
       >
         Find Closest Station
       </Button>
