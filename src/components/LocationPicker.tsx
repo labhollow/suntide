@@ -203,7 +203,7 @@ const LocationPicker: React.FC<LocationPickerProps> = ({ id, name, onLocationUpd
                 />
               )}
               <CommandList className="max-h-[50vh] overflow-y-auto">
-                <CommandEmpty className="py-6 text-center text-neutral-700">No location found.</CommandEmpty>
+                <CommandEmpty className="py-6 text-center text-neutral-600">No location found.</CommandEmpty>
                 
                 {userLocation && (
                   <CommandGroup heading="Nearby Stations" className="text-neutral-500">
@@ -212,7 +212,7 @@ const LocationPicker: React.FC<LocationPickerProps> = ({ id, name, onLocationUpd
                         key={station.key}
                         value={`nearby-${station.key}`}
                         onSelect={() => handleStationSelect(station.key)}
-                        className="bg-white text-neutral-700 hover:bg-neutral-50"
+                        className="bg-white text-neutral-600 hover:bg-neutral-50 font-normal"
                       >
                         {toProperCase(station.name)}
                         <span className="ml-2 text-sm text-blue-600">
@@ -220,7 +220,7 @@ const LocationPicker: React.FC<LocationPickerProps> = ({ id, name, onLocationUpd
                         </span>
                       </CommandItem>
                     ))}
-                    <CommandSeparator className="bg-neutral-200" />
+                    <CommandSeparator className="bg-neutral-100" />
                   </CommandGroup>
                 )}
                 
@@ -231,13 +231,13 @@ const LocationPicker: React.FC<LocationPickerProps> = ({ id, name, onLocationUpd
                         key={key}
                         value={`recent-${key}`}
                         onSelect={() => handleStationSelect(key)}
-                        className="bg-white text-neutral-700 hover:bg-neutral-50"
+                        className="bg-white text-neutral-600 hover:bg-neutral-50 font-normal"
                       >
                         <History className="mr-2 h-4 w-4" />
                         {toProperCase(NOAA_STATIONS[key]?.name)}
                       </CommandItem>
                     ))}
-                    <CommandSeparator className="bg-neutral-200" />
+                    <CommandSeparator className="bg-neutral-100" />
                   </CommandGroup>
                 )}
                 
@@ -248,7 +248,7 @@ const LocationPicker: React.FC<LocationPickerProps> = ({ id, name, onLocationUpd
                         key={key}
                         value={`${state}-${station.name}`}
                         onSelect={() => handleStationSelect(key)}
-                        className="bg-white text-neutral-700 hover:bg-neutral-50"
+                        className="bg-white text-neutral-600 hover:bg-neutral-50 font-normal"
                       >
                         {toProperCase(station.name)}
                       </CommandItem>
