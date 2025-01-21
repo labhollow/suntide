@@ -1,99 +1,34 @@
-@media only screen and (orientation: landscape) {
-  /* Styles for landscape orientation */
-  #root {
-    display: flex; /* or grid */
-    flex-direction: row; /* or appropriate grid settings */
-    padding: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);
-    background: #1a1a2e !important;
-  }
-}
-
-/* Reset all margins and paddings first */
+/* Reset margins, paddings, and box-sizing */
 * {
   margin: 0;
   padding: 0;
   box-sizing: border-box;
-  background: #1a1a2e !important;
 }
 
-/* Handle the root element */
-#root {
-  width: 100dvw;
-  /* height: 100vh; */
-  height: 100dvh; /* dynamic viewport height */
-  margin: 0;
-  padding: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);
-  text-align: center;
-  background: #1a1a2e !important;
-  position: relative;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  /* Add overflow hidden to prevent horizontal scrolling */
-  overflow-x: hidden;
-}
-
-/* Base HTML and body styles */
-html {
-  background: #1a1a2e;
-  width: 100%;
-  height: 100%;
-  overflow: hidden;
-  padding: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);
-}
-
-body {
+/* Ensure the html and body fill the screen */
+html, body {
   margin: 0;
   padding: 0;
-  background: linear-gradient(to right, #1a1a2e, #4a1259);
-  width: 100%;
-  height: 100%;
-  overflow: auto;
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
+  width: 100vw;
+  height: 100vh;
+  overflow: hidden;
+  background-color: #1a1a2e;
 }
 
-/* Add viewport meta tag if not already present */
-/* <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no"> */
-
-/* Rest of your existing styles remain the same */
-
-.logo {
-  height: 6em;
-  padding: 1.5em;
-  will-change: filter;
-  transition: filter 300ms;
-}
-.logo:hover {
-  filter: drop-shadow(0 0 2em #646cffaa);
-}
-.logo.react:hover {
-  filter: drop-shadow(0 0 2em #61dafbaa);
+/* Root element to account for safe area insets */
+#root {
+  display: flex;
+  flex-direction: column; /* Adjust as necessary for layout */
+  width: 100vw;
+  height: 100vh;
+  background-color: #1a1a2e;
+  padding: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);
+  overflow: hidden; /* Prevent unwanted scrolling */
 }
 
-@keyframes logo-spin {
-  from {
-    transform: rotate(0deg);
+/* Landscape-specific styles */
+@media only screen and (orientation: landscape) {
+  html, body, #root {
+    background-color: #1a1a2e; /* Ensures consistency */
   }
-  to {
-    transform: rotate(360deg);
-  }
-}
-
-@media (prefers-reduced-motion: no-preference) {
-  a:nth-of-type(2) .logo {
-    animation: logo-spin infinite 20s linear;
-  }
-}
-
-.card {
-  padding: 2em;
-}
-
-.read-the-docs {
-  color: #888;
 }
