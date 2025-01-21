@@ -3,61 +3,62 @@
   margin: 0;
   padding: 0;
   box-sizing: border-box;
+  outline: 1px solid red !important; /* Debugging: outline all elements */
 }
 
+/* Ensure the html and body fill the screen */
 html, body {
   margin: 0;
   padding: 0;
   width: 100vw;
-  height: 100dvh; /* Ensure the height matches the dynamic viewport */
-  overflow: hidden; /* Prevent any scrolling */
-  background-color: #1a1a2e; /* Match your app's background */
+  height: calc(100vh - env(safe-area-inset-top, 0) - env(safe-area-inset-bottom, 0));
+  min-height: 100vh; /* Fallback for browsers without env() support */
+  overflow: hidden; /* Prevent scrolling */
+  background-color: #1a1a2e !important; /* Match your app's background */
+  border: 5px solid blue !important; /* Debugging: border for html */
 }
 
+/* Root element to account for safe area insets */
 #root {
   margin: 0;
-  padding: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);
   width: 100vw;
-  height: 100dvh;
-  background-color: #1a1a2e;
+  height: calc(100vh - env(safe-area-inset-top, 0) - env(safe-area-inset-bottom, 0));
+  min-height: 100vh; /* Fallback for browsers without env() support */
+  padding: env(safe-area-inset-top, 0) env(safe-area-inset-right, 0) env(safe-area-inset-bottom, 0) env(safe-area-inset-left, 0);
+  background-color: #1a1a2e !important; /* Match your app's background */
   display: flex;
   flex-direction: column; /* Adjust layout as needed */
   overflow: hidden; /* Prevent any overflow issues */
+  border: 5px solid yellow !important; /* Debugging: border for #root */
 }
 
+/* Landscape-specific styles */
+@media only screen and (orientation: landscape) {
+  html, body, #root {
+    width: 100vw;
+    height: calc(100vh - env(safe-area-inset-top, 0) - env(safe-area-inset-bottom, 0));
+    min-height: 100vh; /* Fallback for browsers without env() support */
+    background-color: #1a1a2e !important;
+    overflow: hidden;
+  }
+}
+
+/* Additional Safari/Chrome on iOS fixes */
+@supports (-webkit-touch-callout: none) {
+  html, body, #root {
+    background-color: #1a1a2e !important; /* Ensure full coverage on iOS */
+  }
+}
+
+/* Debugging: Visualize element boundaries */
 html {
-  background-color: #1a1a2e;
+  border: 5px solid blue !important; /* Debugging: html element */
 }
 
 body {
-  background: #1a1a2e; /* Match the root background */
+  border: 5px solid green !important; /* Debugging: body element */
 }
 
 #root {
-  background-color: #1a1a2e;
+  border: 5px solid yellow !important; /* Debugging: root element */
 }
-
-* {
-  outline: 1px solid red; /* Replace red with another color to see overlaps */
-}
-
-
-@supports (-webkit-touch-callout: none) {
-  /* Safari and Chrome on iOS */
-  html, body {
-    background-color: #1a1a2e;
-  }
-
-  #root {
-    background-color: #1a1a2e;
-  }
-}
-
-
-@media only screen and (orientation: landscape) {
-  html, body, #root {
-    height: calc(100vh - env(safe-area-inset-top) - env(safe-area-inset-bottom));
-    width: 100vw;
-  }
-}
-
