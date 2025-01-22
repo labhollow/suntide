@@ -195,27 +195,27 @@ const Index = () => {
               </div>
               <div className="h-full">
                 <Card className="p-6 backdrop-blur-sm bg-white/5 border-white/10 h-full">
-                  <div className="flex items-center justify-between mb-8">
-                    <h3 className="text-2xl font-light text-blue-100">
+                  <div className="flex items-center justify-between mb-4">
+                    <h3 className="text-lg font-semibold text-blue-200">
                       Sun Events
                     </h3>
                     <Sun className="w-6 h-6 text-tide-sunrise" />
                   </div>
                   {nextTide && (
-                    <div className="space-y-8">
+                    <div className="space-y-4">
                       <div>
                         <div className="flex items-center gap-2 mb-2">
-                          <Sunrise className="w-6 h-6 text-tide-sunrise" />
-                          <span className="text-tide-sunrise text-2xl">Sunrise</span>
+                          <Sunrise className="w-5 h-5 text-tide-sunrise" />
+                          <span className="text-tide-sunrise">Sunrise</span>
                         </div>
-                        <span className="text-white text-4xl font-light">{nextTide.sunrise}</span>
+                        <span className="text-xl font-semibold text-white">{nextTide.sunrise}</span>
                       </div>
                       <div>
                         <div className="flex items-center gap-2 mb-2">
-                          <Sunset className="w-6 h-6 text-tide-sunset" />
-                          <span className="text-tide-sunset text-2xl">Sunset</span>
+                          <Sunset className="w-5 h-5 text-tide-sunset" />
+                          <span className="text-tide-sunset">Sunset</span>
                         </div>
-                        <span className="text-white text-4xl font-light">{nextTide.sunset}</span>
+                        <span className="text-xl font-semibold text-white">{nextTide.sunset}</span>
                       </div>
                     </div>
                   )}
