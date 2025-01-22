@@ -194,32 +194,37 @@ const Index = () => {
                 />
               </div>
               <div className="h-full">
-                <Card className="p-6 backdrop-blur-sm bg-white/5 border-white/10 h-full">
-                  <div className="flex items-center justify-between mb-4">
-                    <h3 className="text-lg font-semibold text-blue-200">
-                      Sun Events
-                    </h3>
-                    <Sun className="w-6 h-6 text-tide-sunrise" />
-                  </div>
-                  {nextTide && (
-                    <div className="space-y-4">
-                      <div>
-                        <div className="flex items-center gap-2 mb-2">
-                          <Sunrise className="w-5 h-5 text-tide-sunrise" />
-                          <span className="text-tide-sunrise">Sunrise</span>
-                        </div>
-                        <span className="text-xl font-semibold text-white">{nextTide.sunrise}</span>
+              <div className="card-wrapper">
+              <Card className="p-6 bg-white/5 backdrop-blur-sm border-white/10 min-card-height">
+                <div className="flex items-center justify-between mb-4 new-line-height">
+                  <h3 className="text-xl font-semibold text-blue-200">Sun Events</h3>
+                  <Sun className="w-6 h-6 text-tide-sunrise" />
+                </div>
+                {nextTide && (
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="space-y-2">
+                      <div className="flex items-center text-tide-sunrise">
+                        <Sunrise className="w-5 h-5 mr-2" />
+                        <span>Sunrise</span>
                       </div>
-                      <div>
-                        <div className="flex items-center gap-2 mb-2">
-                          <Sunset className="w-5 h-5 text-tide-sunset" />
-                          <span className="text-tide-sunset">Sunset</span>
-                        </div>
-                        <span className="text-xl font-semibold text-white">{nextTide.sunset}</span>
+                      <div className="text-xl font-semibold text-white new-line-height">
+                        {nextTide.sunrise}
+                        
                       </div>
                     </div>
-                  )}
-                </Card>
+                    <div className="space-y-2">
+                      <div className="flex items-center text-tide-sunset">
+                        <Sunset className="w-5 h-5 mr-2" />
+                        <span>Sunset</span>
+                      </div>
+                      <div className="text-xl font-semibold text-white new-line-height">
+                        {nextTide.sunset}
+                      </div>
+                    </div>
+                  </div>
+                )}
+              </Card>
+            </div>
               </div>
             </div>
 

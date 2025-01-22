@@ -75,7 +75,7 @@ const TideCarousel = ({ tideData, alertDuration }: TideCarouselProps) => {
                   : 'bg-white/5'
               }`}>
                 <div className="flex items-center justify-between mb-4">
-                  <h3 className="text-lg font-semibold text-blue-200">
+                  <h3 className="text-xl font-semibold text-blue-200">
                     {tide.context || `${tide.type === 'H' ? 'High' : 'Low'} Tide ${index + 1}`}
                   </h3>
                   <div className="flex items-center gap-2">

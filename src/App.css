@@ -29,6 +29,29 @@ html, body {
   overflow: hidden; /* Prevent any overflow issues */
 }
 
+/* .min-card-height{
+  min-height: 162px !important;
+  height: 162px !important;
+  
+} */
+.new-line-height{
+  line-height: 2.3rem !important;
+} 
+/* Add a wrapper to enforce equal heights for child cards */
+.card-wrapper {
+  display: flex; /* Align items horizontally */
+  gap: 1rem; /* Add spacing between cards */
+}
+
+.card-wrapper > .card {
+  flex: 1; /* Ensure both cards take equal width */
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between; /* Align content properly */
+  min-height: 162px; /* Set a minimum height */
+  height: auto; /* Allow dynamic resizing */
+}
+
 /* Landscape-specific styles */
 @media only screen and (orientation: landscape) {
   html, body, #root {
