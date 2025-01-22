@@ -176,14 +176,14 @@ const LocationPicker: React.FC<LocationPickerProps> = ({ id, name, onLocationUpd
   }, []);
 
   return (
-    <Card className="p-4 flex flex-col sm:flex-row gap-4 items-stretch sm:items-center bg-white/95 backdrop-blur-sm border-neutral-200">
+    <Card className="p-4 flex flex-col sm:flex-row gap-4 items-stretch sm:items-center bg-card-background backdrop-blur-sm border-neutral-200">
       <div className="flex items-center gap-4 flex-1 min-w-0">
         <MapPin className="text-blue-600 hidden sm:block" />
         <Popover open={open} onOpenChange={setOpen}>
           <PopoverTrigger asChild>
             <Button
               variant="outline"
-              className="w-full justify-between bg-white border-neutral-200 text-neutral-700 font-normal truncate hover:bg-neutral-50"
+              className="w-full justify-between bg-slate-900 border-neutral-200 text-white font-normal truncate hover:bg-neutral-50"
             >
               {selectedLocation
                 ? toProperCase(NOAA_STATIONS[selectedLocation]?.name)
