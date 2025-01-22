@@ -187,41 +187,39 @@ const Index = () => {
             />
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
-              <div>
+              <div className="h-full">
                 <TideCarousel 
                   tideData={todayTideData}
                   alertDuration={alertDuration}
                 />
               </div>
-              <div>
-              <Card className="p-6 bg-white/5 backdrop-blur-sm border-white/10">
-                <div className="flex items-center justify-between mb-4">
-                  <h3 className="text-lg font-semibold text-blue-200">Sun Events</h3>
-                  <Sun className="w-6 h-6 text-tide-sunrise" />
-                </div>
-                {nextTide && (
-                  <div className="grid grid-cols-2 gap-4">
-                    <div className="space-y-2">
-                      <div className="flex items-center text-tide-sunrise">
-                        <Sunrise className="w-5 h-5 mr-2" />
-                        <span>Sunrise</span>
-                      </div>
-                      <div className="text-xl font-semibold text-white">
-                        {nextTide.sunrise}
-                      </div>
-                    </div>
-                    <div className="space-y-2">
-                      <div className="flex items-center text-tide-sunset">
-                        <Sunset className="w-5 h-5 mr-2" />
-                        <span>Sunset</span>
-                      </div>
-                      <div className="text-xl font-semibold text-white">
-                        {nextTide.sunset}
-                      </div>
-                    </div>
+              <div className="h-full">
+                <Card className="p-6 backdrop-blur-sm bg-white/5 border-white/10 h-full">
+                  <div className="flex items-center justify-between mb-8">
+                    <h3 className="text-2xl font-light text-blue-100">
+                      Sun Events
+                    </h3>
+                    <Sun className="w-6 h-6 text-tide-sunrise" />
                   </div>
-                )}
-              </Card>
+                  {nextTide && (
+                    <div className="space-y-8">
+                      <div>
+                        <div className="flex items-center gap-2 mb-2">
+                          <Sunrise className="w-6 h-6 text-tide-sunrise" />
+                          <span className="text-tide-sunrise text-2xl">Sunrise</span>
+                        </div>
+                        <span className="text-white text-4xl font-light">{nextTide.sunrise}</span>
+                      </div>
+                      <div>
+                        <div className="flex items-center gap-2 mb-2">
+                          <Sunset className="w-6 h-6 text-tide-sunset" />
+                          <span className="text-tide-sunset text-2xl">Sunset</span>
+                        </div>
+                        <span className="text-white text-4xl font-light">{nextTide.sunset}</span>
+                      </div>
+                    </div>
+                  )}
+                </Card>
               </div>
             </div>
 
