@@ -33,7 +33,7 @@
 
 /* Base HTML and body styles */
 html {
-  background: #1a1a2e;
+  background: linear-gradient(to right, #1a1a2e, #ac3fca);
   width: 100%;
   height: 100%;
   overflow: hidden;
@@ -43,7 +43,7 @@ html {
 body {
   margin: 0;
   padding: 0;
-  background: linear-gradient(to right, #1a1a2e, #4a1259);
+  background: linear-gradient(to right, #1a1a2e, #ac3fca);
   width: 100%;
   height: 100%;
   overflow: auto;

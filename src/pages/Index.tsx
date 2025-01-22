@@ -266,14 +266,14 @@ const Index = () => {
                 </TabsTrigger>
                 <TabsTrigger 
                   value="monthly" 
-                  className="data-[state=active]:bg-blue-200/10 data-[state=active]:text-blue-200"
+                  className="data-[state=active]:bg-blue-200/10 data-[state=active]:text-blue-200 hidden sm:block"
                 >
                   <Waves className="w-4 h-4 mr-2" />
                   This Month
                 </TabsTrigger>
                 <TabsTrigger 
                   value="sunrise-sunset" 
-                  className="data-[state=active]:bg-blue-200/10 data-[state=active]:text-blue-200"
+                  className="data-[state=active]:bg-blue-200/10 data-[state=active]:text-blue-200 hidden sm:block"
                 >
                   Calendar
                 </TabsTrigger>
