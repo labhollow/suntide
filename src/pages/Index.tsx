@@ -12,7 +12,6 @@ import TideHeader from "@/components/TideHeader";
 import TideView from "@/components/TideView";
 import TideCalendar from '@/components/TideCalendar';
 import { Moon, Sun, Waves, Sunrise, Sunset, AlertTriangle, Loader2 } from 'lucide-react';
-import TideCarousel from "@/components/TideCarousel";
 
 const DEFAULT_LOCATION = {
   "id": "9410583",
@@ -186,18 +185,42 @@ const Index = () => {
               upcomingAlerts={getUpcomingAlerts(monthlyTideData)}
             />
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
-              <div className="h-full">
-                <TideCarousel 
-                  tideData={todayTideData}
-                  alertDuration={alertDuration}
-                />
-              </div>
-              <div className="h-full">
-              <div className="card-wrapper">
-              <Card className="p-6 bg-white/5 backdrop-blur-sm border-white/10 min-card-height">
-                <div className="flex items-center justify-between mb-4 new-line-height">
-                  <h3 className="text-xl font-semibold text-blue-200">Sun Events</h3>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+              <Card className={`p-6 backdrop-blur-sm border-white/10 transition-colors ${
+                isNextTideAlert 
+                  ? 'bg-orange-500/20 border-orange-500/50' 
+                  : 'bg-white/5'
+              }`}>
+                <div className="flex items-center justify-between mb-4">
+                  <h3 className="text-lg font-semibold text-blue-200">Next Tide</h3>
+                  <div className="flex items-center gap-2">
+                    {isNextTideAlert && (
+                      <AlertTriangle className="w-5 h-5 text-orange-400 animate-pulse" />
+                    )}
+                    <Waves className="w-6 h-6 text-blue-400" />
+                  </div>
+                </div>
+                {nextTide && (
+                  <div className="space-y-2">
+                    <div className="text-3xl font-bold text-white">
+                      {parseFloat(nextTide.v).toFixed(1)}ft
+                    </div>
+                    <div className="text-blue-200">
+                      {format(parseISO(nextTide.t), 'h:mm a')}
+                    </div>
+                    <div className={`${
+                      isNextTideAlert ? 'text-orange-400' : 'text-blue-200/80'
+                    }`}>
+                      {nextTide.type === 'H' ? 'High Tide' : 'Low Tide'}
+                      {isNextTideAlert && ` - ${getAlertText()}`}
+                    </div>
+                  </div>
+                )}
+              </Card>
+
+              <Card className="p-6 bg-white/5 backdrop-blur-sm border-white/10">
+                <div className="flex items-center justify-between mb-4">
+                  <h3 className="text-lg font-semibold text-blue-200">Sun Events</h3>
                   <Sun className="w-6 h-6 text-tide-sunrise" />
                 </div>
                 {nextTide && (
@@ -207,9 +230,8 @@ const Index = () => {
                         <Sunrise className="w-5 h-5 mr-2" />
                         <span>Sunrise</span>
                       </div>
-                      <div className="text-xl font-semibold text-white new-line-height">
+                      <div className="text-xl font-semibold text-white">
                         {nextTide.sunrise}
-                        
                       </div>
                     </div>
                     <div className="space-y-2">
@@ -217,15 +239,13 @@ const Index = () => {
                         <Sunset className="w-5 h-5 mr-2" />
                         <span>Sunset</span>
                       </div>
-                      <div className="text-xl font-semibold text-white new-line-height">
+                      <div className="text-xl font-semibold text-white">
                         {nextTide.sunset}
                       </div>
                     </div>
                   </div>
                 )}
               </Card>
-            </div>
-              </div>
             </div>
 
             <Tabs defaultValue="daily" className="w-full">

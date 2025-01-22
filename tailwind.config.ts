@@ -36,14 +36,6 @@ export default {
         ring: "hsl(var(--ring))",
         background: "hsl(var(--background))",
         foreground: "hsl(var(--foreground))",
-        padding: {
-          'safe-left': 'env(safe-area-inset-left)',
-          'safe-right': 'env(safe-area-inset-right)',
-        },
-        margin: {
-          'safe-left': 'env(safe-area-inset-left)',
-          'safe-right': 'env(safe-area-inset-right)',
-        },
         primary: {
           DEFAULT: "hsl(var(--primary))",
           foreground: "hsl(var(--primary-foreground))",
@@ -75,12 +67,12 @@ export default {
       },
       keyframes: {
         "accordion-down": {
-          from: { height: "0" },
+          from: { height: 0 },
           to: { height: "var(--radix-accordion-content-height)" }
         },
         "accordion-up": {
           from: { height: "var(--radix-accordion-content-height)" },
-          to: { height: "0" }
+          to: { height: 0 }
         },
         wave: {
           "0%, 100%": { transform: "translateY(0)" },
@@ -94,5 +86,5 @@ export default {
       },
     },
   },
-  plugins: [require("tailwindcss-animate"),require('tailwindcss-safe-area')],
+  plugins: [require("tailwindcss-animate")],
 } satisfies Config;
