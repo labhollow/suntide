@@ -186,11 +186,41 @@ const Index = () => {
               upcomingAlerts={getUpcomingAlerts(monthlyTideData)}
             />
 
-            <div className="mb-6">
-              <TideCarousel 
-                tideData={todayTideData}
-                alertDuration={alertDuration}
-              />
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+              <div>
+                <TideCarousel 
+                  tideData={todayTideData}
+                  alertDuration={alertDuration}
+                />
+              </div>
+              <div>
+                <Card className="p-6 backdrop-blur-sm bg-white/5 border-white/10">
+                  <div className="flex items-center justify-between mb-4">
+                    <h3 className="text-lg font-semibold text-blue-200">
+                      Sunrise & Sunset
+                    </h3>
+                    <div className="flex items-center gap-2">
+                      <Sun className="w-6 h-6 text-orange-400" />
+                    </div>
+                  </div>
+                  {nextTide && (
+                    <div className="space-y-4">
+                      <div>
+                        <div className="flex items-center gap-2">
+                          <Sunrise className="w-5 h-5 text-orange-400" />
+                          <span className="text-blue-200">{nextTide.sunrise}</span>
+                        </div>
+                      </div>
+                      <div>
+                        <div className="flex items-center gap-2">
+                          <Sunset className="w-5 h-5 text-orange-400" />
+                          <span className="text-blue-200">{nextTide.sunset}</span>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+                </Card>
+              </div>
             </div>
 
             <Tabs defaultValue="daily" className="w-full">
