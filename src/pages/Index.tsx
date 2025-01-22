@@ -195,27 +195,27 @@ const Index = () => {
               </div>
               <div>
                 <Card className="p-6 backdrop-blur-sm bg-white/5 border-white/10">
-                  <div className="flex items-center justify-between mb-4">
-                    <h3 className="text-lg font-semibold text-blue-200">
-                      Sunrise & Sunset
+                  <div className="flex items-center justify-between mb-8">
+                    <h3 className="text-2xl font-light text-blue-100">
+                      Sun Events
                     </h3>
-                    <div className="flex items-center gap-2">
-                      <Sun className="w-6 h-6 text-orange-400" />
-                    </div>
+                    <Sun className="w-6 h-6 text-tide-sunrise" />
                   </div>
                   {nextTide && (
-                    <div className="space-y-4">
+                    <div className="space-y-8">
                       <div>
-                        <div className="flex items-center gap-2">
-                          <Sunrise className="w-5 h-5 text-orange-400" />
-                          <span className="text-blue-200">{nextTide.sunrise}</span>
+                        <div className="flex items-center gap-2 mb-2">
+                          <Sunrise className="w-6 h-6 text-tide-sunrise" />
+                          <span className="text-tide-sunrise text-2xl">Sunrise</span>
                         </div>
+                        <span className="text-white text-4xl font-light">{nextTide.sunrise}</span>
                       </div>
                       <div>
-                        <div className="flex items-center gap-2">
-                          <Sunset className="w-5 h-5 text-orange-400" />
-                          <span className="text-blue-200">{nextTide.sunset}</span>
+                        <div className="flex items-center gap-2 mb-2">
+                          <Sunset className="w-6 h-6 text-tide-sunset" />
+                          <span className="text-tide-sunset text-2xl">Sunset</span>
                         </div>
+                        <span className="text-white text-4xl font-light">{nextTide.sunset}</span>
                       </div>
                     </div>
                   )}
