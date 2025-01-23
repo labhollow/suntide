@@ -94,7 +94,13 @@ const TideChart = ({ data, period }: TideChartProps) => {
               dot={{
                 stroke: '#60a5fa',
                 strokeWidth: 2,
-                r: 3,
+                r: 4,
+                fill: '#1e1b4b'
+              }}
+              activeDot={{
+                stroke: '#60a5fa',
+                strokeWidth: 2,
+                r: 6,
                 fill: '#1e1b4b'
               }}
             />
