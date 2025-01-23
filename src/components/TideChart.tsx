@@ -76,6 +76,9 @@ const TideChart = ({ data, period }: TideChartProps) => {
               stroke="white"
               tick={{ fontSize: 10, fill: 'white' }}
               tickMargin={8}
+              scale="time"
+              type="category"
+              interval="preserveStartEnd"
             />
             <YAxis 
               stroke="white"
