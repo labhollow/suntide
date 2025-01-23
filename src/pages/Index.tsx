@@ -11,7 +11,7 @@ import TideAlerts from "@/components/TideAlerts";
 import TideHeader from "@/components/TideHeader";
 import TideView from "@/components/TideView";
 import TideCalendar from '@/components/TideCalendar';
-import { Moon, Sun, Waves, Sunrise, Sunset, AlertTriangle, Loader2 } from 'lucide-react';
+import { Moon, Sun, Waves, Sunrise, Sunset, AlertTriangle, Loader2, Calendar } from 'lucide-react';
 
 const DEFAULT_LOCATION = {
   "id": "9410583",
@@ -30,7 +30,6 @@ const Index = () => {
   const [alertDuration] = useState(2);
   const [isLoading, setIsLoading] = useState(true);
 
-  // Effect to handle initial location setup
   useEffect(() => {
     const savedLocation = localStorage.getItem("savedLocation");
     const initialLocation = savedLocation ? JSON.parse(savedLocation) : DEFAULT_LOCATION;
@@ -41,7 +40,6 @@ const Index = () => {
 
     setLocation(initialLocation);
     
-    // Find the station ID for the location
     const locationStationId = Object.entries(NOAA_STATIONS).find(
       ([_, station]) => station.name === initialLocation.name
     )?.[1].id;
@@ -51,7 +49,6 @@ const Index = () => {
     }
   }, []);
 
-  // Effect to fetch tide data
   useEffect(() => {
     const fetchData = async () => {
       if (!stationId || !location) return;
@@ -252,29 +249,30 @@ const Index = () => {
               <TabsList className="grid w-full grid-cols-2 sm:grid-cols-4 bg-white/5 backdrop-blur-sm border border-white/10 rounded-lg">
                 <TabsTrigger 
                   value="daily" 
-                  className="data-[state=active]:bg-blue-200/10 data-[state=active]:text-blue-200"
+                  className="data-[state=active]:bg-blue-200/10 data-[state=active]:text-blue-200 flex items-center justify-center gap-2"
                 >
-                  <Sun className="w-4 h-4 mr-2" />
+                  <Sun className="w-4 h-4" />
                   Today
                 </TabsTrigger>
                 <TabsTrigger 
                   value="weekly" 
-                  className="data-[state=active]:bg-blue-200/10 data-[state=active]:text-blue-200"
+                  className="data-[state=active]:bg-blue-200/10 data-[state=active]:text-blue-200 flex items-center justify-center gap-2"
                 >
-                  <Moon className="w-4 h-4 mr-2" />
+                  <Sun className="w-4 h-4" />
                   This Week
                 </TabsTrigger>
                 <TabsTrigger 
                   value="monthly" 
-                  className="data-[state=active]:bg-blue-200/10 data-[state=active]:text-blue-200 hidden sm:block"
+                  className="data-[state=active]:bg-blue-200/10 data-[state=active]:text-blue-200 hidden sm:flex items-center justify-center gap-2"
                 >
-                  <Waves className="w-4 h-4 mr-2" />
+                  <Sun className="w-4 h-4" />
                   This Month
                 </TabsTrigger>
                 <TabsTrigger 
                   value="sunrise-sunset" 
-                  className="data-[state=active]:bg-blue-200/10 data-[state=active]:text-blue-200 hidden sm:block"
+                  className="data-[state=active]:bg-blue-200/10 data-[state=active]:text-blue-200 hidden sm:flex items-center justify-center gap-2"
                 >
+                  <Calendar className="w-4 h-4" />
                   Calendar
                 </TabsTrigger>
               </TabsList>
