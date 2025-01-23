@@ -22,7 +22,7 @@ interface TidePrediction {
   sunset?: string;
 }
 
-// Helper function to format time to HH:mm format
+// Helper function to format time to HH:mm format --
 const formatTime = (date: Date): string => {
   return format(date, "HH:mm");
 };
