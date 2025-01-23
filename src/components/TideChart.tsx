@@ -29,7 +29,8 @@ const TideChart = ({ data, period }: TideChartProps) => {
   };
 
   const formattedData = data.map(item => ({
-    time: item.t,
+    time: parseISO(item.t).getTime(), // Convert to timestamp for proper time scale
+    displayTime: item.t, // Keep original string for display
     height: parseFloat(item.v),
     type: item.type === "H" ? "high" : "low"
   }));
@@ -37,10 +38,11 @@ const TideChart = ({ data, period }: TideChartProps) => {
   const CustomTooltip = ({ active, payload, label }: any) => {
     if (active && payload && payload.length) {
       try {
+        const date = new Date(label);
         return (
           <Card className="p-2 sm:p-3 bg-slate-800/90 border-white/10 text-white">
             <p className="text-sm sm:text-base font-medium">
-              {format(parseISO(label), "h:mm a")}
+              {format(date, "h:mm a")}
             </p>
             <p className="text-sm">
               Height: {payload[0].value.toFixed(2)} ft
@@ -71,14 +73,14 @@ const TideChart = ({ data, period }: TideChartProps) => {
           >
             <CartesianGrid strokeDasharray="3 3" opacity={0.1} stroke="white" />
             <XAxis 
-              dataKey="time" 
-              tickFormatter={formatXAxis}
+              dataKey="time"
+              tickFormatter={(value) => format(new Date(value), "h:mm a")}
               stroke="white"
               tick={{ fontSize: 10, fill: 'white' }}
               tickMargin={8}
+              type="number"
+              domain={['dataMin', 'dataMax']}
               scale="time"
-              type="category"
-              interval="preserveStartEnd"
             />
             <YAxis 
               stroke="white"
@@ -91,7 +93,12 @@ const TideChart = ({ data, period }: TideChartProps) => {
               dataKey="height"
               stroke="#60a5fa"
               strokeWidth={2}
-              dot={true}
+              dot={{
+                stroke: '#60a5fa',
+                strokeWidth: 2,
+                r: 4,
+                fill: '#1e1b4b'
+              }}
               activeDot={{
                 stroke: '#60a5fa',
                 strokeWidth: 2,
