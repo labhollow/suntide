@@ -51,14 +51,14 @@ const TideChart = ({ data, period }: TideChartProps) => {
   return (
     <Card className="p-2 sm:p-4 w-full bg-white/5 backdrop-blur-sm border-white/10">
       <h3 className="text-base sm:text-lg font-medium mb-2 sm:mb-4 text-center text-blue-200">Tide Levels</h3>
-      <div className="w-full h-[250px] sm:h-[300px]">
-        <ResponsiveContainer width="100%" height="100%" aspect={1.7}>
+      <div className="w-full h-[300px] sm:h-[400px]">
+        <ResponsiveContainer width="100%" height="100%">
           <LineChart
             data={formattedData}
             margin={{ 
               top: 20, 
               right: 30, 
-              left: 20, 
+              left: 40, 
               bottom: 20 
             }}
           >
@@ -66,15 +66,17 @@ const TideChart = ({ data, period }: TideChartProps) => {
             <XAxis 
               dataKey="time"
               stroke="white"
-              tick={{ fontSize: 10, fill: 'white' }}
-              tickMargin={8}
+              tick={{ fontSize: 12, fill: 'white' }}
+              tickMargin={10}
+              height={50}
               interval="preserveStartEnd"
-              minTickGap={30}
+              angle={0}
             />
             <YAxis 
               stroke="white"
-              tick={{ fontSize: 10, fill: 'white' }}
-              tickMargin={8}
+              tick={{ fontSize: 12, fill: 'white' }}
+              tickMargin={10}
+              width={45}
               domain={['dataMin - 0.5', 'dataMax + 0.5']}
             />
             <Tooltip content={<CustomTooltip />} />
