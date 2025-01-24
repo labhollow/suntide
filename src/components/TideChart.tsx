@@ -18,19 +18,9 @@ interface TideChartProps {
 const TideChart = ({ data, period }: TideChartProps) => {
   console.log('Data passed to TideChart:', data);
 
-  const formatXAxis = (timeStr: string) => {
-    try {
-      const date = parseISO(timeStr);
-      return format(date, "h:mm a");
-    } catch (error) {
-      console.error('Error formatting date:', timeStr, error);
-      return '';
-    }
-  };
-
   const formattedData = data.map(item => ({
-    time: parseISO(item.t).getTime(), // Convert to timestamp for proper time scale
-    displayTime: item.t, // Keep original string for display
+    time: format(parseISO(item.t), 'HH:mm'),
+    displayTime: item.t,
     height: parseFloat(item.v),
     type: item.type === "H" ? "high" : "low"
   }));
@@ -38,11 +28,10 @@ const TideChart = ({ data, period }: TideChartProps) => {
   const CustomTooltip = ({ active, payload, label }: any) => {
     if (active && payload && payload.length) {
       try {
-        const date = new Date(label);
         return (
           <Card className="p-2 sm:p-3 bg-slate-800/90 border-white/10 text-white">
             <p className="text-sm sm:text-base font-medium">
-              {format(date, "h:mm a")}
+              {label}
             </p>
             <p className="text-sm">
               Height: {payload[0].value.toFixed(2)} ft
@@ -74,13 +63,9 @@ const TideChart = ({ data, period }: TideChartProps) => {
             <CartesianGrid strokeDasharray="3 3" opacity={0.1} stroke="white" />
             <XAxis 
               dataKey="time"
-              tickFormatter={(value) => format(new Date(value), "h:mm a")}
               stroke="white"
               tick={{ fontSize: 10, fill: 'white' }}
               tickMargin={8}
-              type="number"
-              domain={['dataMin', 'dataMax']}
-              scale="time"
             />
             <YAxis 
               stroke="white"
