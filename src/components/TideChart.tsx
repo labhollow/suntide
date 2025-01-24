@@ -58,7 +58,7 @@ const TideChart = ({ data, period }: TideChartProps) => {
             margin={{ 
               top: 20, 
               right: 30, 
-              left: 40, 
+              left: 60, 
               bottom: 20 
             }}
           >
@@ -76,8 +76,10 @@ const TideChart = ({ data, period }: TideChartProps) => {
               stroke="white"
               tick={{ fontSize: 12, fill: 'white' }}
               tickMargin={10}
-              width={45}
+              width={55}
+              orientation="left"
               domain={['dataMin - 0.5', 'dataMax + 0.5']}
+              dx={-10}
             />
             <Tooltip content={<CustomTooltip />} />
             <Line
