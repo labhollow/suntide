@@ -2,7 +2,6 @@ import React from "react";
 import { Line, LineChart, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from "recharts";
 import { Card } from "@/components/ui/card";
 import { format, parseISO } from "date-fns";
-import { metersToFeet } from "@/utils/tideUtils";
 
 interface TideData {
   t: string;
@@ -53,27 +52,30 @@ const TideChart = ({ data, period }: TideChartProps) => {
     <Card className="p-2 sm:p-4 w-full bg-white/5 backdrop-blur-sm border-white/10">
       <h3 className="text-base sm:text-lg font-medium mb-2 sm:mb-4 text-center text-blue-200">Tide Levels</h3>
       <div className="w-full h-[250px] sm:h-[300px]">
-        <ResponsiveContainer width="100%" height="100%">
+        <ResponsiveContainer width="100%" height="100%" aspect={1.7}>
           <LineChart
             data={formattedData}
             margin={{ 
-              top: 10, 
-              right: 10, 
-              left: 0, 
-              bottom: 0 
+              top: 20, 
+              right: 30, 
+              left: 20, 
+              bottom: 20 
             }}
           >
-            <CartesianGrid strokeDasharray="3 3" opacity={0.1} stroke="white" />
+            <CartesianGrid strokeDasharray="3 3" opacity={0.1} stroke="white" vertical={false} />
             <XAxis 
               dataKey="time"
               stroke="white"
               tick={{ fontSize: 10, fill: 'white' }}
               tickMargin={8}
+              interval="preserveStartEnd"
+              minTickGap={30}
             />
             <YAxis 
               stroke="white"
               tick={{ fontSize: 10, fill: 'white' }}
               tickMargin={8}
+              domain={['dataMin - 0.5', 'dataMax + 0.5']}
             />
             <Tooltip content={<CustomTooltip />} />
             <Line
@@ -93,6 +95,8 @@ const TideChart = ({ data, period }: TideChartProps) => {
                 r: 6,
                 fill: '#1e1b4b'
               }}
+              animationDuration={1500}
+              animationEasing="ease-in-out"
             />
           </LineChart>
         </ResponsiveContainer>
