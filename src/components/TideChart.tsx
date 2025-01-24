@@ -19,10 +19,10 @@ const TideChart = ({ data, period }: TideChartProps) => {
   console.log('Data passed to TideChart:', data);
 
   const formattedData = data.map(item => ({
-    time: format(parseISO(item.t), 'HH:mm'),
+    time: format(parseISO(item.t), 'h:mm a'),
     displayTime: item.t,
     height: parseFloat(item.v),
-    type: item.type === "H" ? "high" : "low"
+    type: item.type === "H" ? "High Tide" : "Low Tide"
   }));
 
   const CustomTooltip = ({ active, payload, label }: any) => {
@@ -35,6 +35,9 @@ const TideChart = ({ data, period }: TideChartProps) => {
             </p>
             <p className="text-sm">
               Height: {payload[0].value.toFixed(2)} ft
+            </p>
+            <p className="text-sm text-blue-200">
+              {payload[0].payload.type}
             </p>
           </Card>
         );
