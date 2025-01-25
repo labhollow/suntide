@@ -92,12 +92,12 @@ const TideTable = ({ data, period }: TideTableProps) => {
       <Table>
         <TableHeader>
           <TableRow>
-            <TableHead className="text-gray-300 font-semibold">Date</TableHead>
-            <TableHead className="text-gray-300 font-semibold">Time</TableHead>
-            <TableHead className="text-gray-300 font-semibold">Type</TableHead>
-            <TableHead className="text-gray-300 font-semibold">Height (ft)</TableHead>
-            <TableHead className="text-gray-300 font-semibold">Sunrise</TableHead>
-            <TableHead className="text-gray-300 font-semibold">Sunset</TableHead>
+            <TableHead className="text-blue-200 font-semibold">Date</TableHead>
+            <TableHead className="text-blue-200 font-semibold">Time</TableHead>
+            <TableHead className="text-blue-200 font-semibold">Type</TableHead>
+            <TableHead className="text-blue-200 font-semibold">Height (ft)</TableHead>
+            <TableHead className="text-blue-200 font-semibold">Sunrise</TableHead>
+            <TableHead className="text-blue-200 font-semibold">Sunset</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
