@@ -51,14 +51,14 @@ const TideChart = ({ data, period }: TideChartProps) => {
   return (
     <div className="w-full bg-white/5 backdrop-blur-sm border border-white/10 rounded-lg">
       <h3 className="text-base sm:text-lg font-medium p-4 text-center text-blue-200">Tide Levels</h3>
-      <div className="w-full h-[300px] sm:h-[400px] px-1 sm:px-4 pb-4">
+      <div className="w-full h-[300px] sm:h-[400px] px-4 sm:px-6 pb-4">
         <ResponsiveContainer width="100%" height="100%">
           <LineChart
             data={formattedData}
             margin={{ 
               top: 20, 
-              right: 10,
-              left: 0,
+              right: 15,
+              left: 10,
               bottom: 20 
             }}
           >
@@ -76,9 +76,17 @@ const TideChart = ({ data, period }: TideChartProps) => {
               stroke="white"
               tick={{ fontSize: 12, fill: 'white' }}
               tickMargin={10}
-              width={35}
+              width={40}
               orientation="left"
-              domain={['dataMin - 0.5', 'dataMax + 0.5']}
+              domain={['auto', 'auto']}
+              tickFormatter={(value) => `${value.toFixed(1)}`}
+              label={{ 
+                value: 'Height (ft)', 
+                angle: -90, 
+                position: 'insideLeft',
+                style: { fill: 'white', fontSize: 12 },
+                offset: 0
+              }}
             />
             <Tooltip content={<CustomTooltip />} />
             <Line
