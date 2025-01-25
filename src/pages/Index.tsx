@@ -148,8 +148,8 @@ const Index = () => {
 
   if (!location || isLoading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-purple-850 via-purple-600 to-pink-500">
-        <div className="min-h-screen w-full">
+      <div className="min-h-screen bg-slate-900">
+        <div className="min-h-screen w-full bg-gradient-to-br from-slate-900 via-purple-850 to-slate-900">
           <div className="relative w-full min-h-screen">
             <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAwIiBoZWlnaHQ9IjIwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZGVmcz48cGF0dGVybiBpZD0ic3RhcnMiIHg9IjAiIHk9IjAiIHdpZHRoPSI1MCIgaGVpZ2h0PSI1MCIgcGF0dGVyblVuaXRzPSJ1c2VyU3BhY2VPblVzZSI+PGNpcmNsZSBjeD0iMSIgY3k9IjEiIHI9IjEiIGZpbGw9InJnYmEoMjU1LCAyNTUsIDI1NSwgMC4yKSIvPjwvcGF0dGVybj48L2RlZnM+PHJlY3Qgd2lkdGg9IjEwMCUiIGhlaWdodD0iMTAwJSIgZmlsbD0idXJsKCNzdGFycykiLz48L3N2Zz4=')] opacity-30 pointer-events-none" />
             <div className="max-w-4xl mx-auto p-4 sm:p-6 space-y-6 relative">
@@ -159,8 +159,8 @@ const Index = () => {
                 upcomingAlerts={[]}
               />
               <div className="flex flex-col items-center justify-center space-y-4 p-8">
-                <Loader2 className="w-8 h-8 animate-spin text-white" />
-                <p className="text-white">Loading tide data...</p>
+                <Loader2 className="w-8 h-8 animate-spin text-blue-500" />
+                <p className="text-blue-200">Loading tide data...</p>
               </div>
             </div>
           </div>
@@ -170,8 +170,8 @@ const Index = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-purple-850 via-purple-600 to-pink-500">
-      <div className="min-h-screen w-full">
+    <div className="min-h-screen bg-slate-900">
+      <div className="min-h-screen w-full bg-gradient-to-br from-slate-900 via-purple-850 to-slate-900">
         <div className="relative w-full min-h-screen">
           <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAwIiBoZWlnaHQ9IjIwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZGVmcz48cGF0dGVybiBpZD0ic3RhcnMiIHg9IjAiIHk9IjAiIHdpZHRoPSI1MCIgaGVpZ2h0PSI1MCIgcGF0dGVyblVuaXRzPSJ1c2VyU3BhY2VPblVzZSI+PGNpcmNsZSBjeD0iMSIgY3k9IjEiIHI9IjEiIGZpbGw9InJnYmEoMjU1LCAyNTUsIDI1NSwgMC4yKSIvPjwvcGF0dGVybj48L2RlZnM+PHJlY3Qgd2lkdGg9IjEwMCUiIGhlaWdodD0iMTAwJSIgZmlsbD0idXJsKCNzdGFycykiLz48L3N2Zz4=')] opacity-30 pointer-events-none" />
 
@@ -183,18 +183,18 @@ const Index = () => {
             />
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
-              <Card className={`p-6 backdrop-blur-md border-white/20 shadow-lg transition-colors ${
+              <Card className={`p-6 backdrop-blur-sm border-white/10 transition-colors ${
                 isNextTideAlert 
-                  ? 'bg-white/30' 
-                  : 'bg-white/20'
+                  ? 'bg-orange-500/20 border-orange-500/50' 
+                  : 'bg-white/5'
               }`}>
                 <div className="flex items-center justify-between mb-4">
-                  <h3 className="text-lg font-semibold text-white">Next Tide</h3>
+                  <h3 className="text-lg font-semibold text-blue-200">Next Tide</h3>
                   <div className="flex items-center gap-2">
                     {isNextTideAlert && (
-                      <AlertTriangle className="w-5 h-5 text-white animate-pulse" />
+                      <AlertTriangle className="w-5 h-5 text-orange-400 animate-pulse" />
                     )}
-                    <Waves className="w-6 h-6 text-white" />
+                    <Waves className="w-6 h-6 text-blue-400" />
                   </div>
                 </div>
                 {nextTide && (
@@ -202,10 +202,12 @@ const Index = () => {
                     <div className="text-3xl font-bold text-white">
                       {parseFloat(nextTide.v).toFixed(1)}ft
                     </div>
-                    <div className="text-white/90">
+                    <div className="text-blue-200">
                       {format(parseISO(nextTide.t), 'h:mm a')}
                     </div>
-                    <div className="text-white/90">
+                    <div className={`${
+                      isNextTideAlert ? 'text-orange-400' : 'text-blue-200/80'
+                    }`}>
                       {nextTide.type === 'H' ? 'High Tide' : 'Low Tide'}
                       {isNextTideAlert && ` - ${getAlertText()}`}
                     </div>
@@ -213,15 +215,15 @@ const Index = () => {
                 )}
               </Card>
 
-              <Card className="p-6 bg-white/20 backdrop-blur-md border-white/20 shadow-lg">
+              <Card className="p-6 bg-white/5 backdrop-blur-sm border-white/10">
                 <div className="flex items-center justify-between mb-4">
-                  <h3 className="text-lg font-semibold text-white">Sun Events</h3>
-                  <Sun className="w-6 h-6 text-white" />
+                  <h3 className="text-lg font-semibold text-blue-200">Sun Events</h3>
+                  <Sun className="w-6 h-6 text-tide-sunrise" />
                 </div>
                 {nextTide && (
                   <div className="grid grid-cols-2 gap-4">
                     <div className="space-y-2">
-                      <div className="flex items-center text-white">
+                      <div className="flex items-center text-tide-sunrise">
                         <Sunrise className="w-5 h-5 mr-2" />
                         <span>Sunrise</span>
                       </div>
@@ -230,7 +232,7 @@ const Index = () => {
                       </div>
                     </div>
                     <div className="space-y-2">
-                      <div className="flex items-center text-white">
+                      <div className="flex items-center text-tide-sunset">
                         <Sunset className="w-5 h-5 mr-2" />
                         <span>Sunset</span>
                       </div>
@@ -244,31 +246,31 @@ const Index = () => {
             </div>
 
             <Tabs defaultValue="daily" className="w-full">
-              <TabsList className="grid w-full grid-cols-2 sm:grid-cols-4 bg-white/10 backdrop-blur-md border-white/20 rounded-lg">
+              <TabsList className="grid w-full grid-cols-2 sm:grid-cols-4 bg-white/5 backdrop-blur-sm border border-white/10 rounded-lg">
                 <TabsTrigger 
                   value="daily" 
-                  className="data-[state=active]:bg-white/20 data-[state=active]:text-white text-white/70 flex items-center justify-center gap-2"
+                  className="data-[state=active]:bg-blue-200/10 data-[state=active]:text-blue-200 flex items-center justify-center gap-2"
                 >
                   <Sun className="w-4 h-4" />
                   Today
                 </TabsTrigger>
                 <TabsTrigger 
                   value="weekly" 
-                  className="data-[state=active]:bg-white/20 data-[state=active]:text-white text-white/70 flex items-center justify-center gap-2"
+                  className="data-[state=active]:bg-blue-200/10 data-[state=active]:text-blue-200 flex items-center justify-center gap-2"
                 >
                   <Sun className="w-4 h-4" />
                   This Week
                 </TabsTrigger>
                 <TabsTrigger 
                   value="monthly" 
-                  className="data-[state=active]:bg-white/20 data-[state=active]:text-white text-white/70 hidden sm:flex items-center justify-center gap-2"
+                  className="data-[state=active]:bg-blue-200/10 data-[state=active]:text-blue-200 hidden sm:flex items-center justify-center gap-2"
                 >
                   <Sun className="w-4 h-4" />
                   This Month
                 </TabsTrigger>
                 <TabsTrigger 
                   value="sunrise-sunset" 
-                  className="data-[state=active]:bg-white/20 data-[state=active]:text-white text-white/70 hidden sm:flex items-center justify-center gap-2"
+                  className="data-[state=active]:bg-blue-200/10 data-[state=active]:text-blue-200 hidden sm:flex items-center justify-center gap-2"
                 >
                   <Calendar className="w-4 h-4" />
                   Calendar
