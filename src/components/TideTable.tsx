@@ -91,13 +91,13 @@ const TideTable = ({ data, period }: TideTableProps) => {
     <div className="w-full overflow-auto">
       <Table>
         <TableHeader>
-          <TableRow>
-            <TableHead className="text-blue-200 font-semibold">Date</TableHead>
-            <TableHead className="text-blue-200 font-semibold">Time</TableHead>
-            <TableHead className="text-blue-200 font-semibold">Type</TableHead>
-            <TableHead className="text-blue-200 font-semibold">Height (ft)</TableHead>
-            <TableHead className="text-blue-200 font-semibold">Sunrise</TableHead>
-            <TableHead className="text-blue-200 font-semibold">Sunset</TableHead>
+          <TableRow className="border-white/20">
+            <TableHead className="text-white font-semibold">Date</TableHead>
+            <TableHead className="text-white font-semibold">Time</TableHead>
+            <TableHead className="text-white font-semibold">Type</TableHead>
+            <TableHead className="text-white font-semibold">Height (ft)</TableHead>
+            <TableHead className="text-white font-semibold">Sunrise</TableHead>
+            <TableHead className="text-white font-semibold">Sunset</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
@@ -105,12 +105,11 @@ const TideTable = ({ data, period }: TideTableProps) => {
             <TableRow 
               key={`${tide.date.toISOString()}-${tide.type}-${index}`}
               className={`
-                ${tide.isNearSunriseOrSunset ? "bg-orange-500/20 border-orange-500/50 hover:bg-orange-500/50" : ""}
-                transition-all duration-300 ease-in-out
-                hover:bg-slate-700/50
+                ${tide.isNearSunriseOrSunset ? "bg-white/30 border-white/30 hover:bg-white/40" : "hover:bg-white/20"}
+                transition-all duration-300 ease-in-out border-white/10
               `}
             >
-              <TableCell className={`${tide.isNearSunriseOrSunset ? "text-white font-semibold flex items-center gap-2" : "text-gray-300"} transition-colors duration-300`}>
+              <TableCell className={`${tide.isNearSunriseOrSunset ? "text-white font-semibold flex items-center gap-2" : "text-white/90"} transition-colors duration-300`}>
                 {format(tide.date, "MMM dd, yyyy")}
                 {tide.isNearSunriseOrSunset && (
                   <div className="flex flex-col items-center">
@@ -128,19 +127,19 @@ const TideTable = ({ data, period }: TideTableProps) => {
                   </div>
                 )}
               </TableCell>
-              <TableCell className={`${tide.isNearSunriseOrSunset ? "text-white font-semibold" : "text-gray-300"} transition-colors duration-300`}>
+              <TableCell className={`${tide.isNearSunriseOrSunset ? "text-white font-semibold" : "text-white/90"} transition-colors duration-300`}>
                 {format(tide.date, "hh:mm a")}
               </TableCell>
-              <TableCell className={`${tide.isNearSunriseOrSunset ? "text-white font-semibold capitalize" : "text-gray-300 capitalize"} transition-colors duration-300`}>
+              <TableCell className={`${tide.isNearSunriseOrSunset ? "text-white font-semibold capitalize" : "text-white/90 capitalize"} transition-colors duration-300`}>
                 {tide.type}
               </TableCell>
-              <TableCell className={`${tide.isNearSunriseOrSunset ? "text-white font-semibold" : "text-gray-300"} transition-colors duration-300`}>
+              <TableCell className={`${tide.isNearSunriseOrSunset ? "text-white font-semibold" : "text-white/90"} transition-colors duration-300`}>
                 {tide.height.toFixed(2)}
               </TableCell>
-              <TableCell className={`${tide.isNearSunriseOrSunset ? "text-white font-semibold" : "text-gray-300"} transition-colors duration-300`}>
+              <TableCell className={`${tide.isNearSunriseOrSunset ? "text-white font-semibold" : "text-white/90"} transition-colors duration-300`}>
                 {tide.sunrise || 'N/A'}
               </TableCell>
-              <TableCell className={`${tide.isNearSunriseOrSunset ? "text-white font-semibold" : "text-gray-300"} transition-colors duration-300`}>
+              <TableCell className={`${tide.isNearSunriseOrSunset ? "text-white font-semibold" : "text-white/90"} transition-colors duration-300`}>
                 {tide.sunset || 'N/A'}
               </TableCell>
             </TableRow>

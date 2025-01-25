@@ -15,8 +15,6 @@ interface TideChartProps {
 }
 
 const TideChart = ({ data, period }: TideChartProps) => {
-  console.log('Data passed to TideChart:', data);
-
   const formattedData = data.map(item => ({
     time: format(parseISO(item.t), 'h:mm a'),
     displayTime: item.t,
@@ -28,14 +26,14 @@ const TideChart = ({ data, period }: TideChartProps) => {
     if (active && payload && payload.length) {
       try {
         return (
-          <Card className="p-2 sm:p-3 bg-slate-800/90 border-white/10 text-white">
-            <p className="text-sm sm:text-base font-medium">
+          <Card className="p-2 sm:p-3 bg-white/90 backdrop-blur-sm border-none shadow-lg">
+            <p className="text-sm sm:text-base font-medium text-purple-850">
               {label}
             </p>
-            <p className="text-sm">
+            <p className="text-sm text-purple-850">
               Height: {payload[0].value.toFixed(2)} ft
             </p>
-            <p className="text-sm text-blue-200">
+            <p className="text-sm text-purple-600">
               {payload[0].payload.type}
             </p>
           </Card>
@@ -49,8 +47,10 @@ const TideChart = ({ data, period }: TideChartProps) => {
   };
 
   return (
-    <Card className="p-2 sm:p-4 w-full bg-white/5 backdrop-blur-sm border-white/10">
-      <h3 className="text-base sm:text-lg font-medium mb-2 sm:mb-4 text-center text-blue-200">Tide Levels</h3>
+    <Card className="p-4 sm:p-6 w-full bg-white/20 backdrop-blur-md border-white/20 shadow-xl">
+      <h3 className="text-lg sm:text-xl font-medium mb-4 sm:mb-6 text-center text-white">
+        Tide Levels
+      </h3>
       <div className="w-full h-[300px] sm:h-[400px]">
         <ResponsiveContainer width="100%" height="100%">
           <LineChart
@@ -62,7 +62,7 @@ const TideChart = ({ data, period }: TideChartProps) => {
               bottom: 20 
             }}
           >
-            <CartesianGrid strokeDasharray="3 3" opacity={0.1} stroke="white" vertical={false} />
+            <CartesianGrid strokeDasharray="3 3" opacity={0.2} stroke="white" vertical={false} />
             <XAxis 
               dataKey="time"
               stroke="white"
@@ -70,7 +70,6 @@ const TideChart = ({ data, period }: TideChartProps) => {
               tickMargin={10}
               height={50}
               interval="preserveStartEnd"
-              angle={0}
             />
             <YAxis 
               stroke="white"
@@ -79,25 +78,24 @@ const TideChart = ({ data, period }: TideChartProps) => {
               width={55}
               orientation="left"
               domain={['dataMin - 0.5', 'dataMax + 0.5']}
-              dx={-10}
             />
             <Tooltip content={<CustomTooltip />} />
             <Line
               type="monotone"
               dataKey="height"
-              stroke="#60a5fa"
-              strokeWidth={2}
+              stroke="#fff"
+              strokeWidth={3}
               dot={{
-                stroke: '#60a5fa',
+                stroke: '#fff',
                 strokeWidth: 2,
                 r: 4,
-                fill: '#1e1b4b'
+                fill: '#9b87f5'
               }}
               activeDot={{
-                stroke: '#60a5fa',
+                stroke: '#fff',
                 strokeWidth: 2,
                 r: 6,
-                fill: '#1e1b4b'
+                fill: '#9b87f5'
               }}
               animationDuration={1500}
               animationEasing="ease-in-out"
