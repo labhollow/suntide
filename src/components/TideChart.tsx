@@ -49,16 +49,16 @@ const TideChart = ({ data, period }: TideChartProps) => {
   };
 
   return (
-    <Card className="p-2 sm:p-4 w-full bg-white/5 backdrop-blur-sm border-white/10">
-      <h3 className="text-base sm:text-lg font-medium mb-2 sm:mb-4 text-center text-blue-200">Tide Levels</h3>
-      <div className="w-full h-[300px] sm:h-[400px]">
+    <div className="w-full bg-white/5 backdrop-blur-sm border border-white/10 rounded-lg">
+      <h3 className="text-base sm:text-lg font-medium p-4 text-center text-blue-200">Tide Levels</h3>
+      <div className="w-full h-[300px] sm:h-[400px] px-1 sm:px-4 pb-4">
         <ResponsiveContainer width="100%" height="100%">
           <LineChart
             data={formattedData}
             margin={{ 
               top: 20, 
-              right: 30, 
-              left: 60, 
+              right: 10,
+              left: 0,
               bottom: 20 
             }}
           >
@@ -76,10 +76,9 @@ const TideChart = ({ data, period }: TideChartProps) => {
               stroke="white"
               tick={{ fontSize: 12, fill: 'white' }}
               tickMargin={10}
-              width={55}
+              width={35}
               orientation="left"
               domain={['dataMin - 0.5', 'dataMax + 0.5']}
-              dx={-10}
             />
             <Tooltip content={<CustomTooltip />} />
             <Line
@@ -105,7 +104,7 @@ const TideChart = ({ data, period }: TideChartProps) => {
           </LineChart>
         </ResponsiveContainer>
       </div>
-    </Card>
+    </div>
   );
 };
 
