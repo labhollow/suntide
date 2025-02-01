@@ -24,7 +24,7 @@ export const fetchNearbyStations = async (lat: number, lng: number, radius: numb
     return [];
   }
 
-  return data.map((station: any) => ({
+  return (data as any[]).map((station: any) => ({
     ...station,
     region: station.state || 'International'
   }));
@@ -59,7 +59,7 @@ export const searchStations = async (searchTerm: string): Promise<NOAAStation[]>
     return [];
   }
 
-  return data.map((station: any) => ({
+  return (data as any[]).map((station: any) => ({
     ...station,
     region: station.state || 'International'
   }));
