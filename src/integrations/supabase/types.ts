@@ -9,13 +9,76 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
-      [_ in never]: never
+      noaa_stations: {
+        Row: {
+          created_at: string
+          id: string
+          lat: number
+          lng: number
+          name: string
+          state: string | null
+        }
+        Insert: {
+          created_at?: string
+          id: string
+          lat: number
+          lng: number
+          name: string
+          state?: string | null
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          lat?: number
+          lng?: number
+          name?: string
+          state?: string | null
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      calculate_distance: {
+        Args: {
+          lat1: number
+          lon1: number
+          lat2: number
+          lon2: number
+        }
+        Returns: number
+      }
+      get_nearby_stations: {
+        Args: {
+          search_lat: number
+          search_lng: number
+          radius?: number
+          max_stations?: number
+        }
+        Returns: {
+          id: string
+          name: string
+          lat: number
+          lng: number
+          state: string
+          distance: number
+        }[]
+      }
+      search_stations: {
+        Args: {
+          search_term: string
+          max_results?: number
+        }
+        Returns: {
+          id: string
+          name: string
+          lat: number
+          lng: number
+          state: string
+        }[]
+      }
     }
     Enums: {
       [_ in never]: never

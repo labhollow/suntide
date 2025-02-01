@@ -18,7 +18,12 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
-import { NOAAStation, fetchNearbyStations, getCachedStations } from "@/services/noaaStationService";
+import {
+  NOAAStation,
+  fetchNearbyStations,
+  getCachedStations,
+  searchStations
+} from "@/services/noaaStationService";
 
 interface LocationPickerProps {
   id?: string;
@@ -33,6 +38,8 @@ const LocationPicker: React.FC<LocationPickerProps> = ({ id, name, onLocationUpd
   const [recentLocations, setRecentLocations] = useState<string[]>([]);
   const [stations, setStations] = useState<NOAAStation[]>([]);
   const [nearbyStations, setNearbyStations] = useState<NOAAStation[]>([]);
+  const [searchResults, setSearchResults] = useState<NOAAStation[]>([]);
+  const [searchTerm, setSearchTerm] = useState("");
   const { toast } = useToast();
   const isMobile = useIsMobile();
 
@@ -64,6 +71,19 @@ const LocationPicker: React.FC<LocationPickerProps> = ({ id, name, onLocationUpd
     updateNearbyStations();
   }, [userLocation]);
 
+  // Handle search
+  useEffect(() => {
+    const handleSearch = async () => {
+      if (searchTerm.length >= 2) {
+        const results = await searchStations(searchTerm);
+        setSearchResults(results);
+      } else {
+        setSearchResults([]);
+      }
+    };
+    handleSearch();
+  }, [searchTerm]);
+
   const handleStationSelect = (station: NOAAStation) => {
     const locationData = {
       name: station.name,
@@ -71,7 +91,6 @@ const LocationPicker: React.FC<LocationPickerProps> = ({ id, name, onLocationUpd
       lng: station.lng,
     };
     
-    // Update recent locations
     const updatedRecent = [station.id, ...recentLocations.filter(loc => loc !== station.id)].slice(0, 3);
     setRecentLocations(updatedRecent);
     localStorage.setItem("recentLocations", JSON.stringify(updatedRecent));
@@ -116,8 +135,9 @@ const LocationPicker: React.FC<LocationPickerProps> = ({ id, name, onLocationUpd
   // Group stations by region
   const groupedStations = useMemo(() => {
     const groups: Record<string, NOAAStation[]> = {};
+    const stationsToGroup = searchTerm.length >= 2 ? searchResults : stations;
     
-    stations.forEach(station => {
+    stationsToGroup.forEach(station => {
       const region = station.region || 'International';
       if (!groups[region]) {
         groups[region] = [];
@@ -126,7 +146,7 @@ const LocationPicker: React.FC<LocationPickerProps> = ({ id, name, onLocationUpd
     });
     
     return groups;
-  }, [stations]);
+  }, [stations, searchResults, searchTerm]);
 
   // Load saved data on component mount
   useEffect(() => {
@@ -171,16 +191,16 @@ const LocationPicker: React.FC<LocationPickerProps> = ({ id, name, onLocationUpd
             sideOffset={4}
           >
             <Command className="bg-transparent">
-              {!isMobile && (
-                <CommandInput 
-                  placeholder="Search locations..." 
-                  className="text-neutral-700"
-                />
-              )}
+              <CommandInput 
+                placeholder="Search locations..." 
+                value={searchTerm}
+                onValueChange={setSearchTerm}
+                className="text-neutral-700"
+              />
               <CommandList className="max-h-[50vh] overflow-y-auto">
                 <CommandEmpty className="py-6 text-center text-neutral-600">No location found.</CommandEmpty>
                 
-                {userLocation && nearbyStations.length > 0 && (
+                {userLocation && nearbyStations.length > 0 && !searchTerm && (
                   <CommandGroup heading="Nearby Stations" className="text-neutral-500">
                     {nearbyStations.map((station) => (
                       <CommandItem
@@ -199,7 +219,7 @@ const LocationPicker: React.FC<LocationPickerProps> = ({ id, name, onLocationUpd
                   </CommandGroup>
                 )}
                 
-                {recentLocations.length > 0 && (
+                {recentLocations.length > 0 && !searchTerm && (
                   <CommandGroup heading="Recent" className="text-neutral-500">
                     {recentLocations.map((id) => {
                       const station = stations.find(s => s.id === id);
@@ -230,6 +250,11 @@ const LocationPicker: React.FC<LocationPickerProps> = ({ id, name, onLocationUpd
                         className="bg-white text-neutral-600 hover:bg-neutral-50 font-normal"
                       >
                         {toProperCase(station.name)}
+                        {station.distance && (
+                          <span className="ml-2 text-sm text-blue-600">
+                            ({Math.round(station.distance)}mi)
+                          </span>
+                        )}
                       </CommandItem>
                     ))}
                   </CommandGroup>
