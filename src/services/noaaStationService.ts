@@ -6,6 +6,7 @@ export interface NOAAStation {
   lat: number;
   lng: number;
   region?: string;  // Optional region/state field
+  distance?: number; // Added distance field as optional
 }
 
 interface NOAAStationsResponse {
