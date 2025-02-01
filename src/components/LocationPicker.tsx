@@ -18,7 +18,7 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
-import { NOAA_STATIONS } from "@/utils/noaaApi";
+import { NOAAStation, fetchNearbyStations, getCachedStations } from "@/services/noaaStationService";
 
 interface LocationPickerProps {
   id?: string;
@@ -31,6 +31,8 @@ const LocationPicker: React.FC<LocationPickerProps> = ({ id, name, onLocationUpd
   const [selectedLocation, setSelectedLocation] = useState<string>("");
   const [userLocation, setUserLocation] = useState<{ lat: number; lng: number } | null>(null);
   const [recentLocations, setRecentLocations] = useState<string[]>([]);
+  const [stations, setStations] = useState<NOAAStation[]>([]);
+  const [nearbyStations, setNearbyStations] = useState<NOAAStation[]>([]);
   const { toast } = useToast();
   const isMobile = useIsMobile();
 
@@ -42,43 +44,27 @@ const LocationPicker: React.FC<LocationPickerProps> = ({ id, name, onLocationUpd
       .join(' ');
   };
 
-  const calculateDistance = (lat1: number, lon1: number, lat2: number, lon2: number): number => {
-    const R = 3959; // Earth's radius in miles
-    const dLat = (lat2 - lat1) * Math.PI / 180;
-    const dLon = (lon2 - lon1) * Math.PI / 180;
-    const a = 
-      Math.sin(dLat/2) * Math.sin(dLat/2) +
-      Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) * 
-      Math.sin(dLon/2) * Math.sin(dLon/2);
-    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
-    return R * c;
-  };
+  // Load stations on component mount
+  useEffect(() => {
+    const loadStations = async () => {
+      const fetchedStations = await getCachedStations();
+      setStations(fetchedStations);
+    };
+    loadStations();
+  }, []);
 
-  // Get nearby stations based on user location
-  const nearbyStations = useMemo(() => {
-    if (!userLocation) return [];
-    
-    return Object.entries(NOAA_STATIONS)
-      .map(([key, station]) => ({
-        key,
-        ...station,
-        distance: calculateDistance(userLocation.lat, userLocation.lng, station.lat, station.lng)
-      }))
-      .sort((a, b) => a.distance - b.distance)
-      .slice(0, 5);
+  // Update nearby stations when user location changes
+  useEffect(() => {
+    const updateNearbyStations = async () => {
+      if (userLocation) {
+        const nearby = await fetchNearbyStations(userLocation.lat, userLocation.lng);
+        setNearbyStations(nearby);
+      }
+    };
+    updateNearbyStations();
   }, [userLocation]);
 
-  const handleStationSelect = (stationKey: string) => {
-    const station = NOAA_STATIONS?.[stationKey];
-    if (!station) {
-      toast({
-        title: "Error",
-        description: "Could not select this location. Please try another one.",
-        variant: "destructive",
-      });
-      return;
-    }
-
+  const handleStationSelect = (station: NOAAStation) => {
     const locationData = {
       name: station.name,
       lat: station.lat,
@@ -86,42 +72,32 @@ const LocationPicker: React.FC<LocationPickerProps> = ({ id, name, onLocationUpd
     };
     
     // Update recent locations
-    const updatedRecent = [stationKey, ...recentLocations.filter(loc => loc !== stationKey)].slice(0, 3);
+    const updatedRecent = [station.id, ...recentLocations.filter(loc => loc !== station.id)].slice(0, 3);
     setRecentLocations(updatedRecent);
     localStorage.setItem("recentLocations", JSON.stringify(updatedRecent));
     
     localStorage.setItem("savedLocation", JSON.stringify(locationData));
     onLocationUpdate?.(locationData);
-    setSelectedLocation(stationKey);
+    setSelectedLocation(station.id);
     setOpen(false);
   };
 
   const handleSaveLocation = () => {
     if ("geolocation" in navigator) {
       navigator.geolocation.getCurrentPosition(
-        (position) => {
-          setUserLocation({
+        async (position) => {
+          const userLoc = {
             lat: position.coords.latitude,
             lng: position.coords.longitude
-          });
+          };
+          setUserLocation(userLoc);
           
-          const nearestStationKey = Object.entries(NOAA_STATIONS)
-            .map(([key, station]) => ({
-              key,
-              distance: calculateDistance(
-                position.coords.latitude,
-                position.coords.longitude,
-                station.lat,
-                station.lng
-              )
-            }))
-            .sort((a, b) => a.distance - b.distance)[0]?.key;
-
-          if (nearestStationKey) {
-            handleStationSelect(nearestStationKey);
+          const nearby = await fetchNearbyStations(userLoc.lat, userLoc.lng);
+          if (nearby.length > 0) {
+            handleStationSelect(nearby[0]);
             toast({
               title: "Location Updated",
-              description: `Found nearest station: ${NOAA_STATIONS[nearestStationKey].name}`,
+              description: `Found nearest station: ${nearby[0].name}`,
             });
           }
         },
@@ -137,6 +113,21 @@ const LocationPicker: React.FC<LocationPickerProps> = ({ id, name, onLocationUpd
     }
   };
 
+  // Group stations by region
+  const groupedStations = useMemo(() => {
+    const groups: Record<string, NOAAStation[]> = {};
+    
+    stations.forEach(station => {
+      const region = station.region || 'International';
+      if (!groups[region]) {
+        groups[region] = [];
+      }
+      groups[region].push(station);
+    });
+    
+    return groups;
+  }, [stations]);
+
   // Load saved data on component mount
   useEffect(() => {
     try {
@@ -145,11 +136,9 @@ const LocationPicker: React.FC<LocationPickerProps> = ({ id, name, onLocationUpd
       
       if (saved) {
         const parsed = JSON.parse(saved);
-        const stationKey = Object.entries(NOAA_STATIONS).find(
-          ([_, station]) => station.name.toLowerCase() === parsed.name.toLowerCase()
-        )?.[0];
-        if (stationKey) {
-          setSelectedLocation(stationKey);
+        const station = stations.find(s => s.name.toLowerCase() === parsed.name.toLowerCase());
+        if (station) {
+          setSelectedLocation(station.id);
         }
       }
       
@@ -159,21 +148,7 @@ const LocationPicker: React.FC<LocationPickerProps> = ({ id, name, onLocationUpd
     } catch (error) {
       console.error('Error reading from localStorage:', error);
     }
-  }, []);
-
-  // Group stations by state
-  const groupedStations = useMemo(() => {
-    const groups: Record<string, typeof NOAA_STATIONS> = {};
-    
-    Object.entries(NOAA_STATIONS).forEach(([key, station]) => {
-      if (!groups[station.state]) {
-        groups[station.state] = {};
-      }
-      groups[station.state][key] = station;
-    });
-    
-    return groups;
-  }, []);
+  }, [stations]);
 
   return (
     <Card className="p-4 flex flex-col sm:flex-row gap-4 items-stretch sm:items-center bg-card-background backdrop-blur-sm border-neutral-200">
@@ -186,7 +161,7 @@ const LocationPicker: React.FC<LocationPickerProps> = ({ id, name, onLocationUpd
               className="w-full justify-between bg-slate-900 border-neutral-200 text-white font-normal truncate hover:bg-neutral-50"
             >
               {selectedLocation
-                ? toProperCase(NOAA_STATIONS[selectedLocation]?.name)
+                ? toProperCase(stations.find(s => s.id === selectedLocation)?.name || '')
                 : "Select location..."}
             </Button>
           </PopoverTrigger>
@@ -205,18 +180,18 @@ const LocationPicker: React.FC<LocationPickerProps> = ({ id, name, onLocationUpd
               <CommandList className="max-h-[50vh] overflow-y-auto">
                 <CommandEmpty className="py-6 text-center text-neutral-600">No location found.</CommandEmpty>
                 
-                {userLocation && (
+                {userLocation && nearbyStations.length > 0 && (
                   <CommandGroup heading="Nearby Stations" className="text-neutral-500">
                     {nearbyStations.map((station) => (
                       <CommandItem
-                        key={station.key}
-                        value={`nearby-${station.key}`}
-                        onSelect={() => handleStationSelect(station.key)}
+                        key={station.id}
+                        value={`nearby-${station.id}`}
+                        onSelect={() => handleStationSelect(station)}
                         className="bg-white text-neutral-600 hover:bg-neutral-50 font-normal"
                       >
                         {toProperCase(station.name)}
                         <span className="ml-2 text-sm text-blue-600">
-                          ({Math.round(station.distance)}mi)
+                          ({Math.round(station.distance || 0)}mi)
                         </span>
                       </CommandItem>
                     ))}
@@ -226,28 +201,32 @@ const LocationPicker: React.FC<LocationPickerProps> = ({ id, name, onLocationUpd
                 
                 {recentLocations.length > 0 && (
                   <CommandGroup heading="Recent" className="text-neutral-500">
-                    {recentLocations.map((key) => (
-                      <CommandItem
-                        key={key}
-                        value={`recent-${key}`}
-                        onSelect={() => handleStationSelect(key)}
-                        className="bg-white text-neutral-600 hover:bg-neutral-50 font-normal"
-                      >
-                        <History className="mr-2 h-4 w-4" />
-                        {toProperCase(NOAA_STATIONS[key]?.name)}
-                      </CommandItem>
-                    ))}
+                    {recentLocations.map((id) => {
+                      const station = stations.find(s => s.id === id);
+                      if (!station) return null;
+                      return (
+                        <CommandItem
+                          key={id}
+                          value={`recent-${id}`}
+                          onSelect={() => handleStationSelect(station)}
+                          className="bg-white text-neutral-600 hover:bg-neutral-50 font-normal"
+                        >
+                          <History className="mr-2 h-4 w-4" />
+                          {toProperCase(station.name)}
+                        </CommandItem>
+                      );
+                    })}
                     <CommandSeparator className="bg-neutral-100" />
                   </CommandGroup>
                 )}
                 
-                {Object.entries(groupedStations).map(([state, stations]) => (
-                  <CommandGroup key={state} heading={state} className="text-neutral-500">
-                    {Object.entries(stations).map(([key, station]) => (
+                {Object.entries(groupedStations).map(([region, regionStations]) => (
+                  <CommandGroup key={region} heading={region} className="text-neutral-500">
+                    {regionStations.map((station) => (
                       <CommandItem
-                        key={key}
-                        value={`${state}-${station.name}`}
-                        onSelect={() => handleStationSelect(key)}
+                        key={station.id}
+                        value={`${region}-${station.name}`}
+                        onSelect={() => handleStationSelect(station)}
                         className="bg-white text-neutral-600 hover:bg-neutral-50 font-normal"
                       >
                         {toProperCase(station.name)}
