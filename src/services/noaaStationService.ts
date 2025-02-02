@@ -10,6 +10,17 @@ export interface NOAAStation {
   region?: string;
 }
 
+export const importStations = async (): Promise<void> => {
+  try {
+    const { data, error } = await supabase.functions.invoke('import-stations');
+    if (error) throw error;
+    console.log('Stations imported:', data);
+  } catch (error) {
+    console.error('Error importing stations:', error);
+    throw error;
+  }
+};
+
 export const fetchNearbyStations = async (lat: number, lng: number, radius: number = 50): Promise<NOAAStation[]> => {
   const { data, error } = await supabase
     .rpc('get_nearby_stations', { 
