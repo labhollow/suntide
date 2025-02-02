@@ -66,6 +66,16 @@ export type Database = {
           distance: number
         }[]
       }
+      insert_station: {
+        Args: {
+          station_id: string
+          station_name: string
+          station_lat: number
+          station_lng: number
+          station_state: string
+        }
+        Returns: undefined
+      }
       search_stations: {
         Args: {
           search_term: string

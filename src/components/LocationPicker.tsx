@@ -22,7 +22,8 @@ import {
   NOAAStation,
   fetchNearbyStations,
   getCachedStations,
-  searchStations
+  searchStations,
+  importStations
 } from "@/services/noaaStationService";
 
 interface LocationPickerProps {
@@ -55,11 +56,27 @@ const LocationPicker: React.FC<LocationPickerProps> = ({ id, name, onLocationUpd
   // Load stations on component mount
   useEffect(() => {
     const loadStations = async () => {
-      const fetchedStations = await getCachedStations();
-      setStations(fetchedStations);
+      try {
+        const fetchedStations = await getCachedStations();
+        if (fetchedStations.length === 0) {
+          // If no stations found, trigger the import
+          await importStations();
+          const importedStations = await getCachedStations();
+          setStations(importedStations);
+        } else {
+          setStations(fetchedStations);
+        }
+      } catch (error) {
+        console.error('Error loading stations:', error);
+        toast({
+          title: "Error",
+          description: "Failed to load stations. Please try again.",
+          variant: "destructive",
+        });
+      }
     };
     loadStations();
-  }, []);
+  }, [toast]);
 
   // Load recent locations from localStorage
   useEffect(() => {
