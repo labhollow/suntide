@@ -8,11 +8,14 @@ const corsHeaders = {
 };
 
 serve(async (req: Request) => {
+  // Handle CORS preflight requests
   if (req.method === 'OPTIONS') {
     return new Response('ok', { headers: corsHeaders });
   }
 
   try {
+    console.log('Starting station import process...');
+    
     // Create Supabase client using environment variables
     const supabaseClient = createClient(
       Deno.env.get('SUPABASE_URL') ?? '',
@@ -21,6 +24,8 @@ serve(async (req: Request) => {
 
     // Process each station
     for (const [id, station] of Object.entries(stations)) {
+      console.log(`Processing station ${id}: ${station.name}`);
+      
       const { data, error } = await supabaseClient.rpc('insert_station', {
         station_id: id,
         station_name: station.name,
@@ -33,6 +38,8 @@ serve(async (req: Request) => {
         console.error(`Error inserting station ${id}:`, error);
       }
     }
+
+    console.log('Station import completed successfully');
 
     return new Response(
       JSON.stringify({ message: 'Stations imported successfully' }),
