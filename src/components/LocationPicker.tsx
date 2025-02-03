@@ -34,7 +34,7 @@ interface LocationPickerProps {
 
 const LocationPicker: React.FC<LocationPickerProps> = ({ id, name, onLocationUpdate }) => {
   const [open, setOpen] = useState(false);
-  const [selectedLocation, setSelectedLocation] = useState<string>("");
+  const [selectedStation, setSelectedStation] = useState<NOAAStation | null>(null);
   const [userLocation, setUserLocation] = useState<{ lat: number; lng: number } | null>(null);
   const [recentLocations, setRecentLocations] = useState<string[]>([]);
   const [stations, setStations] = useState<NOAAStation[]>([]);
@@ -59,12 +59,21 @@ const LocationPicker: React.FC<LocationPickerProps> = ({ id, name, onLocationUpd
       try {
         const fetchedStations = await getCachedStations();
         if (fetchedStations.length === 0) {
-          // If no stations found, trigger the import
           await importStations();
           const importedStations = await getCachedStations();
           setStations(importedStations);
         } else {
           setStations(fetchedStations);
+        }
+
+        // Load saved location if it exists
+        const savedLocation = localStorage.getItem("savedLocation");
+        if (savedLocation) {
+          const location = JSON.parse(savedLocation);
+          const station = fetchedStations.find(s => s.name === location.name);
+          if (station) {
+            setSelectedStation(station);
+          }
         }
       } catch (error) {
         console.error('Error loading stations:', error);
@@ -78,7 +87,6 @@ const LocationPicker: React.FC<LocationPickerProps> = ({ id, name, onLocationUpd
     loadStations();
   }, [toast]);
 
-  // Load recent locations from localStorage
   useEffect(() => {
     const savedRecent = localStorage.getItem("recentLocations");
     if (savedRecent) {
@@ -90,7 +98,6 @@ const LocationPicker: React.FC<LocationPickerProps> = ({ id, name, onLocationUpd
     }
   }, []);
 
-  // Update nearby stations when user location changes
   useEffect(() => {
     const updateNearbyStations = async () => {
       if (userLocation) {
@@ -118,7 +125,6 @@ const LocationPicker: React.FC<LocationPickerProps> = ({ id, name, onLocationUpd
     updateNearbyStations();
   }, [userLocation, toast]);
 
-  // Handle search
   useEffect(() => {
     const handleSearch = async () => {
       if (searchTerm.length >= 2) {
@@ -155,10 +161,10 @@ const LocationPicker: React.FC<LocationPickerProps> = ({ id, name, onLocationUpd
     setRecentLocations(updatedRecent);
     localStorage.setItem("recentLocations", JSON.stringify(updatedRecent));
     
-    // Save selected location
+    // Save selected location and update state
     localStorage.setItem("savedLocation", JSON.stringify(locationData));
+    setSelectedStation(station);
     onLocationUpdate?.(locationData);
-    setSelectedLocation(station.id);
     setOpen(false);
 
     toast({
@@ -224,8 +230,8 @@ const LocationPicker: React.FC<LocationPickerProps> = ({ id, name, onLocationUpd
               variant="outline"
               className="w-full justify-between bg-slate-900 border-neutral-200 text-white font-normal truncate hover:bg-neutral-50"
             >
-              {selectedLocation
-                ? toProperCase(stations.find(s => s.id === selectedLocation)?.name || '')
+              {selectedStation
+                ? toProperCase(selectedStation.name)
                 : "Select location..."}
             </Button>
           </PopoverTrigger>
