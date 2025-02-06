@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import { useQuery } from '@tanstack/react-query';
 
 interface GoogleAdProps {
@@ -21,6 +21,9 @@ const GoogleAd: React.FC<GoogleAdProps> = ({
   style
 }) => {
   const [adError, setAdError] = useState<string | null>(null);
+  const adRef = useRef<HTMLDivElement>(null);
+  const scriptLoaded = useRef(false);
+  
   const { data: publisherId } = useQuery({
     queryKey: ['adsensePublisherId'],
     queryFn: async () => {
@@ -30,66 +33,82 @@ const GoogleAd: React.FC<GoogleAdProps> = ({
   });
 
   useEffect(() => {
+    let mounted = true;
+    
     const loadAdsenseScript = async () => {
-      try {
-        if (!publisherId) return;
+      if (!publisherId || scriptLoaded.current) return;
 
+      try {
         // Check if script already exists
         const existingScript = document.querySelector('script[src*="pagead2.googlesyndication.com"]');
         
         if (!existingScript) {
-          return new Promise((resolve, reject) => {
-            const script = document.createElement('script');
-            script.src = `https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=${publisherId}`;
-            script.crossOrigin = 'anonymous';
-            script.async = true;
-            
-            script.onload = () => resolve(true);
-            script.onerror = (error) => {
-              console.error('Error loading AdSense script:', error);
+          const script = document.createElement('script');
+          script.src = `https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=${publisherId}`;
+          script.crossOrigin = 'anonymous';
+          script.async = true;
+          
+          script.onload = () => {
+            if (mounted) {
+              scriptLoaded.current = true;
+              tryInitializeAd();
+            }
+          };
+          
+          script.onerror = (error) => {
+            console.error('Error loading AdSense script:', error);
+            if (mounted) {
               setAdError('Failed to load advertisement');
-              reject(error);
-            };
-            
-            document.head.appendChild(script);
-          });
+            }
+          };
+          
+          document.head.appendChild(script);
+        } else {
+          scriptLoaded.current = true;
+          tryInitializeAd();
         }
       } catch (error) {
         console.error('Error in AdSense setup:', error);
-        setAdError('Failed to initialize advertisement');
+        if (mounted) {
+          setAdError('Failed to initialize advertisement');
+        }
       }
     };
 
-    const initializeAd = () => {
-      if (window.adsbygoogle) {
-        try {
-          window.adsbygoogle.push({});
-        } catch (error) {
-          console.error('Error initializing ad:', error);
+    const tryInitializeAd = () => {
+      if (!window.adsbygoogle || !adRef.current) return;
+      
+      try {
+        // Clear any existing ad content
+        if (adRef.current.innerHTML.trim() !== '') {
+          adRef.current.innerHTML = '';
+        }
+        
+        window.adsbygoogle = window.adsbygoogle || [];
+        window.adsbygoogle.push({});
+      } catch (error) {
+        console.error('Error initializing ad:', error);
+        if (mounted) {
           setAdError('Failed to display advertisement');
         }
       }
     };
 
-    // Load script and initialize ad with proper timing
-    loadAdsenseScript().then(() => {
-      // Wait for script to be properly loaded
-      setTimeout(initializeAd, 1000);
-    }).catch((error) => {
-      console.error('Failed to load AdSense:', error);
-      setAdError('Advertisement unavailable');
-    });
+    loadAdsenseScript();
 
+    return () => {
+      mounted = false;
+    };
   }, [publisherId]);
 
   if (adError) {
-    // Return an empty div with min height to prevent layout shifts
     return <div className="min-h-[100px] bg-transparent" />;
   }
 
   return (
     <div className="w-full overflow-hidden my-4">
       <ins
+        ref={adRef}
         className="adsbygoogle"
         style={{
           display: 'block',
