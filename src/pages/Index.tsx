@@ -11,6 +11,7 @@ import TideAlerts from "@/components/TideAlerts";
 import TideHeader from "@/components/TideHeader";
 import TideView from "@/components/TideView";
 import TideCalendar from '@/components/TideCalendar';
+import GoogleAd from '@/components/GoogleAd';
 import { Moon, Sun, Waves, Sunrise, Sunset, AlertTriangle, Loader2, Calendar } from 'lucide-react';
 
 const DEFAULT_LOCATION = {
@@ -182,6 +183,9 @@ const Index = () => {
               upcomingAlerts={getUpcomingAlerts(monthlyTideData)}
             />
 
+            {/* Top Ad Placement */}
+            <GoogleAd />
+
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
               <Card className={`p-6 backdrop-blur-sm border-white/10 transition-colors ${
                 isNextTideAlert 
@@ -278,21 +282,44 @@ const Index = () => {
               </TabsList>
               
               <TabsContent value="daily">
-                {isLoading ? <p>Loading tide data...</p> : <TideView data={todayTideData} period="daily" />}
+                {isLoading ? <p>Loading tide data...</p> : (
+                  <>
+                    <TideView data={todayTideData} period="daily" />
+                    <GoogleAd />
+                  </>
+                )}
               </TabsContent>
               
               <TabsContent value="weekly">
-                {isLoading ? <p>Loading tide data...</p> : <TideView data={weeklyTideData} period="weekly" />}
+                {isLoading ? <p>Loading tide data...</p> : (
+                  <>
+                    <TideView data={weeklyTideData} period="weekly" />
+                    <GoogleAd />
+                  </>
+                )}
               </TabsContent>
               
               <TabsContent value="monthly">
-                {isLoading ? <p>Loading tide data...</p> : <TideView data={monthlyTideData} period="monthly" />}
+                {isLoading ? <p>Loading tide data...</p> : (
+                  <>
+                    <TideView data={monthlyTideData} period="monthly" />
+                    <GoogleAd />
+                  </>
+                )}
               </TabsContent>
               
               <TabsContent value="sunrise-sunset">
-                {isLoading ? <p>Loading tide data...</p> : <TideCalendar tideData={monthlyTideData} />}
+                {isLoading ? <p>Loading tide data...</p> : (
+                  <>
+                    <TideCalendar tideData={monthlyTideData} />
+                    <GoogleAd />
+                  </>
+                )}
               </TabsContent>
             </Tabs>
+
+            {/* Bottom Ad Placement */}
+            <GoogleAd />
           </div>
         </div>
       </div>
