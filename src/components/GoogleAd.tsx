@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 
 interface GoogleAdProps {
@@ -20,6 +20,7 @@ const GoogleAd: React.FC<GoogleAdProps> = ({
   responsive = true,
   style
 }) => {
+  const [adError, setAdError] = useState<string | null>(null);
   const { data: publisherId } = useQuery({
     queryKey: ['adsensePublisherId'],
     queryFn: async () => {
@@ -29,41 +30,62 @@ const GoogleAd: React.FC<GoogleAdProps> = ({
   });
 
   useEffect(() => {
-    try {
-      if (publisherId) {
+    const loadAdsenseScript = async () => {
+      try {
+        if (!publisherId) return;
+
         // Check if script already exists
         const existingScript = document.querySelector('script[src*="pagead2.googlesyndication.com"]');
         
         if (!existingScript) {
-          // Load AdSense script only if it hasn't been loaded
-          const script = document.createElement('script');
-          script.src = `https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=${publisherId}`;
-          script.crossOrigin = 'anonymous';
-          script.async = true;
-          document.head.appendChild(script);
-
-          script.onerror = (error) => {
-            console.error('Error loading AdSense script:', error);
-          };
+          return new Promise((resolve, reject) => {
+            const script = document.createElement('script');
+            script.src = `https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=${publisherId}`;
+            script.crossOrigin = 'anonymous';
+            script.async = true;
+            
+            script.onload = () => resolve(true);
+            script.onerror = (error) => {
+              console.error('Error loading AdSense script:', error);
+              setAdError('Failed to load advertisement');
+              reject(error);
+            };
+            
+            document.head.appendChild(script);
+          });
         }
-
-        // Initialize ads with a delay to ensure script is loaded
-        setTimeout(() => {
-          if (window.adsbygoogle) {
-            try {
-              window.adsbygoogle.push({});
-            } catch (error) {
-              console.error('Error initializing ad:', error);
-            }
-          }
-        }, 1000);
+      } catch (error) {
+        console.error('Error in AdSense setup:', error);
+        setAdError('Failed to initialize advertisement');
       }
-    } catch (error) {
-      console.error('Error in AdSense setup:', error);
-    }
+    };
+
+    const initializeAd = () => {
+      if (window.adsbygoogle) {
+        try {
+          window.adsbygoogle.push({});
+        } catch (error) {
+          console.error('Error initializing ad:', error);
+          setAdError('Failed to display advertisement');
+        }
+      }
+    };
+
+    // Load script and initialize ad with proper timing
+    loadAdsenseScript().then(() => {
+      // Wait for script to be properly loaded
+      setTimeout(initializeAd, 1000);
+    }).catch((error) => {
+      console.error('Failed to load AdSense:', error);
+      setAdError('Advertisement unavailable');
+    });
+
   }, [publisherId]);
 
-  if (!publisherId) return null;
+  if (adError) {
+    // Return an empty div with min height to prevent layout shifts
+    return <div className="min-h-[100px] bg-transparent" />;
+  }
 
   return (
     <div className="w-full overflow-hidden my-4">
