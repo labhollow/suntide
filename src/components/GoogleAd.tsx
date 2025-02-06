@@ -21,7 +21,7 @@ const GoogleAd: React.FC<GoogleAdProps> = ({
   style
 }) => {
   const [adError, setAdError] = useState<string | null>(null);
-  const adRef = useRef<HTMLDivElement>(null);
+  const adRef = useRef<HTMLElement>(null);
   const scriptLoaded = useRef(false);
   
   const { data: publisherId } = useQuery({
