@@ -21,19 +21,26 @@ const GoogleAd: React.FC<GoogleAdProps> = ({
   style
 }) => {
   const [adError, setAdError] = useState<string | null>(null);
-  const adRef = useRef<HTMLElement>(null);
+  const adRef = useRef<HTMLInsElement>(null);
   const scriptLoaded = useRef(false);
+  const [isClient, setIsClient] = useState(false);
   
   const { data: publisherId } = useQuery({
     queryKey: ['adsensePublisherId'],
     queryFn: async () => {
-      // In production, this would fetch from your backend
       return 'ca-pub-5874765168681596';
     },
   });
 
   useEffect(() => {
+    setIsClient(true);
+  }, []);
+
+  useEffect(() => {
+    if (!isClient) return;
+    
     let mounted = true;
+    let adScript: HTMLScriptElement | null = null;
     
     const loadAdsenseScript = async () => {
       if (!publisherId || scriptLoaded.current) return;
@@ -43,29 +50,29 @@ const GoogleAd: React.FC<GoogleAdProps> = ({
         const existingScript = document.querySelector('script[src*="pagead2.googlesyndication.com"]');
         
         if (!existingScript) {
-          const script = document.createElement('script');
-          script.src = `https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=${publisherId}`;
-          script.crossOrigin = 'anonymous';
-          script.async = true;
+          adScript = document.createElement('script');
+          adScript.src = `https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=${publisherId}`;
+          adScript.crossOrigin = 'anonymous';
+          adScript.async = true;
           
-          script.onload = () => {
+          adScript.onload = () => {
             if (mounted) {
               scriptLoaded.current = true;
-              tryInitializeAd();
+              setTimeout(tryInitializeAd, 100); // Add small delay before initialization
             }
           };
           
-          script.onerror = (error) => {
+          adScript.onerror = (error) => {
             console.error('Error loading AdSense script:', error);
             if (mounted) {
               setAdError('Failed to load advertisement');
             }
           };
           
-          document.head.appendChild(script);
+          document.head.appendChild(adScript);
         } else {
           scriptLoaded.current = true;
-          tryInitializeAd();
+          setTimeout(tryInitializeAd, 100);
         }
       } catch (error) {
         console.error('Error in AdSense setup:', error);
@@ -84,8 +91,7 @@ const GoogleAd: React.FC<GoogleAdProps> = ({
           adRef.current.innerHTML = '';
         }
         
-        window.adsbygoogle = window.adsbygoogle || [];
-        window.adsbygoogle.push({});
+        (window.adsbygoogle = window.adsbygoogle || []).push({});
       } catch (error) {
         console.error('Error initializing ad:', error);
         if (mounted) {
@@ -98,10 +104,13 @@ const GoogleAd: React.FC<GoogleAdProps> = ({
 
     return () => {
       mounted = false;
+      if (adScript && adScript.parentNode) {
+        adScript.parentNode.removeChild(adScript);
+      }
     };
-  }, [publisherId]);
+  }, [publisherId, isClient]);
 
-  if (adError) {
+  if (!isClient || adError) {
     return <div className="min-h-[100px] bg-transparent" />;
   }
 
