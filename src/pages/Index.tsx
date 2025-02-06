@@ -184,7 +184,7 @@ const Index = () => {
             />
 
             {/* Top Ad Placement */}
-           {/* <GoogleAd slot="1234567890" format="auto" responsive={true} /> */}
+            <GoogleAd slot="1234567890" format="auto" responsive={true} />
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
               <Card className={`p-6 backdrop-blur-sm border-white/10 transition-colors ${
@@ -285,7 +285,7 @@ const Index = () => {
                 {isLoading ? <p>Loading tide data...</p> : (
                   <>
                     <TideView data={todayTideData} period="daily" />
-                    {/* <GoogleAd slot="2345678901" format="auto" responsive={true} /> */}
+                    <GoogleAd slot="2345678901" format="auto" responsive={true} />
                   </>
                 )}
               </TabsContent>
@@ -294,7 +294,7 @@ const Index = () => {
                 {isLoading ? <p>Loading tide data...</p> : (
                   <>
                     <TideView data={weeklyTideData} period="weekly" />
-                    {/* <GoogleAd slot="3456789012" format="auto" responsive={true} /> */}
+                    <GoogleAd slot="3456789012" format="auto" responsive={true} />
                   </>
                 )}
               </TabsContent>
