@@ -24,27 +24,42 @@ const GoogleAd: React.FC<GoogleAdProps> = ({
     queryKey: ['adsensePublisherId'],
     queryFn: async () => {
       // In production, this would fetch from your backend
-      return 'pub-5874765168681596';
+      return 'ca-pub-5874765168681596';
     },
   });
 
   useEffect(() => {
     try {
       if (publisherId) {
-        // Load AdSense script
-        const script = document.createElement('script');
-        script.src = `https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=${publisherId}`;
-        script.crossOrigin = 'anonymous';
-        script.async = true;
-        document.head.appendChild(script);
+        // Check if script already exists
+        const existingScript = document.querySelector('script[src*="pagead2.googlesyndication.com"]');
+        
+        if (!existingScript) {
+          // Load AdSense script only if it hasn't been loaded
+          const script = document.createElement('script');
+          script.src = `https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=${publisherId}`;
+          script.crossOrigin = 'anonymous';
+          script.async = true;
+          document.head.appendChild(script);
 
-        // Initialize ads
-        if (window.adsbygoogle) {
-          window.adsbygoogle.push({});
+          script.onerror = (error) => {
+            console.error('Error loading AdSense script:', error);
+          };
         }
+
+        // Initialize ads with a delay to ensure script is loaded
+        setTimeout(() => {
+          if (window.adsbygoogle) {
+            try {
+              window.adsbygoogle.push({});
+            } catch (error) {
+              console.error('Error initializing ad:', error);
+            }
+          }
+        }, 1000);
       }
     } catch (error) {
-      console.error('Error loading AdSense:', error);
+      console.error('Error in AdSense setup:', error);
     }
   }, [publisherId]);
 
