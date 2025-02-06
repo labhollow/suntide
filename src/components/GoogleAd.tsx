@@ -21,7 +21,7 @@ const GoogleAd: React.FC<GoogleAdProps> = ({
   style
 }) => {
   const [adError, setAdError] = useState<string | null>(null);
-  const adRef = useRef<HTMLInsElement>(null);
+  const adRef = useRef<HTMLElement>(null);
   const scriptLoaded = useRef(false);
   const [isClient, setIsClient] = useState(false);
   
