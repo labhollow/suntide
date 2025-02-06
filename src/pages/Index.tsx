@@ -184,7 +184,7 @@ const Index = () => {
             />
 
             {/* Top Ad Placement */}
-            <GoogleAd />
+            <GoogleAd slot="1234567890" format="auto" responsive={true} />
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
               <Card className={`p-6 backdrop-blur-sm border-white/10 transition-colors ${
@@ -285,7 +285,7 @@ const Index = () => {
                 {isLoading ? <p>Loading tide data...</p> : (
                   <>
                     <TideView data={todayTideData} period="daily" />
-                    <GoogleAd />
+                    <GoogleAd slot="2345678901" format="auto" responsive={true} />
                   </>
                 )}
               </TabsContent>
@@ -294,7 +294,7 @@ const Index = () => {
                 {isLoading ? <p>Loading tide data...</p> : (
                   <>
                     <TideView data={weeklyTideData} period="weekly" />
-                    <GoogleAd />
+                    <GoogleAd slot="3456789012" format="auto" responsive={true} />
                   </>
                 )}
               </TabsContent>
@@ -303,7 +303,7 @@ const Index = () => {
                 {isLoading ? <p>Loading tide data...</p> : (
                   <>
                     <TideView data={monthlyTideData} period="monthly" />
-                    <GoogleAd />
+                    <GoogleAd slot="4567890123" format="auto" responsive={true} />
                   </>
                 )}
               </TabsContent>
@@ -312,14 +312,14 @@ const Index = () => {
                 {isLoading ? <p>Loading tide data...</p> : (
                   <>
                     <TideCalendar tideData={monthlyTideData} />
-                    <GoogleAd />
+                    <GoogleAd slot="5678901234" format="auto" responsive={true} />
                   </>
                 )}
               </TabsContent>
             </Tabs>
 
             {/* Bottom Ad Placement */}
-            <GoogleAd />
+            <GoogleAd slot="6789012345" format="auto" responsive={true} />
           </div>
         </div>
       </div>
