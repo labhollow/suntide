@@ -184,7 +184,7 @@ const Index = () => {
             />
 
             {/* Top Ad Placement */}
-           {/* <GoogleAd slot="1234567890" format="auto" responsive={true} /> */}
+           <GoogleAd slot="3498132583" format="auto" responsive={true} />
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
               <Card className={`p-6 backdrop-blur-sm border-white/10 transition-colors ${
