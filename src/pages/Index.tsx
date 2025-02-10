@@ -319,7 +319,7 @@ const Index = () => {
             </Tabs>
 
             {/* Bottom Ad Placement */}
-            <GoogleAd slot="6789012345" format="auto" responsive={true} />
+            <GoogleAd slot="8881664661" format="auto" responsive={true} />
           </div>
         </div>
       </div>
