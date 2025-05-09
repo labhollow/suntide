@@ -11,6 +11,7 @@ import TideAlerts from "@/components/TideAlerts";
 import TideHeader from "@/components/TideHeader";
 import TideView from "@/components/TideView";
 import TideCalendar from '@/components/TideCalendar';
+import MoonCard from '@/components/MoonCard';
 import GoogleAd from '@/components/GoogleAd';
 import { Moon, Sun, Waves, Sunrise, Sunset, AlertTriangle, Loader2, Calendar } from 'lucide-react';
 
@@ -127,14 +128,22 @@ const Index = () => {
     const duration = parseInt(localStorage.getItem('alertDuration') || '2');
     
     return isWithinHours(tideTime, nextTide.sunrise, duration) || 
-           isWithinHours(tideTime, nextTide.sunset, duration);
+           isWithinHours(tideTime, nextTide.sunset, duration) ||
+           (nextTide.moonrise && isWithinHours(tideTime, nextTide.moonrise, duration)) ||
+           (nextTide.moonset && isWithinHours(tideTime, nextTide.moonset, duration));
   }, [nextTide]);
 
   const getAlertText = () => {
     if (!nextTide) return '';
     const tideTime = format(parseISO(nextTide.t), 'hh:mm a');
     const nearSunrise = isWithinHours(tideTime, nextTide.sunrise, alertDuration);
-    return ` Near ${nearSunrise ? 'Sunrise' : 'Sunset'}`;
+    const nearMoonrise = nextTide.moonrise && isWithinHours(tideTime, nextTide.moonrise, alertDuration);
+    const nearMoonset = nextTide.moonset && isWithinHours(tideTime, nextTide.moonset, alertDuration);
+    
+    if (nearSunrise) return ' Near Sunrise';
+    if (nearMoonrise) return ' Near Moonrise';
+    if (nearMoonset) return ' Near Moonset';
+    return ' Near Sunset';
   };
 
   const handleLocationChange = (newLocation: Location) => {
@@ -186,7 +195,7 @@ const Index = () => {
             {/* Top Ad Placement */}
            {/* <GoogleAd slot="3498132583" format="auto" responsive={true} /> */}
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
               <Card className={`p-6 backdrop-blur-sm border-white/10 transition-colors ${
                 isNextTideAlert 
                   ? 'bg-orange-500/20 border-orange-500/50' 
@@ -247,6 +256,13 @@ const Index = () => {
                   </div>
                 )}
               </Card>
+              
+              <MoonCard 
+                moonrise={nextTide?.moonrise || null}
+                moonset={nextTide?.moonset || null}
+                phase={nextTide?.moonPhase || 'Unknown'}
+                illumination={nextTide?.moonIllumination || 0}
+              />
             </div>
 
             <Tabs defaultValue="daily" className="w-full">
