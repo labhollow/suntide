@@ -1,4 +1,3 @@
-
 import React from "react";
 import {
   Table,
@@ -28,6 +27,21 @@ interface TideData {
   isNearMoonriseOrMoonset?: boolean;
 }
 
+interface FormattedTideData {
+  date: Date;
+  type: string;
+  height: number;
+  sunrise: string;
+  sunset: string;
+  moonrise: string | null;
+  moonset: string | null;
+  moonPhase: string;
+  isNearSunriseOrSunset: boolean;
+  isNearSunrise?: boolean;
+  isNearMoonriseOrMoonset: boolean;
+  isNearMoonrise?: boolean;
+}
+
 interface TideTableProps {
   data: TideData[];
   period: "daily" | "weekly" | "monthly";
@@ -45,10 +59,45 @@ const TideTable = ({ data, period }: TideTableProps) => {
   });
 
   // Format and process tide data
-  const { data: formattedData = [] } = useQuery({
+  const { data: formattedData = [] } = useQuery<FormattedTideData[]>({
     queryKey: ['formattedTideData', data, alertDuration],
     queryFn: () => {
-      // ... keep existing code (formatting data with duration processing)
+      if (!data || data.length === 0) return [];
+      const hours = parseInt(alertDuration, 10);
+      
+      return data.map((tide) => {
+        const date = parseISO(tide.t);
+        const height = metersToFeet(parseFloat(tide.v));
+        const sunriseTime = tide.sunrise || 'N/A';
+        const sunsetTime = tide.sunset || 'N/A';
+        const moonriseTime = tide.moonrise || null;
+        const moonsetTime = tide.moonset || null;
+        
+        // Check if tide is near sunrise or sunset
+        const isNearSunrise = tide.sunrise ? isWithinHours(format(date, 'hh:mm a'), sunriseTime, hours) : false;
+        const isNearSunset = tide.sunset ? isWithinHours(format(date, 'hh:mm a'), sunsetTime, hours) : false;
+        const isNearSunriseOrSunset = isNearSunrise || isNearSunset || !!tide.isNearSunriseOrSunset;
+        
+        // Check if tide is near moonrise or moonset
+        const isNearMoonrise = moonriseTime ? isWithinHours(format(date, 'hh:mm a'), moonriseTime, hours) : false;
+        const isNearMoonset = moonsetTime ? isWithinHours(format(date, 'hh:mm a'), moonsetTime, hours) : false;
+        const isNearMoonriseOrMoonset = isNearMoonrise || isNearMoonset || !!tide.isNearMoonriseOrMoonset;
+        
+        return {
+          date,
+          type: tide.type,
+          height,
+          sunrise: sunriseTime,
+          sunset: sunsetTime,
+          moonrise: moonriseTime,
+          moonset: moonsetTime,
+          moonPhase: tide.moonPhase || 'N/A',
+          isNearSunriseOrSunset,
+          isNearSunrise,
+          isNearMoonriseOrMoonset,
+          isNearMoonrise
+        };
+      });
     },
     enabled: !!data && !!alertDuration,
     staleTime: 0,
