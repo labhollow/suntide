@@ -1,3 +1,4 @@
+
 import React from "react";
 import {
   Table,
@@ -128,7 +129,10 @@ const TideTable = ({ data, period }: TideTableProps) => {
               `}
             >
               <TableCell className={`${tide.isNearSunriseOrSunset || tide.isNearMoonriseOrMoonset ? "text-white font-semibold flex items-center gap-2" : "text-gray-300"} transition-colors duration-300`}>
-                {format(tide.date, "MMM dd, yyyy")}
+                <div className="flex flex-col">
+                  <span className="text-blue-200 font-medium">{format(tide.date, "EEEE")}</span>
+                  {format(tide.date, "MMM dd, yyyy")}
+                </div>
                 {tide.isNearSunriseOrSunset && (
                   <div className="flex flex-col items-center">
                     {tide.isNearSunrise ? (
