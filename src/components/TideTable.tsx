@@ -1,4 +1,3 @@
-
 import React from "react";
 import {
   Table,
@@ -111,7 +110,7 @@ const TideTable = ({ data, period }: TideTableProps) => {
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead className="text-blue-200 font-semibold">Date</TableHead>
+                <TableHead className="text-blue-200 font-semibold min-w-[200px]">Date</TableHead>
                 <TableHead className="text-blue-200 font-semibold">Time</TableHead>
                 <TableHead className="text-blue-200 font-semibold">Type</TableHead>
                 <TableHead className="text-blue-200 font-semibold">Height (ft)</TableHead>
@@ -139,36 +138,38 @@ const TideTable = ({ data, period }: TideTableProps) => {
                     hover:bg-slate-700/50
                   `}
                 >
-                  <TableCell className={`${tide.isNearSunriseOrSunset || tide.isNearMoonriseOrMoonset ? "text-white font-semibold flex items-center gap-2" : "text-gray-300"} transition-colors duration-300`}>
-                    <div className="flex flex-col">
-                      <span className="text-blue-200 font-medium">{format(tide.date, "EEEE")}</span>
-                      {format(tide.date, "MMM dd, yyyy")}
-                    </div>
-                    {tide.isNearSunriseOrSunset && (
-                      <div className="flex flex-col items-center">
-                        {tide.isNearSunrise ? (
-                          <>
+                  <TableCell className={`${tide.isNearSunriseOrSunset || tide.isNearMoonriseOrMoonset ? "text-white font-semibold" : "text-gray-300"} transition-colors duration-300 min-w-[200px]`}>
+                    <div className="flex items-center gap-2">
+                      <div className="flex flex-col">
+                        <span className="text-blue-200 font-medium">{format(tide.date, "EEEE")}</span>
+                        {format(tide.date, "MMM dd, yyyy")}
+                      </div>
+                      {tide.isNearSunriseOrSunset && (
+                        <div className="flex flex-col items-center">
+                          {tide.isNearSunrise ? (
+                            <>
+                              <span className="text-xs text-white font-light">rise</span>
+                              <ArrowUp className="w-4 h-4" />
+                            </>
+                          ) : (
+                            <>
+                              <ArrowDown className="w-4 h-4" />
+                              <span className="text-xs text-white font-light">set</span>
+                            </>
+                          )}
+                        </div>
+                      )}
+                      {tide.isNearMoonriseOrMoonset && !tide.isNearSunriseOrSunset && (
+                        <div className="flex flex-col items-center">
+                          <Moon className="w-4 h-4" />
+                          {tide.isNearMoonrise ? (
                             <span className="text-xs text-white font-light">rise</span>
-                            <ArrowUp className="w-4 h-4" />
-                          </>
-                        ) : (
-                          <>
-                            <ArrowDown className="w-4 h-4" />
+                          ) : (
                             <span className="text-xs text-white font-light">set</span>
-                          </>
-                        )}
-                      </div>
-                    )}
-                    {tide.isNearMoonriseOrMoonset && !tide.isNearSunriseOrSunset && (
-                      <div className="flex flex-col items-center">
-                        <Moon className="w-4 h-4" />
-                        {tide.isNearMoonrise ? (
-                          <span className="text-xs text-white font-light">rise</span>
-                        ) : (
-                          <span className="text-xs text-white font-light">set</span>
-                        )}
-                      </div>
-                    )}
+                          )}
+                        </div>
+                      )}
+                    </div>
                   </TableCell>
                   <TableCell className={`${tide.isNearSunriseOrSunset || tide.isNearMoonriseOrMoonset ? "text-white font-semibold" : "text-gray-300"} transition-colors duration-300`}>
                     {format(tide.date, "hh:mm a")}
