@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { Calendar, momentLocalizer } from 'react-big-calendar';
 import moment from 'moment';
@@ -7,7 +8,35 @@ import { format, parseISO } from 'date-fns';
 
 const localizer = momentLocalizer(moment);
 
-const TideCalendar = ({ tideData }) => {
+interface TideEvent {
+  start: Date;
+  end: Date;
+  title: string;
+  isNearSunriseOrSunset: boolean;
+  allDay: boolean;
+  resource: {
+    sunrise: string | null;
+    sunset: string | null;
+  };
+}
+
+interface Tide {
+  t: string;
+  v: string;
+  type: string;
+  sunrise?: string;
+  sunset?: string;
+  moonrise?: string;
+  moonset?: string;
+  moonPhase?: string;
+  moonIllumination?: number;
+}
+
+interface TideCalendarProps {
+  tideData: Tide[];
+}
+
+const TideCalendar: React.FC<TideCalendarProps> = ({ tideData }) => {
     console.log('Received Tide Data:', tideData);
 
     const events = tideData.map(tide => {
@@ -40,19 +69,19 @@ const TideCalendar = ({ tideData }) => {
                 isNearSunriseOrSunset: true,
                 allDay: false,
                 resource: {
-                    sunrise: tide.sunrise,
-                    sunset: tide.sunset
+                    sunrise: tide.sunrise || null,
+                    sunset: tide.sunset || null
                 }
             };
         } catch (error) {
             console.error('Error processing tide data:', error, tide);
             return null;
         }
-    }).filter(Boolean);
+    }).filter(Boolean) as TideEvent[];
 
     console.log('Processed Calendar Events:', events);
 
-    const eventStyleGetter = (event) => {
+    const eventStyleGetter = (event: TideEvent) => {
         return {
             style: {
                 backgroundColor: '#ea384c',
@@ -76,7 +105,7 @@ const TideCalendar = ({ tideData }) => {
                 endAccessor="end"
                 style={{ height: 500 }}
                 eventPropGetter={eventStyleGetter}
-                tooltipAccessor={(event) => {
+                tooltipAccessor={(event: TideEvent) => {
                     if (!event.start) return '';
                     const timeStr = format(event.start, 'hh:mm a');
                     const sunriseStr = event.resource.sunrise ? `Sunrise: ${event.resource.sunrise}` : '';
