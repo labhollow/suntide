@@ -1,5 +1,4 @@
-
-import React from "react";
+import React, { useState } from "react";
 import {
   Table,
   TableBody,
@@ -14,6 +13,7 @@ import { ArrowUp, ArrowDown, Moon } from "lucide-react";
 import { metersToFeet } from "@/utils/tideUtils";
 import { isWithinHours } from "@/utils/dateUtils";
 import { useQuery } from "@tanstack/react-query";
+import TideDetailModal from "./TideDetailModal";
 
 interface TideData {
   t: string;
@@ -49,6 +49,9 @@ interface TideTableProps {
 }
 
 const TideTable = ({ data, period }: TideTableProps) => {
+  const [selectedTide, setSelectedTide] = useState<FormattedTideData | null>(null);
+  const [isDetailOpen, setIsDetailOpen] = useState(false);
+  
   console.log('Data received by TideTable:', data);
   
   // Get alert duration
@@ -105,6 +108,15 @@ const TideTable = ({ data, period }: TideTableProps) => {
     gcTime: 0
   });
 
+  const handleRowClick = (tide: FormattedTideData) => {
+    setSelectedTide(tide);
+    setIsDetailOpen(true);
+  };
+
+  const handleCloseDetail = () => {
+    setIsDetailOpen(false);
+  };
+
   if (!data || data.length === 0) {
     return (
       <div className="w-full p-4 text-center text-gray-500">
@@ -141,8 +153,9 @@ const TideTable = ({ data, period }: TideTableProps) => {
                         ${tide.isNearSunriseOrSunset ? "bg-orange-500/20 border-orange-500/50 hover:bg-orange-500/50" : ""}
                         ${tide.isNearMoonriseOrMoonset && !tide.isNearSunriseOrSunset ? "bg-blue-500/20 border-blue-500/50 hover:bg-blue-500/50" : ""}
                         transition-all duration-300 ease-in-out
-                        hover:bg-slate-700/50
+                        hover:bg-slate-700/50 cursor-pointer
                       `}
+                      onClick={() => handleRowClick(tide)}
                     >
                       <TableCell className={`${tide.isNearSunriseOrSunset || tide.isNearMoonriseOrMoonset ? "text-white font-semibold" : "text-gray-300"} transition-colors duration-300 min-w-[100px]`}>
                         <div className="flex items-center gap-2">
@@ -209,6 +222,13 @@ const TideTable = ({ data, period }: TideTableProps) => {
           </div>
         </ScrollArea>
       </div>
+      
+      {/* Tide Detail Modal */}
+      <TideDetailModal 
+        isOpen={isDetailOpen} 
+        onClose={handleCloseDetail} 
+        tideData={selectedTide} 
+      />
     </div>
   );
 };
