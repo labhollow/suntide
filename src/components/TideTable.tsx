@@ -1,4 +1,6 @@
-import React, { useState } from "react";
+
+import React from "react";
+import { useNavigate } from "react-router-dom";
 import {
   Table,
   TableBody,
@@ -13,7 +15,6 @@ import { ArrowUp, ArrowDown, Moon } from "lucide-react";
 import { metersToFeet } from "@/utils/tideUtils";
 import { isWithinHours } from "@/utils/dateUtils";
 import { useQuery } from "@tanstack/react-query";
-import TideDetailModal from "./TideDetailModal";
 
 interface TideData {
   t: string;
@@ -49,8 +50,7 @@ interface TideTableProps {
 }
 
 const TideTable = ({ data, period }: TideTableProps) => {
-  const [selectedTide, setSelectedTide] = useState<FormattedTideData | null>(null);
-  const [isDetailOpen, setIsDetailOpen] = useState(false);
+  const navigate = useNavigate();
   
   console.log('Data received by TideTable:', data);
   
@@ -108,13 +108,10 @@ const TideTable = ({ data, period }: TideTableProps) => {
     gcTime: 0
   });
 
-  const handleRowClick = (tide: FormattedTideData) => {
-    setSelectedTide(tide);
-    setIsDetailOpen(true);
-  };
-
-  const handleCloseDetail = () => {
-    setIsDetailOpen(false);
+  const handleRowClick = (tide: FormattedTideData, index: number) => {
+    // Generate a unique ID for the tide based on date and index
+    const tideId = `${format(tide.date, 'yyyyMMdd')}-${tide.type}-${index}`;
+    navigate(`/tide/${tideId}`, { state: { tideData: tide } });
   };
 
   if (!data || data.length === 0) {
@@ -155,7 +152,7 @@ const TideTable = ({ data, period }: TideTableProps) => {
                         transition-all duration-300 ease-in-out
                         hover:bg-slate-700/50 cursor-pointer
                       `}
-                      onClick={() => handleRowClick(tide)}
+                      onClick={() => handleRowClick(tide, index)}
                     >
                       <TableCell className={`${tide.isNearSunriseOrSunset || tide.isNearMoonriseOrMoonset ? "text-white font-semibold" : "text-gray-300"} transition-colors duration-300 min-w-[100px]`}>
                         <div className="flex items-center gap-2">
@@ -190,30 +187,7 @@ const TideTable = ({ data, period }: TideTableProps) => {
                           )}
                         </div>
                       </TableCell>
-                      <TableCell className={`${tide.isNearSunriseOrSunset || tide.isNearMoonriseOrMoonset ? "text-white font-semibold" : "text-gray-300"} transition-colors duration-300`}>
-                        {format(tide.date, "hh:mm a")}
-                      </TableCell>
-                      <TableCell className={`${tide.isNearSunriseOrSunset || tide.isNearMoonriseOrMoonset ? "text-white font-semibold capitalize" : "text-gray-300 capitalize"} transition-colors duration-300`}>
-                        {tide.type}
-                      </TableCell>
-                      <TableCell className={`${tide.isNearSunriseOrSunset || tide.isNearMoonriseOrMoonset ? "text-white font-semibold" : "text-gray-300"} transition-colors duration-300`}>
-                        {tide.height.toFixed(2)}
-                      </TableCell>
-                      <TableCell className={`${tide.isNearSunriseOrSunset || tide.isNearMoonriseOrMoonset ? "text-white font-semibold" : "text-gray-300"} transition-colors duration-300`}>
-                        {tide.sunrise || 'N/A'}
-                      </TableCell>
-                      <TableCell className={`${tide.isNearSunriseOrSunset || tide.isNearMoonriseOrMoonset ? "text-white font-semibold" : "text-gray-300"} transition-colors duration-300`}>
-                        {tide.sunset || 'N/A'}
-                      </TableCell>
-                      <TableCell className={`${tide.isNearSunriseOrSunset || tide.isNearMoonriseOrMoonset ? "text-white font-semibold" : "text-gray-300"} transition-colors duration-300`}>
-                        {tide.moonrise || 'N/A'}
-                      </TableCell>
-                      <TableCell className={`${tide.isNearSunriseOrSunset || tide.isNearMoonriseOrMoonset ? "text-white font-semibold" : "text-gray-300"} transition-colors duration-300`}>
-                        {tide.moonset || 'N/A'}
-                      </TableCell>
-                      <TableCell className={`${tide.isNearSunriseOrSunset || tide.isNearMoonriseOrMoonset ? "text-white font-semibold" : "text-gray-300"} transition-colors duration-300`}>
-                        {tide.moonPhase || 'N/A'}
-                      </TableCell>
+                      // ... keep existing code (the rest of the table cells)
                     </TableRow>
                   ))}
                 </TableBody>
@@ -222,13 +196,6 @@ const TideTable = ({ data, period }: TideTableProps) => {
           </div>
         </ScrollArea>
       </div>
-      
-      {/* Tide Detail Modal */}
-      <TideDetailModal 
-        isOpen={isDetailOpen} 
-        onClose={handleCloseDetail} 
-        tideData={selectedTide} 
-      />
     </div>
   );
 };

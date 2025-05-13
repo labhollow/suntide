@@ -10,11 +10,9 @@ import { NOAA_STATIONS } from "@/utils/noaaApi";
 import TideAlerts from "@/components/TideAlerts";
 import TideHeader from "@/components/TideHeader";
 import TideView from "@/components/TideView";
-// import TideCalendar from '@/components/TideCalendar';
 import MoonCard from '@/components/MoonCard';
 import GoogleAd from '@/components/GoogleAd';
-import { Moon, Sun, Waves, Sunrise, Sunset, AlertTriangle, Loader2, Calendar } from 'lucide-react';
-
+import { Moon, Sun, Waves, Sunrise, Sunset, AlertTriangle, Loader2 } from 'lucide-react';
 const DEFAULT_LOCATION = {
   "id": "9410583",
   "name": "Balboa Pier, Newport Beach",
