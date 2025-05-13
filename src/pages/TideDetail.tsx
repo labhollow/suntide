@@ -184,7 +184,7 @@ const TideDetail = () => {
                     <p className="text-blue-300 text-sm">
                       {isNearMoonrise ? 
                         "This tide is near moonrise! Watch for stronger tidal effects." : 
-                        "This tide is near moonset! Excellent time for observing marine life."}
+                        "This tide is near moonset! Could be a good opportunity for moon reflections."}
                     </p>
                   </div>
                 )}
