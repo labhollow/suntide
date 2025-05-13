@@ -1,5 +1,5 @@
 
-import React from 'react';
+import React, { useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -10,6 +10,11 @@ const TideDetail = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const tideData = location.state?.tideData;
+  
+  // Effect to scroll to the top when component mounts
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, []);
   
   if (!tideData) {
     return (
