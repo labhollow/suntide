@@ -288,13 +288,13 @@ const Index = () => {
                   <Sun className="w-4 h-4" />
                   This Month
                 </TabsTrigger>
-                <TabsTrigger 
+                {/* <TabsTrigger 
                   value="sunrise-sunset" 
                   className="data-[state=active]:bg-blue-200/10 data-[state=active]:text-blue-200 hidden sm:flex items-center justify-center gap-2"
                 >
                   <Calendar className="w-4 h-4" />
                   Calendar
-                </TabsTrigger>
+                </TabsTrigger> */}
               </TabsList>
               
               <TabsContent value="daily">
@@ -324,14 +324,14 @@ const Index = () => {
                 )}
               </TabsContent>
               
-              <TabsContent value="sunrise-sunset">
+              {/* <TabsContent value="sunrise-sunset">
                 {isLoading ? <p>Loading tide data...</p> : (
                   <>
                     <TideCalendar tideData={monthlyTideData} />
-                    {/* <GoogleAd slot="5678901234" format="auto" responsive={true} /> */}
+        
                   </>
                 )}
-              </TabsContent>
+              </TabsContent> */}
             </Tabs>
 
             {/* Bottom Ad Placement */}
