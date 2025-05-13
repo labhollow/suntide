@@ -187,7 +187,30 @@ const TideTable = ({ data, period }: TideTableProps) => {
                           )}
                         </div>
                       </TableCell>
-                      // ... keep existing code (the rest of the table cells)
+                      <TableCell className={`${tide.isNearSunriseOrSunset || tide.isNearMoonriseOrMoonset ? "text-white font-semibold" : "text-gray-300"} transition-colors duration-300`}>
+                        {format(tide.date, "hh:mm a")}
+                      </TableCell>
+                      <TableCell className={`${tide.isNearSunriseOrSunset || tide.isNearMoonriseOrMoonset ? "text-white font-semibold capitalize" : "text-gray-300 capitalize"} transition-colors duration-300`}>
+                        {tide.type}
+                      </TableCell>
+                      <TableCell className={`${tide.isNearSunriseOrSunset || tide.isNearMoonriseOrMoonset ? "text-white font-semibold" : "text-gray-300"} transition-colors duration-300`}>
+                        {tide.height.toFixed(2)}
+                      </TableCell>
+                      <TableCell className={`${tide.isNearSunriseOrSunset || tide.isNearMoonriseOrMoonset ? "text-white font-semibold" : "text-gray-300"} transition-colors duration-300`}>
+                        {tide.sunrise || 'N/A'}
+                      </TableCell>
+                      <TableCell className={`${tide.isNearSunriseOrSunset || tide.isNearMoonriseOrMoonset ? "text-white font-semibold" : "text-gray-300"} transition-colors duration-300`}>
+                        {tide.sunset || 'N/A'}
+                      </TableCell>
+                      <TableCell className={`${tide.isNearSunriseOrSunset || tide.isNearMoonriseOrMoonset ? "text-white font-semibold" : "text-gray-300"} transition-colors duration-300`}>
+                        {tide.moonrise || 'N/A'}
+                      </TableCell>
+                      <TableCell className={`${tide.isNearSunriseOrSunset || tide.isNearMoonriseOrMoonset ? "text-white font-semibold" : "text-gray-300"} transition-colors duration-300`}>
+                        {tide.moonset || 'N/A'}
+                      </TableCell>
+                      <TableCell className={`${tide.isNearSunriseOrSunset || tide.isNearMoonriseOrMoonset ? "text-white font-semibold" : "text-gray-300"} transition-colors duration-300`}>
+                        {tide.moonPhase || 'N/A'}
+                      </TableCell>
                     </TableRow>
                   ))}
                 </TableBody>
