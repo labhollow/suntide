@@ -63,7 +63,7 @@ const TideTable = ({ data, period }: TideTableProps) => {
   });
 
   // Format and process tide data
-  const { data: formattedData = [] } = useQuery<FormattedTideData[]>({
+  const { data: processedTideData = [] } = useQuery<FormattedTideData[]>({
     queryKey: ['formattedTideData', data, alertDuration],
     queryFn: () => {
       if (!data || data.length === 0) return [];
@@ -71,7 +71,7 @@ const TideTable = ({ data, period }: TideTableProps) => {
       
       return data.map((tide) => {
         const date = parseISO(tide.t);
-        const height = metersToFeet(parseFloat(tide.v));
+        const height = parseFloat(tide.v); // API already returns heights in feet
         const sunriseTime = tide.sunrise || 'N/A';
         const sunsetTime = tide.sunset || 'N/A';
         const moonriseTime = tide.moonrise || null;
@@ -143,7 +143,7 @@ const TideTable = ({ data, period }: TideTableProps) => {
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {formattedData.map((tide, index) => (
+                  {processedTideData.map((tide, index) => (
                     <TableRow 
                       key={`${tide.date.toISOString()}-${tide.type}-${index}`}
                       className={`

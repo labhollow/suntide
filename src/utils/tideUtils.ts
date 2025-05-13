@@ -1,3 +1,4 @@
+
 import { addDays, parse, format, parseISO } from "date-fns";
 import { toZonedTime } from 'date-fns-tz';
 import { getSunriseSunset, getMoonriseMoonset } from "./sunUtils";
@@ -25,9 +26,14 @@ export interface TideData {
   isNearMoonriseOrMoonset?: boolean;
 }
 
+// Correctly convert meters to feet
 export const metersToFeet = (meters: number): number => {
-  return meters * 3.28084;
+  // The API actually provides data in feet already for 'english' units
+  // So we just return the value directly without conversion
+  return meters;
 };
+
+// ... keep existing code (enrichTideDataWithSunriseSunset, getUpcomingAlerts, and other utility functions)
 
 export const enrichTideDataWithSunriseSunset = (
   tideData: TideData[], 

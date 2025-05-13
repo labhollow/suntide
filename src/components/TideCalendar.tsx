@@ -1,11 +1,26 @@
+
 import React from 'react';
-import { Calendar, momentLocalizer } from 'react-big-calendar';
-import moment from 'moment';
+import { Calendar } from 'react-big-calendar';
+import { format, parseISO } from 'date-fns';
 import 'react-big-calendar/lib/css/react-big-calendar.css';
 import { isWithinHours } from '@/utils/dateUtils';
-import { format, parseISO } from 'date-fns';
+import { startOfDay, endOfDay } from 'date-fns';
+import { dateFnsLocalizer } from 'react-big-calendar';
 
-const localizer = momentLocalizer(moment);
+// Set up the date-fns localizer for react-big-calendar
+const locales = {
+  'en-US': require('date-fns/locale/en-US')
+};
+
+const localizer = dateFnsLocalizer({
+  format,
+  parse: parseISO,
+  startOfWeek: (date: Date) => {
+    return new Date(date.setDate(date.getDate() - date.getDay()));
+  },
+  getDay: (date: Date) => date.getDay(),
+  locales,
+});
 
 interface TideEvent {
   start: Date;
